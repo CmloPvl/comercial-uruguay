@@ -1,13 +1,52 @@
-# 📊 Boceto de Vistas
+Boceto de Vistas del Proyecto
 
-Se han diseñado **7 vistas** que cumplen con los requisitos del desafío. Cada vista se encuentra documentada en la carpeta [`docs/hito-1/vistas/`](vistas/):
+Este documento detalla la estructura visual de las pantallas del sistema. Aquí está:
 
-| #   | Vista                    | Archivo                          |
-| --- | ------------------------ | -------------------------------- |
-| 1   | Página principal (Home)  | `vistas/01-home.md`              |
-| 2   | Galería de publicaciones | `vistas/02-galeria.md`           |
-| 3   | Detalle de publicación   | `vistas/03-detalle.md`           |
-| 4   | Registro de usuarios     | `vistas/04-registro.md`          |
-| 5   | Inicio de sesión         | `vistas/05-login.md`             |
-| 6   | Mi perfil                | `vistas/06-perfil.md`            |
-| 7   | Crear publicación        | `vistas/07-crear-publicacion.md` |
+1. Home
+
+Página de aterrizaje (landing page) que presenta la propuesta de valor del proyecto.
+
+    Boceto:
+    ![la imagen tambien esta en la carpeta images](./images/01-home-principal.png)
+
+2. Tienda / Galería / Vitrina
+
+Vista principal donde se despliegan los artículos o publicaciones disponibles para la comunidad.
+
+    Boceto:
+    ![la imagen tambien esta en la carpeta images](./images/02-galeria-tienda-vitrina.png)
+
+3. Detalle de Publicación
+
+Vista dedicada a mostrar la información completa, imágenes y detalles de un ítem seleccionado.
+
+    Boceto:
+    ![la imagen tambien esta en la carpeta images](./images/03-detalle-publicacion.png)
+
+4. Registro
+
+Formulario para que nuevos usuarios puedan unirse a la plataforma.
+
+    Boceto:
+    ![la imagen tambien esta en la carpeta images](./images/04-registro.png)
+
+5. Login
+
+Pantalla de autenticación para que los usuarios registrados accedan a sus sesiones.
+
+    Boceto:
+    ![la imagen tambien esta en la carpeta images](./images/05-login.png)
+
+6. Mi Perfil
+
+Área privada donde el usuario gestiona sus datos personales y preferencias de cuenta.
+
+    Boceto:
+    ![la imagen tambien esta en la carpeta images](./images/06-mi-perfil.png)
+
+7. Crear Publicación
+
+Formulario para que el usuario pueda publicar nuevos artículos o contenido en la plataforma.
+
+    Boceto:
+    ![la imagen tambien esta en la carpeta images](./images/07-crear-publicacion.png)
