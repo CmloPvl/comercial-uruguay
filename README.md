@@ -1,5 +1,7 @@
 # 🏪 Comercial Uruguay - Marketplace
 
+Integrantes: Camilo Riquelme - Mairon Monarde
+
 ## 📋 Descripción del Proyecto
 
 Marketplace digital para **Comercial Uruguay**, un comercio local en Valparaíso especializado en productos económicos con distintas categorías.
