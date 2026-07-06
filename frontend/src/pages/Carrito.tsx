@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import Layout from "../components/layout/Layout"
 import { useCart } from "../context/CartContext"
 import { useAuth } from "../context/AuthContext"
@@ -19,7 +19,6 @@ import CartItem from "../components/cart/CartItem"
 export default function Carrito() {
   const { items, totalItems, totalPrice, clearCart } = useCart()
   const { user } = useAuth()
-  const navigate = useNavigate()
   const [deliveryOption, setDeliveryOption] = useState<"retiro" | "envio">("retiro")
 
   // Generar mensaje para WhatsApp

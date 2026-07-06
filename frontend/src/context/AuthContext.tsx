@@ -5,6 +5,7 @@ interface User {
   name: string
   fullName: string
   email: string
+  phone?: string
   role: "CLIENTE" | "ADMIN"
 }
 
@@ -47,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name: "María Pérez",
           fullName: "María Pérez",
           email: email,
+          phone: "+56 9 1234 5678",
           role: "CLIENTE" as const,
         }
         setUser(demoUser)
