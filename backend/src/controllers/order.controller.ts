@@ -119,7 +119,7 @@ export const getOrderById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getAllOrders = async (req: AuthRequest, res: Response) => {
+export const getAllOrders = async (_req: AuthRequest, res: Response) => {
   try {
     const orders = await OrderModel.findAll();
     

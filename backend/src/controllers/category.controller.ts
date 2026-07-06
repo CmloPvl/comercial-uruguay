@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { CategoryModel } from '../models/Category';
 
-export const getCategories = async (req: AuthRequest, res: Response) => {
+export const getCategories = async (_req: AuthRequest, res: Response) => {
   try {
     const categories = await CategoryModel.findAll();
     return res.json({

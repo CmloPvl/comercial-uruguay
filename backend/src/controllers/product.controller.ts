@@ -2,15 +2,15 @@ import { Response } from 'express';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { ProductModel } from '../models/Product';
 
-export const getProducts = async (req: AuthRequest, res: Response) => {
+export const getProducts = async (_req: AuthRequest, res: Response) => {
   try {
     const products = await ProductModel.findAll();
-    res.json({
+    return res.json({
       success: true,
       data: products
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message || 'Error al obtener productos'
     });
@@ -19,7 +19,7 @@ export const getProducts = async (req: AuthRequest, res: Response) => {
 
 export const getProductById = async (req: AuthRequest, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const product = await ProductModel.findById(id);
     
     if (!product) {
@@ -29,12 +29,12 @@ export const getProductById = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       data: product
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message || 'Error al obtener producto'
     });
@@ -45,7 +45,6 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
   try {
     const { name, description, price, sku, stock, images, categoryId, isOnSale, discount } = req.body;
 
-    // Validación básica
     if (!name || !description || !price || !sku) {
       return res.status(400).json({
         success: false,
@@ -65,7 +64,7 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
       discount: discount || 0
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: 'Producto creado exitosamente',
       data: product
@@ -77,7 +76,7 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
         message: 'El SKU ya está registrado'
       });
     }
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message || 'Error al crear producto'
     });
@@ -86,7 +85,7 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
 
 export const updateProduct = async (req: AuthRequest, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { name, description, price, sku, stock, images, categoryId, isOnSale, discount } = req.body;
 
     const updatedProduct = await ProductModel.update(id, {
@@ -108,7 +107,7 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Producto actualizado exitosamente',
       data: updatedProduct
@@ -120,7 +119,7 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
         message: 'El SKU ya está registrado'
       });
     }
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message || 'Error al actualizar producto'
     });
@@ -129,7 +128,7 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
 
 export const deleteProduct = async (req: AuthRequest, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const deleted = await ProductModel.delete(id);
 
     if (!deleted) {
@@ -139,12 +138,12 @@ export const deleteProduct = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Producto eliminado exitosamente'
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message || 'Error al eliminar producto'
     });
