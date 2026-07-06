@@ -38,7 +38,7 @@ export const register = async (req: Request, res: Response) => {
       { expiresIn: '7d' }
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: 'Usuario registrado exitosamente',
       data: {
@@ -52,7 +52,7 @@ export const register = async (req: Request, res: Response) => {
       }
     });
   } catch (error: any) {
-    res.status(400).json({
+    return res.status(400).json({
       success: false,
       message: error.errors?.[0]?.message || error.message || 'Error al registrar usuario'
     });
@@ -90,7 +90,7 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: '7d' }
     );
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Inicio de sesión exitoso',
       data: {
@@ -104,7 +104,7 @@ export const login = async (req: Request, res: Response) => {
       }
     });
   } catch (error: any) {
-    res.status(400).json({
+    return res.status(400).json({
       success: false,
       message: error.errors?.[0]?.message || error.message || 'Error al iniciar sesión'
     });
