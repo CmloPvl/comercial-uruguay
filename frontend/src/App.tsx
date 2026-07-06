@@ -6,6 +6,7 @@ import Perfil from "./pages/Perfil"
 import Productos from "./pages/Productos"
 import ProductoDetalle from "./pages/ProductoDetalle"
 import CrearPublicacion from "./pages/CrearPublicacion"
+import Carrito from "./pages/Carrito"
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/productos" element={<Productos />} />
         <Route path="/producto/:id" element={<ProductoDetalle />} />
         <Route path="/crear-publicacion" element={<CrearPublicacion />} />
+        <Route path="/carrito" element={<Carrito />} />
       </Routes>
     </BrowserRouter>
   )
