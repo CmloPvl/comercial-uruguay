@@ -15,7 +15,6 @@ import {
 import { Card, CardContent } from "../components/ui/card"
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
-import { Badge } from "../components/ui/badge"
 import { Avatar, AvatarFallback } from "../components/ui/avatar"
 
 export default function Perfil() {
