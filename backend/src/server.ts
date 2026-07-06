@@ -28,7 +28,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/favorites', favoriteRoutes);
 
 // Ruta de prueba
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (_req, res) => {
   res.json({ status: 'OK', message: 'Servidor funcionando correctamente' });
 });
 
