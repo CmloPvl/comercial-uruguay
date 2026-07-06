@@ -27,7 +27,7 @@ export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction)
     };
 
     req.user = decoded;
-    next();
+    return next(); // ← Cambio aquí
   } catch (error) {
     return res.status(401).json({
       success: false,
