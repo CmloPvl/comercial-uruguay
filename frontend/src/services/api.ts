@@ -1,7 +1,7 @@
 import axios, { type AxiosResponse, type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api', // ✅ Cambiado
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -35,5 +35,30 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// =============================================
+// ✅ SERVICIO DE AUTENTICACIÓN (NUEVO)
+// =============================================
+export const authService = {
+  async login(credentials: { email: string; password: string }) {
+    const response = await api.post('/auth/login', credentials);
+    return response.data;
+  },
+
+  async register(userData: { fullName: string; email: string; password: string; phone?: string; address?: string }) {
+    const response = await api.post('/auth/register', userData);
+    return response.data;
+  },
+
+  async recoverPassword(email: string) {
+    const response = await api.post('/auth/recover', { email });
+    return response.data;
+  },
+
+  logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  },
+};
 
 export default api;

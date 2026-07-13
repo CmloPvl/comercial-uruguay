@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Home from "./pages/Home"
 import Login from "./pages/auth/Login"
 import Registro from "./pages/auth/Registro"
+import RecuperarContrasena from "./pages/auth/RecuperarContrasena"
 import Perfil from "./pages/Perfil"
 import Productos from "./pages/Productos"
 import ProductoDetalle from "./pages/ProductoDetalle"
@@ -14,21 +15,32 @@ import Favoritos from './pages/Favoritos'
 import AdminDashboard from './pages/admin/Dashboard'
 import MisPedidos from './pages/MisPedidos'
 import ProtectedRoute from './components/common/ProtectedRoute'
+import Nosotros from './pages/Nosotros'
+import Contacto from './pages/Contacto'
+import Envios from './pages/Envios'
+import RetiroTienda from './pages/RetiroTienda'
+import Ofertas from './pages/Ofertas'  // ✅ NUEVO
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Páginas públicas */}
+        {/* ====== PÁGINAS PÚBLICAS ====== */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
+        <Route path="/recuperar" element={<RecuperarContrasena />} />
         <Route path="/productos" element={<Productos />} />
         <Route path="/producto/:id" element={<ProductoDetalle />} />
+        <Route path="/ofertas" element={<Ofertas />} />  {/* ✅ NUEVO */}
         <Route path="/terminos" element={<Terminos />} />
         <Route path="/privacidad" element={<Privacidad />} />
+        <Route path="/nosotros" element={<Nosotros />} />
+        <Route path="/contacto" element={<Contacto />} />
+        <Route path="/envios" element={<Envios />} />
+        <Route path="/retiro" element={<RetiroTienda />} />
         
-        {/* Páginas protegidas (requieren autenticación) */}
+        {/* ====== PÁGINAS PROTEGIDAS (requieren autenticación) ====== */}
         <Route path="/perfil" element={
           <ProtectedRoute>
             <Perfil />
@@ -50,7 +62,7 @@ function App() {
           </ProtectedRoute>
         } />
         
-        {/* Páginas de administración (requieren autenticación + ADMIN) */}
+        {/* ====== PÁGINAS DE ADMINISTRACIÓN (requieren autenticación + ADMIN) ====== */}
         <Route path="/crear-publicacion" element={
           <ProtectedRoute requireAdmin>
             <CrearPublicacion />
@@ -62,7 +74,7 @@ function App() {
           </ProtectedRoute>
         } />
         
-        {/* 404 - Siempre al final */}
+        {/* ====== 404 - SIEMPRE AL FINAL ====== */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

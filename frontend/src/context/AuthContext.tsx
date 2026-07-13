@@ -7,6 +7,7 @@ interface User {
   fullName: string;
   email: string;
   phone?: string;
+  address?: string;  // ✅ NUEVO
   role: "CLIENTE" | "ADMIN";
 }
 
@@ -19,7 +20,7 @@ interface AuthContextType {
     password: string; 
     phone?: string; 
     address?: string;
-    termsAccepted?: boolean;  // ✅ NUEVO
+    termsAccepted?: boolean;
   }) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -60,10 +61,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string; 
     phone?: string; 
     address?: string;
-    termsAccepted?: boolean;  // ✅ NUEVO
+    termsAccepted?: boolean;
   }) => {
     try {
-      // Envía los datos al backend incluyendo termsAccepted
       await api.post("/auth/register", userData);
     } catch (error: any) {
       throw new Error(error.response?.data?.message || "Error al registrar usuario");

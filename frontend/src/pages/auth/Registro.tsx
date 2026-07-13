@@ -79,7 +79,7 @@ export default function Registro() {
                 </Label>
                 <Input
                   type="text"
-                  placeholder="Marta Pérez"
+                  placeholder="Nombre y Apellido"
                   className={`mt-1 border-2 ${errors.fullName ? 'border-[#FF6B81]' : 'border-[#00D2D3]'} focus:ring-2 focus:ring-[#FFD93D] focus:border-[#FFD93D]`}
                   {...register("fullName")}
                 />
@@ -95,7 +95,7 @@ export default function Registro() {
                 </Label>
                 <Input
                   type="email"
-                  placeholder="marta.perez@email.com"
+                  placeholder="Correo electrónico"
                   className={`mt-1 border-2 ${errors.email ? 'border-[#FF6B81]' : 'border-[#00D2D3]'} focus:ring-2 focus:ring-[#FFD93D] focus:border-[#FFD93D]`}
                   {...register("email")}
                 />
@@ -111,7 +111,7 @@ export default function Registro() {
                 </Label>
                 <Input
                   type="tel"
-                  placeholder="+56 9 1234 5678"
+                  placeholder="Número de teléfono"
                   className={`mt-1 border-2 ${errors.phone ? 'border-[#FF6B81]' : 'border-[#00D2D3]'} focus:ring-2 focus:ring-[#FFD93D] focus:border-[#FFD93D]`}
                   {...register("phone")}
                 />

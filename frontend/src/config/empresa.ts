@@ -1,9 +1,9 @@
 export const empresaConfig = {
   nombre: 'Comercial Uruguay',
-  telefono: '+5697503324',
+  telefono: '+56975303324',
   telefonoFijo: null,
   email: 'comercialuruguayvalpo@gmail.com',
-  whatsapp: '5697503324',
+  whatsapp: '56975303324',
   direccion: 'Uruguay 660, Valparaíso',
   comuna: 'Valparaíso',
   region: 'Quinta Región',
