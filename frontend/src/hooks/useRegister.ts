@@ -13,6 +13,7 @@ export function useRegister() {
   const {
     register,
     handleSubmit,
+    watch, // ✅ Agregar watch
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -20,8 +21,9 @@ export function useRegister() {
       fullName: "",
       email: "",
       password: "",
+      confirmPassword: "",
       phone: "",
-      termsAccepted: false, // ✅ NUEVO
+      termsAccepted: false,
     },
   });
 
@@ -34,7 +36,7 @@ export function useRegister() {
         email: data.email,
         password: data.password,
         phone: data.phone || undefined,
-        termsAccepted: data.termsAccepted, // ✅ NUEVO
+        termsAccepted: data.termsAccepted,
       });
       navigate("/login");
     } catch (err: any) {
@@ -48,5 +50,6 @@ export function useRegister() {
     errors,
     error,
     isSubmitting,
+    watch, // ✅ Exportar watch
   };
 }

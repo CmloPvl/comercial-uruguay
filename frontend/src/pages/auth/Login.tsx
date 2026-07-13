@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../../components/layout/Layout";
 import { Button } from "../../components/ui/button";
@@ -16,9 +17,11 @@ import { Badge } from "../../components/ui/badge";
 import { Checkbox } from "../../components/ui/checkbox";
 import { Separator } from "../../components/ui/separator";
 import { useLogin } from "../../hooks/useLogin";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const { register, handleSubmit, errors, error, isSubmitting, remember, setRemember } = useLogin();
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <Layout>
@@ -90,14 +93,23 @@ export default function Login() {
                 <Label className="text-sm font-bold text-[#303030] flex items-center gap-2">
                   <span className="text-[#FF6B81] text-lg">🔒</span> Contraseña
                 </Label>
-                <Input
-                  type="password"
-                  placeholder="••••••••"
-                  className={`mt-1 border-2 border-[#7D5FFF] focus:ring-2 focus:ring-[#FFD93D] focus:border-[#FFD93D] transition-all ${
-                    errors.password ? "border-[#FF6B81]" : ""
-                  }`}
-                  {...register("password")}
-                />
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className={`mt-1 border-2 border-[#7D5FFF] focus:ring-2 focus:ring-[#FFD93D] focus:border-[#FFD93D] transition-all ${
+                      errors.password ? "border-[#FF6B81]" : ""
+                    }`}
+                    {...register("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#603060] transition"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
                 {errors.password && (
                   <p className="text-[#FF6B81] text-sm mt-1">{errors.password.message}</p>
                 )}

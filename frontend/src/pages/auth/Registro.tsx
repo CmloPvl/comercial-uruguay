@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../../components/layout/Layout";
 import { Button } from "../../components/ui/button";
@@ -15,6 +16,7 @@ import { Label } from "../../components/ui/label";
 import { Badge } from "../../components/ui/badge";
 import { Checkbox } from "../../components/ui/checkbox";
 import { useRegister } from "../../hooks/useRegister";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Registro() {
   const {
@@ -23,7 +25,16 @@ export default function Registro() {
     errors,
     error,
     isSubmitting,
+    watch,
   } = useRegister();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // ✅ Validación en vivo con watch
+  const password = watch("password");
+  const confirmPassword = watch("confirmPassword");
+  const isPasswordMatch = password && confirmPassword && password === confirmPassword;
 
   return (
     <Layout>
@@ -125,12 +136,21 @@ export default function Registro() {
                 <Label className="text-sm font-bold text-[#303030] flex items-center gap-2">
                   <span className="text-[#603060]">🔒</span> Contraseña
                 </Label>
-                <Input
-                  type="password"
-                  placeholder="••••••••"
-                  className={`mt-1 border-2 ${errors.password ? 'border-[#FF6B81]' : 'border-[#00D2D3]'} focus:ring-2 focus:ring-[#FFD93D] focus:border-[#FFD93D]`}
-                  {...register("password")}
-                />
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className={`mt-1 border-2 ${errors.password ? 'border-[#FF6B81]' : 'border-[#00D2D3]'} focus:ring-2 focus:ring-[#FFD93D] focus:border-[#FFD93D]`}
+                    {...register("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#603060] transition"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
                 {errors.password && (
                   <p className="text-[#FF6B81] text-sm mt-1 font-medium">{errors.password.message}</p>
                 )}
@@ -139,7 +159,38 @@ export default function Registro() {
                 </p>
               </div>
 
-              {/* Términos (con Checkbox de Shadcn y react-hook-form) */}
+              {/* Confirmar contraseña */}
+              <div>
+                <Label className="text-sm font-bold text-[#303030] flex items-center gap-2">
+                  <span className="text-[#90C090]">🔒</span> Confirmar contraseña
+                </Label>
+                <div className="relative">
+                  <Input
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className={`mt-1 border-2 ${errors.confirmPassword ? 'border-[#FF6B81]' : 'border-[#00D2D3]'} focus:ring-2 focus:ring-[#FFD93D] focus:border-[#FFD93D]`}
+                    {...register("confirmPassword")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#603060] transition"
+                  >
+                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+                {errors.confirmPassword && (
+                  <p className="text-[#FF6B81] text-sm mt-1 font-medium">{errors.confirmPassword.message}</p>
+                )}
+                {/* ✅ Validación en vivo con watch */}
+                {confirmPassword && (
+                  <p className={`text-sm mt-1 ${isPasswordMatch ? 'text-[#90C090]' : 'text-[#FF6B81]'}`}>
+                    {isPasswordMatch ? '✅ Las contraseñas coinciden' : '❌ Las contraseñas no coinciden'}
+                  </p>
+                )}
+              </div>
+
+              {/* Términos */}
               <div className="flex items-start gap-3">
                 <Checkbox
                   id="terms"
