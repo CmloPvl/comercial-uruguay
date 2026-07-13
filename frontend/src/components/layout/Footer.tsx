@@ -1,3 +1,7 @@
+import { Link } from 'react-router-dom';
+import { empresaConfig } from '../../config/empresa';
+import { FaFacebook, FaInstagram, FaTiktok } from 'react-icons/fa';
+
 export default function Footer() {
   return (
     <footer className="bg-gradient-to-br from-[#603060] via-[#7D5FFF] to-[#00D2D3] text-white pt-12 pb-6">
@@ -8,21 +12,21 @@ export default function Footer() {
           {/* Columna 1: Logo y descripción */}
           <div className="col-span-1 md:col-span-1">
             <h3 className="text-2xl font-bold flex items-center gap-2">
-              <span className="animate-bounce">🏪</span> Comercial Uruguay
+              <span className="animate-bounce">🏪</span> {empresaConfig.nombre}
             </h3>
             <p className="text-white/80 mt-3 text-sm leading-relaxed">
-              Todo lo que necesitas en un solo lugar. Más de 10 años en Valparaíso ofreciendo productos de calidad y atención cercana.
+              {empresaConfig.descripcion}
             </p>
             <div className="flex gap-3 mt-4">
-              <a href="#" className="bg-white/20 hover:bg-[#FFD93D] hover:text-[#303030] p-2 rounded-full transition-all duration-300 hover:scale-110">
-                <span className="text-xl">📘</span>
-              </a>
-              <a href="#" className="bg-white/20 hover:bg-[#FFD93D] hover:text-[#303030] p-2 rounded-full transition-all duration-300 hover:scale-110">
-                <span className="text-xl">📸</span>
-              </a>
-              <a href="#" className="bg-white/20 hover:bg-[#FFD93D] hover:text-[#303030] p-2 rounded-full transition-all duration-300 hover:scale-110">
-                <span className="text-xl">💬</span>
-              </a>
+              <a href={empresaConfig.facebook} target="_blank" rel="noopener noreferrer" className="bg-white/20 hover:bg-[#FFD93D] hover:text-[#303030] p-2 rounded-full transition-all duration-300 hover:scale-110 text-xl">
+  <FaFacebook />
+</a>
+<a href={empresaConfig.instagram} target="_blank" rel="noopener noreferrer" className="bg-white/20 hover:bg-[#FFD93D] hover:text-[#303030] p-2 rounded-full transition-all duration-300 hover:scale-110 text-xl">
+  <FaInstagram />
+</a>
+<a href={empresaConfig.tiktok} target="_blank" rel="noopener noreferrer" className="bg-white/20 hover:bg-[#FFD93D] hover:text-[#303030] p-2 rounded-full transition-all duration-300 hover:scale-110 text-xl">
+  <FaTiktok />
+</a>
             </div>
           </div>
 
@@ -63,28 +67,36 @@ export default function Footer() {
             <ul className="space-y-3 text-white/80">
               <li className="flex items-start gap-2 hover:text-white transition">
                 <span className="text-[#FF6B81] text-lg">📍</span>
-                <span>Uruguay 660 esquina Colón, Valparaíso</span>
+                <span>{empresaConfig.direccion}</span>
               </li>
               <li className="flex items-center gap-2 hover:text-[#FFD93D] transition">
                 <span className="text-[#FFD93D] text-lg">📱</span>
-                <a href="tel:+56912345678" className="hover:text-[#FFD93D] transition-colors">+56 9 1234 5678</a>
-              </li>
-              <li className="flex items-center gap-2 hover:text-[#00D2D3] transition">
-                <span className="text-[#00D2D3] text-lg">📞</span>
-                <a href="tel:321234567" className="hover:text-[#00D2D3] transition-colors">32 123 4567</a>
+                <a href={`tel:${empresaConfig.telefono}`} className="hover:text-[#FFD93D] transition-colors">
+                  {empresaConfig.telefono}
+                </a>
               </li>
               <li className="flex items-center gap-2 hover:text-[#FF6B81] transition">
                 <span className="text-[#FF6B81] text-lg">✉️</span>
-                <a href="mailto:comercialuruguay@gmail.com" className="hover:text-[#FF6B81] transition-colors">comercialuruguay@gmail.com</a>
+                <a href={`mailto:${empresaConfig.email}`} className="hover:text-[#FF6B81] transition-colors">
+                  {empresaConfig.email}
+                </a>
+              </li>
+              <li className="flex items-start gap-2 hover:text-white transition text-sm">
+                <span className="text-[#00D2D3] text-lg">🕐</span>
+                <div>
+                  <div>Lun-Vie: {empresaConfig.horario.lunesViernes}</div>
+                  <div>Sáb: {empresaConfig.horario.sabado}</div>
+                  <div>Dom: {empresaConfig.horario.domingo}</div>
+                </div>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* ====== NUEVO: Franja de WhatsApp y Envíos ====== */}
+        {/* Franja de WhatsApp y Envíos */}
         <div className="flex flex-wrap items-center justify-center gap-4 py-4 border-b border-white/10">
           <a 
-            href="https://wa.me/56912345678?text=Hola%20Comercial%20Uruguay%2C%20quiero%20consultar%20sobre..." 
+            href={`https://wa.me/${empresaConfig.whatsapp}?text=Hola%20${empresaConfig.nombre}%2C%20quiero%20consultar%20sobre...`}
             target="_blank" 
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-[#00D2D3] hover:bg-[#00D2D3]/80 text-white font-bold px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 text-sm"
@@ -107,15 +119,21 @@ export default function Footer() {
         {/* Franja inferior */}
         <div className="flex flex-col md:flex-row justify-between items-center pt-4 gap-4">
           <p className="text-white/60 text-sm">
-            © 2026 Comercial Uruguay - Todos los derechos reservados
+            © {empresaConfig.año} {empresaConfig.nombre} - Todos los derechos reservados
           </p>
           <div className="flex gap-6 text-sm text-white/60">
-            <a href="#" className="hover:text-[#FFD93D] transition-colors">Políticas de Privacidad</a>
-            <a href="#" className="hover:text-[#FFD93D] transition-colors">Términos y Condiciones</a>
-            <a href="#" className="hover:text-[#FFD93D] transition-colors">Preguntas Frecuentes</a>
+            <Link to="/privacidad" className="hover:text-[#FFD93D] transition-colors">
+              Políticas de Privacidad
+            </Link>
+            <Link to="/terminos" className="hover:text-[#FFD93D] transition-colors">
+              Términos y Condiciones
+            </Link>
+            <a href="#" className="hover:text-[#FFD93D] transition-colors">
+              Preguntas Frecuentes
+            </a>
           </div>
         </div>
       </div>
     </footer>
-  )
+  );
 }

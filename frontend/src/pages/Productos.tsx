@@ -1,4 +1,3 @@
-// src/pages/Productos.tsx
 import { useState, useEffect } from "react"
 import Layout from "../components/layout/Layout"
 import {
@@ -9,21 +8,15 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../components/ui/breadcrumb"
-import ProductList from "../components/products/ProductList"
 import { Badge } from "../components/ui/badge"
-import { Button } from "../components/ui/button"
+import { productService, type Product } from "../services/productService"
+import { favoriteService } from "../services/favoriteService"
+import { useAuth } from "../context/AuthContext"
+import { useCart } from "../context/CartContext"
+import ProductList from "../components/products/ProductList"
+import ProductFilters from "../components/products/ProductFilters"
 
-// Datos de ejemplo (simulando una API)
-const productosData = [
-  { id: 1, name: "Bufanda de Lana", price: 12990, image: "🧣", isOnSale: true, discount: 15, stock: 25 },
-  { id: 2, name: "Guantes de Cuero", price: 8500, image: "🧤", isOnSale: false, discount: 0, stock: 8 },
-  { id: 3, name: "Gorro de Invierno", price: 25000, image: "🧢", isOnSale: true, discount: 20, stock: 0 },
-  { id: 4, name: "Set de Peinado", price: 3200, image: "💇", isOnSale: false, discount: 0, stock: 15 },
-  { id: 5, name: "Juego de Mesa", price: 45000, image: "🎲", isOnSale: false, discount: 0, stock: 3 },
-  { id: 6, name: "Bolsa de Regalo", price: 6800, image: "🎁", isOnSale: true, discount: 10, stock: 20 },
-]
-
-// Categorías con colores (más rosado)
+// Categorías con colores
 const categories = [
   { id: "cabello", name: "Cabello", icon: "💇", color: "hover:bg-[#FF6B81]/20 hover:border-[#FF6B81]" },
   { id: "juguetes", name: "Juguetes", icon: "🧸", color: "hover:bg-[#C06060]/20 hover:border-[#C06060]" },
@@ -34,34 +27,146 @@ const categories = [
 ]
 
 export default function Productos() {
-  const [productos, setProductos] = useState<typeof productosData>([])
-  const [cargando, setCargando] = useState(true)
+  const [productos, setProductos] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>("")
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 50000 })
+  const [priceRange, setPriceRange] = useState({ min: "", max: "" })
   const [showFilters, setShowFilters] = useState(false)
+  const { user } = useAuth()
+  const { addItemById } = useCart()
+  const [favorites, setFavorites] = useState<Set<string>>(new Set())
 
+  // =============================================
+  // CARGAR PRODUCTOS
+  // =============================================
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setProductos(productosData)
-      setCargando(false)
-    }, 1000)
-    return () => clearTimeout(timeout)
+    loadProducts()
+    if (user) {
+      loadFavorites()
+    }
   }, [])
 
+  const loadProducts = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const data = await productService.getProducts()
+      setProductos(data?.products || [])
+    } catch (err: any) {
+      setError(err.message || "Error al cargar productos")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadFavorites = async () => {
+    try {
+      const favs = await favoriteService.getFavorites()
+      setFavorites(new Set(favs.map(f => f.product.id)))
+    } catch (error) {
+      console.error("Error al cargar favoritos:", error)
+    }
+  }
+
+  // =============================================
+  // MANEJAR FAVORITOS
+  // =============================================
+  const handleToggleFavorite = async (productId: string) => {
+    if (!user) {
+      alert("Inicia sesión para guardar favoritos")
+      return
+    }
+
+    try {
+      if (favorites.has(productId)) {
+        await favoriteService.removeFavorite(productId)
+        setFavorites(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(productId)
+          return newSet
+        })
+      } else {
+        await favoriteService.addFavorite(productId)
+        setFavorites(prev => new Set([...prev, productId]))
+      }
+    } catch (err: any) {
+      alert("Error: " + err.message)
+    }
+  }
+
+  // =============================================
+  // MANEJAR CARRITO
+  // =============================================
+  const handleAddToCart = async (productId: string) => {
+    if (!user) {
+      alert("Inicia sesión para agregar al carrito")
+      return
+    }
+
+    try {
+      await addItemById(productId, 1)
+      alert("✅ Producto agregado al carrito")
+    } catch (err: any) {
+      alert("❌ " + err.message)
+    }
+  }
+
+  // =============================================
+  // FILTRAR PRODUCTOS
+  // =============================================
   const filteredProducts = productos.filter(p => {
-    const matchesCategory = !selectedCategory || p.name.includes(selectedCategory)
-    const matchesPrice = p.price >= priceRange.min && p.price <= priceRange.max
+    const matchesCategory = !selectedCategory || p.category?.name === selectedCategory
+    const minPrice = priceRange.min !== "" ? Number(priceRange.min) : 0
+    const maxPrice = priceRange.max !== "" ? Number(priceRange.max) : Infinity
+    const matchesPrice = p.price >= minPrice && p.price <= maxPrice
     return matchesCategory && matchesPrice
   })
 
-  if (cargando) {
+  // =============================================
+  // MANEJAR FILTROS
+  // =============================================
+  const handlePriceChange = (min: string, max: string) => {
+    setPriceRange({ min, max })
+  }
+
+  const handleClearFilters = () => {
+    setSelectedCategory("")
+    setPriceRange({ min: "", max: "" })
+  }
+
+  // =============================================
+  // ESTADO DE CARGA
+  // =============================================
+  if (loading) {
     return (
       <Layout>
         <div className="min-h-[80vh] flex items-center justify-center">
           <div className="text-center">
-            <div className="text-6xl mb-4 animate-bounce">⏳</div>
-            <p className="text-xl font-bold text-[#FF6B81] animate-pulse">Cargando productos...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7D5FFF] mx-auto"></div>
+            <p className="text-gray-500 mt-4">Cargando productos...</p>
           </div>
+        </div>
+      </Layout>
+    )
+  }
+
+  // =============================================
+  // ERROR
+  // =============================================
+  if (error) {
+    return (
+      <Layout>
+        <div className="min-h-[60vh] flex flex-col items-center justify-center py-12 px-4">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-[#303030]">Error al cargar productos</h2>
+          <p className="text-gray-500 mt-2">{error}</p>
+          <button
+            onClick={loadProducts}
+            className="mt-4 bg-[#7D5FFF] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#603060] transition"
+          >
+            Reintentar
+          </button>
         </div>
       </Layout>
     )
@@ -69,7 +174,7 @@ export default function Productos() {
 
   return (
     <Layout>
-      {/* ====== BREADCRUMB SHADCN ====== */}
+      {/* ====== BREADCRUMB ====== */}
       <div className="bg-[#FF6B81]/10 py-3 px-4 border-b-2 border-[#FF6B81]">
         <div className="max-w-6xl mx-auto">
           <Breadcrumb>
@@ -81,26 +186,16 @@ export default function Productos() {
               </BreadcrumbItem>
               <BreadcrumbSeparator className="text-[#FF6B81]" />
               <BreadcrumbItem>
-                <BreadcrumbLink href="/productos" className="text-[#603060] hover:text-[#FF6B81]">
+                <BreadcrumbPage className="text-[#FF6B81] font-bold">
                   Tienda
-                </BreadcrumbLink>
+                </BreadcrumbPage>
               </BreadcrumbItem>
-              {selectedCategory && (
-                <>
-                  <BreadcrumbSeparator className="text-[#FF6B81]" />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage className="text-[#FF6B81] font-bold">
-                      {selectedCategory}
-                    </BreadcrumbPage>
-                  </BreadcrumbItem>
-                </>
-              )}
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </div>
 
-      {/* ====== BANNER MEJORADO ====== */}
+      {/* ====== BANNER ====== */}
       <div className="bg-gradient-to-r from-[#603060] via-[#C06060] to-[#FF6B81] text-white py-10 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <Badge className="bg-[#FFD93D] text-[#303030] mb-3 px-4 py-1 rounded-full">
@@ -127,77 +222,20 @@ export default function Productos() {
         </div>
       </div>
 
-      {/* ====== LAYOUT PRINCIPAL ====== */}
+      {/* ====== CONTENIDO ====== */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row gap-8">
           
           {/* ====== FILTROS (Desktop) ====== */}
           <div className="hidden md:block w-64 flex-shrink-0">
-            <div className="bg-white p-6 rounded-xl border-2 border-[#FF6B81] shadow-lg sticky top-4">
-              <h3 className="font-bold text-lg text-[#603060] mb-4 flex items-center gap-2">
-                <span>📂</span> Filtros
-              </h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-[#303030] mb-2">Categorías</h4>
-                  {categories.map(cat => (
-                    <label key={cat.id} className="flex items-center gap-2 py-1 cursor-pointer hover:text-[#FF6B81] transition">
-                      <input
-                        type="checkbox"
-                        checked={selectedCategory === cat.name}
-                        onChange={() => setSelectedCategory(selectedCategory === cat.name ? "" : cat.name)}
-                        className="accent-[#FF6B81] w-4 h-4"
-                      />
-                      <span className="text-sm">{cat.icon} {cat.name}</span>
-                    </label>
-                  ))}
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-[#303030] mb-2 flex items-center gap-2">
-                    <span>💰</span> Rango de Precio
-                  </h4>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      value={priceRange.min}
-                      onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
-                      className="w-1/2 px-2 py-1 border-2 border-[#FF6B81] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B81]"
-                      placeholder="Min"
-                    />
-                    <input
-                      type="number"
-                      value={priceRange.max}
-                      onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
-                      className="w-1/2 px-2 py-1 border-2 border-[#FF6B81] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B81]"
-                      placeholder="Max"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-[#303030] mb-2 flex items-center gap-2">
-                    <span>📦</span> Disponibilidad
-                  </h4>
-                  <label className="flex items-center gap-2 cursor-pointer hover:text-[#00D2D3] transition">
-                    <input type="checkbox" className="accent-[#00D2D3] w-4 h-4" />
-                    <span className="text-sm">Solo Ofertas</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer hover:text-[#90C090] transition">
-                    <input type="checkbox" className="accent-[#90C090] w-4 h-4" />
-                    <span className="text-sm">Stock Inmediato</span>
-                  </label>
-                </div>
-
-                <button
-                  onClick={() => { setSelectedCategory(""); setPriceRange({ min: 0, max: 50000 }); }}
-                  className="w-full bg-gradient-to-r from-[#FF6B81] to-[#C06060] hover:from-[#C06060] hover:to-[#FF6B81] text-white font-bold py-2.5 rounded-lg transition-all hover:scale-[1.02]"
-                >
-                  🧹 Limpiar Filtros
-                </button>
-              </div>
-            </div>
+            <ProductFilters
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+              priceRange={priceRange}
+              onPriceChange={handlePriceChange}
+              onClearFilters={handleClearFilters}
+            />
           </div>
 
           {/* ====== PRODUCTOS ====== */}
@@ -214,51 +252,15 @@ export default function Productos() {
                 >
                   ⚙️ Filtrar
                 </button>
-                <select className="border-2 border-[#FF6B81] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B81] bg-white">
-                  <option>⭐ Destacados</option>
-                  <option>⬆️ Menor Precio</option>
-                  <option>⬇️ Mayor Precio</option>
-                  <option>🆕 Más Nuevos</option>
-                </select>
               </div>
             </div>
 
-            {(selectedCategory || priceRange.min > 0 || priceRange.max < 50000) && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {selectedCategory && (
-                  <span className="bg-[#FF6B81]/20 text-[#FF6B81] px-3 py-1 rounded-full text-sm flex items-center gap-1 border border-[#FF6B81]/30">
-                    {selectedCategory}
-                    <button onClick={() => setSelectedCategory("")} className="hover:text-[#C06060] transition">✕</button>
-                  </span>
-                )}
-                <button
-                  onClick={() => { setSelectedCategory(""); setPriceRange({ min: 0, max: 50000 }); }}
-                  className="text-[#C06060] text-sm font-medium hover:underline transition"
-                >
-                  🧹 Limpiar todo
-                </button>
-              </div>
-            )}
-
-            <ProductList products={filteredProducts} />
-
-            {filteredProducts.length > 0 && (
-              <div className="flex justify-center items-center gap-2 mt-8">
-                <Button variant="outline" className="border-[#FF6B81] text-[#FF6B81] hover:bg-[#FF6B81] hover:text-white">
-                  ‹
-                </Button>
-                <Button className="bg-[#FF6B81] text-white hover:bg-[#C06060]">1</Button>
-                <Button variant="outline" className="border-[#FF6B81] text-[#FF6B81] hover:bg-[#FF6B81] hover:text-white">
-                  2
-                </Button>
-                <Button variant="outline" className="border-[#FF6B81] text-[#FF6B81] hover:bg-[#FF6B81] hover:text-white">
-                  3
-                </Button>
-                <Button variant="outline" className="border-[#FF6B81] text-[#FF6B81] hover:bg-[#FF6B81] hover:text-white">
-                  ›
-                </Button>
-              </div>
-            )}
+            <ProductList
+              products={filteredProducts}
+              favorites={favorites}
+              onToggleFavorite={handleToggleFavorite}
+              onAddToCart={handleAddToCart}
+            />
           </div>
         </div>
       </div>
@@ -266,7 +268,7 @@ export default function Productos() {
       {/* ====== FILTROS MÓVIL ====== */}
       {showFilters && (
         <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
-          <div className="bg-white w-80 h-full p-6 overflow-y-auto animate-slide-in shadow-2xl">
+          <div className="bg-white w-80 h-full p-6 overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-[#603060] flex items-center gap-2">
                 <span>📂</span> Filtros

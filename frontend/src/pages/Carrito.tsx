@@ -111,7 +111,16 @@ Teléfono: ${user?.phone || "No especificado"}
           {/* Lista de productos */}
           <div className="flex-1">
             <div className="flex items-center justify-between mb-6">
-              <h1 className="text-3xl font-bold text-[#603060]">🛒 Mi Carrito</h1>
+              <div>
+                <h1 className="text-3xl font-bold text-[#603060]">
+                  🛒 Mi Carrito
+                </h1>
+                {user?.fullName && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    👋 Hola, {user.fullName}
+                  </p>
+                )}
+              </div>
               <Badge className="bg-[#00D2D3] text-white text-lg px-4 py-1">
                 {totalItems} productos
               </Badge>

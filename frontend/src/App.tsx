@@ -1,25 +1,69 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Home from "./pages/Home"
-import Login from "./pages/Login"
-import Registro from "./pages/Registro"
+import Login from "./pages/auth/Login"
+import Registro from "./pages/auth/Registro"
 import Perfil from "./pages/Perfil"
 import Productos from "./pages/Productos"
 import ProductoDetalle from "./pages/ProductoDetalle"
-import CrearPublicacion from "./pages/CrearPublicacion"
+import CrearPublicacion from "./pages/admin/CrearPublicacion"
 import Carrito from "./pages/Carrito"
+import Terminos from './pages/Terminos'
+import Privacidad from './pages/Privacidad'
+import NotFound from './pages/NotFound'
+import Favoritos from './pages/Favoritos'
+import AdminDashboard from './pages/admin/Dashboard'
+import MisPedidos from './pages/MisPedidos'
+import ProtectedRoute from './components/common/ProtectedRoute'
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Páginas públicas */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
-        <Route path="/perfil" element={<Perfil />} />
         <Route path="/productos" element={<Productos />} />
         <Route path="/producto/:id" element={<ProductoDetalle />} />
-        <Route path="/crear-publicacion" element={<CrearPublicacion />} />
-        <Route path="/carrito" element={<Carrito />} />
+        <Route path="/terminos" element={<Terminos />} />
+        <Route path="/privacidad" element={<Privacidad />} />
+        
+        {/* Páginas protegidas (requieren autenticación) */}
+        <Route path="/perfil" element={
+          <ProtectedRoute>
+            <Perfil />
+          </ProtectedRoute>
+        } />
+        <Route path="/carrito" element={
+          <ProtectedRoute>
+            <Carrito />
+          </ProtectedRoute>
+        } />
+        <Route path="/favoritos" element={
+          <ProtectedRoute>
+            <Favoritos />
+          </ProtectedRoute>
+        } />
+        <Route path="/mis-pedidos" element={
+          <ProtectedRoute>
+            <MisPedidos />
+          </ProtectedRoute>
+        } />
+        
+        {/* Páginas de administración (requieren autenticación + ADMIN) */}
+        <Route path="/crear-publicacion" element={
+          <ProtectedRoute requireAdmin>
+            <CrearPublicacion />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin" element={
+          <ProtectedRoute requireAdmin>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+        
+        {/* 404 - Siempre al final */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )

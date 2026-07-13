@@ -1,102 +1,103 @@
-// src/components/products/ProductCard.tsx
 import { Button } from "../ui/button"
 import { Link } from "react-router-dom"
 import { Badge } from "../ui/badge"
 import { Card, CardContent } from "../ui/card"
+import type { Product } from "../../services/productService"
 
 interface ProductCardProps {
-  id: number
-  name: string
-  price: number
-  image?: string
-  isOnSale?: boolean
-  discount?: number
-  stock?: number
+  product: Product
+  isFavorite?: boolean
+  onToggleFavorite?: () => void
+  onAddToCart?: () => void
+  showActions?: boolean
 }
 
 export default function ProductCard({ 
-  id, 
-  name, 
-  price, 
-  image, 
-  isOnSale = false, 
-  discount = 0,
-  stock = 10 
+  product,
+  isFavorite = false,
+  onToggleFavorite,
+  onAddToCart,
+  showActions = true
 }: ProductCardProps) {
-  const finalPrice = isOnSale && discount > 0 ? price * (1 - discount / 100) : price
-  const isOutOfStock = stock === 0
+  const finalPrice = product.isOnSale && product.discount > 0
+    ? product.price * (1 - product.discount / 100)
+    : product.price
 
-  // Colores aleatorios para bordes (variedad)
-  const borderColors = [
-    "border-[#00D2D3] hover:border-[#7D5FFF]",
-    "border-[#FF6B81] hover:border-[#FFD93D]",
-    "border-[#FFD93D] hover:border-[#00D2D3]",
-    "border-[#7D5FFF] hover:border-[#FF6B81]",
-    "border-[#FF9F43] hover:border-[#7D5FFF]",
-    "border-[#90C090] hover:border-[#FFD93D]",
-  ]
-  const randomBorder = borderColors[id % borderColors.length]
+  const isOutOfStock = product.stock === 0
+  const hasImage = product.images && Array.isArray(product.images) && product.images.length > 0
 
   return (
-    <Card className={`border-2 ${randomBorder} shadow-md hover:shadow-xl transition-all hover:-translate-y-1 overflow-hidden group`}>
+    <Card className="border-2 border-[#00D2D3]/30 hover:border-[#7D5FFF] transition-all hover:shadow-xl group">
       <CardContent className="p-4">
         {/* Imagen */}
-        <div className="relative bg-gradient-to-br from-[#FFD93D]/20 to-[#FF6B81]/20 h-40 rounded-lg flex items-center justify-center text-6xl group-hover:scale-105 transition">
-          {image || "📦"}
-          {isOnSale && discount > 0 && (
-            <Badge className="absolute top-2 left-2 bg-[#FF6B81] text-white font-bold animate-pulse">
-              🔥 -{discount}%
-            </Badge>
-          )}
-          {isOutOfStock && (
-            <Badge className="absolute top-2 right-2 bg-[#303030] text-white font-bold">
-              ⛔ Sin Stock
-            </Badge>
-          )}
-        </div>
+        <Link to={`/producto/${product.id}`}>
+          <div className="aspect-square bg-gradient-to-br from-[#F0F0C0]/30 to-[#F0C0F0]/30 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
+            {hasImage ? (
+              <img
+                src={product.images[0]}
+                alt={product.name}
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              />
+            ) : (
+              <span className="text-6xl">📦</span>
+            )}
+          </div>
+        </Link>
+
+        {/* Categoría */}
+        {product.category && (
+          <Badge className="bg-[#00D2D3]/10 text-[#00D2D3] hover:bg-[#00D2D3]/20 mb-2">
+            {product.category.name}
+          </Badge>
+        )}
 
         {/* Nombre */}
-        <h3 className="font-bold text-lg mt-3 text-[#303030] group-hover:text-[#7D5FFF] transition-colors line-clamp-1">
-          {name}
-        </h3>
-        
+        <Link to={`/producto/${product.id}`}>
+          <h3 className="font-bold text-[#303030] hover:text-[#7D5FFF] transition-colors line-clamp-2 min-h-[48px]">
+            {product.name}
+          </h3>
+        </Link>
+
         {/* Precio */}
-        <div className="flex items-center gap-2 mt-1">
-          {isOnSale && discount > 0 && (
-            <span className="text-sm text-gray-400 line-through">${price.toLocaleString()}</span>
-          )}
-          <p className={`font-bold text-xl ${isOnSale ? 'text-[#FF6B81]' : 'text-[#7D5FFF]'}`}>
-            ${Math.round(finalPrice).toLocaleString()}
-          </p>
-          {isOnSale && discount > 0 && (
-            <Badge className="bg-[#FFD93D] text-[#303030] text-xs">
-              Ahorra ${Math.round(price * discount / 100).toLocaleString()}
+        <div className="flex items-center justify-between mt-2">
+          <div>
+            {product.isOnSale && product.discount > 0 && (
+              <span className="text-sm text-gray-400 line-through mr-2">
+                ${product.price.toLocaleString('es-CL')}
+              </span>
+            )}
+            <span className="text-lg font-extrabold text-[#603060]">
+              ${Math.round(finalPrice).toLocaleString('es-CL')}
+            </span>
+          </div>
+          {product.isOnSale && product.discount > 0 && (
+            <Badge className="bg-[#FF6B81] text-white">
+              -{product.discount}%
             </Badge>
           )}
         </div>
 
-        {/* Stock */}
-        <p className={`text-sm mt-1 flex items-center gap-1 ${isOutOfStock ? 'text-[#FF6B81]' : 'text-[#00D2D3]'}`}>
-          {isOutOfStock ? '❌ Agotado' : `✅ ${stock} unidades disponibles`}
-        </p>
-
-        {/* Botones */}
-        <div className="flex gap-2 mt-3">
-          <Link to={`/producto/${id}`} className="flex-1">
-            <Button variant="outline" className="w-full border-[#7D5FFF] text-[#7D5FFF] hover:bg-[#7D5FFF] hover:text-white transition-all">
-              👁️ Ver detalle
+        {/* Acciones */}
+        {showActions && (
+          <div className="flex gap-2 mt-3">
+            <Button
+              onClick={onAddToCart}
+              disabled={isOutOfStock}
+              className="flex-1 bg-gradient-to-r from-[#00D2D3] to-[#7D5FFF] hover:from-[#7D5FFF] hover:to-[#00D2D3] text-white font-bold text-sm py-2 rounded-lg shadow-md hover:shadow-lg transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isOutOfStock ? "Sin Stock" : "🛒 Agregar"}
             </Button>
-          </Link>
-          {!isOutOfStock ? (
-            <Button className="flex-1 bg-gradient-to-r from-[#00D2D3] to-[#7D5FFF] hover:from-[#7D5FFF] hover:to-[#00D2D3] text-white font-bold transition-all hover:scale-105">
-              🛒 Agregar
-            </Button>
-          ) : (
-            <Button className="flex-1 bg-gray-300 text-gray-500 cursor-not-allowed">
-              🔔 Avisarme
-            </Button>
-          )}
-        </div>
+            {onToggleFavorite && (
+              <Button
+                variant="outline"
+                onClick={onToggleFavorite}
+                className={`border-2 ${isFavorite ? 'border-[#FF6B81] text-[#FF6B81] bg-[#FF6B81]/10' : 'border-[#FF6B81] text-[#FF6B81] hover:bg-[#FF6B81]/10'} font-bold text-sm py-2 px-4 rounded-lg transition-all hover:scale-[1.02]`}
+              >
+                {isFavorite ? '❤️' : '♡'}
+              </Button>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   )

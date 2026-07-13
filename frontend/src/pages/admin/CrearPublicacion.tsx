@@ -1,8 +1,7 @@
-// src/pages/CrearPublicacion.tsx
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
-import Layout from "../components/layout/Layout"
-import { Button } from "../components/ui/button"
+import Layout from "../../components/layout/Layout"
+import { Button } from "../../components/ui/button"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,21 +9,25 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "../components/ui/breadcrumb"
-import { Card, CardContent } from "../components/ui/card"
-import { Input } from "../components/ui/input"
-import { Label } from "../components/ui/label"
-import { Badge } from "../components/ui/badge"
-import { Textarea } from "../components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select"
+} from "../../components/ui/breadcrumb"
+import { Card, CardContent } from "../../components/ui/card"
+import { Input } from "../../components/ui/input"
+import { Label } from "../../components/ui/label"
+import { Badge } from "../../components/ui/badge"
+import { Textarea } from "../../components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
+import { productService } from "../../services/productService"
+import { useAuth } from "../../context/AuthContext"
 
 export default function CrearPublicacion() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     nombre: "",
     descripcion: "",
     sku: "",
-    categoria: "",
+    categoriaId: "",
     precio: "",
     stock: "",
     variantes: "",
@@ -68,17 +71,14 @@ export default function CrearPublicacion() {
     if (!formData.sku.trim()) {
       newErrors.sku = "El SKU es obligatorio"
     }
-    if (!formData.categoria) {
-      newErrors.categoria = "Debes seleccionar una categoría"
+    if (!formData.categoriaId) {
+      newErrors.categoriaId = "Debes seleccionar una categoría"
     }
     if (!formData.precio || Number(formData.precio) <= 0) {
       newErrors.precio = "El precio debe ser mayor a 0"
     }
     if (!formData.stock || Number(formData.stock) < 0) {
       newErrors.stock = "El stock debe ser un número mayor o igual a 0"
-    }
-    if (images.length === 0) {
-      newErrors.images = "Debes subir al menos una imagen"
     }
     if (formData.enOferta && (!formData.descuento || Number(formData.descuento) <= 0)) {
       newErrors.descuento = "Debes indicar un descuento válido"
@@ -87,7 +87,7 @@ export default function CrearPublicacion() {
     return newErrors
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const newErrors = validate()
     if (Object.keys(newErrors).length > 0) {
@@ -95,9 +95,37 @@ export default function CrearPublicacion() {
       return
     }
     
-    console.log("Publicando producto:", { ...formData, images })
-    alert("✅ Producto publicado exitosamente")
-    navigate("/productos")
+    try {
+      setLoading(true)
+      
+      // Preparar tags y variants como JSON string
+      const tags = formData.etiquetas ? formData.etiquetas.split(",").map(tag => tag.trim()).filter(Boolean) : []
+      const variants = formData.variantes ? formData.variantes.split(",").map(v => v.trim()).filter(Boolean) : []
+
+  const productData = {
+  name: formData.nombre,
+  description: formData.descripcion,
+  sku: formData.sku,
+  categoryId: formData.categoriaId,
+  price: Number(formData.precio),
+  stock: Number(formData.stock),
+  images: images.length > 0 ? images : ["https://via.placeholder.com/300x300?text=Sin+Imagen"],
+  isOnSale: formData.enOferta,
+  discount: formData.enOferta ? Number(formData.descuento) : 0,
+  isActive: true,
+  tags: tags,  // ✅ Enviar como array, no como string
+  variants: variants,  // ✅ Enviar como array, no como string
+}
+
+      await productService.createProduct(productData)
+      alert("✅ Producto publicado exitosamente")
+      navigate("/admin/productos")
+    } catch (error: any) {
+      console.error("Error:", error)
+      alert("❌ Error al publicar: " + (error.response?.data?.message || error.message))
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,9 +140,27 @@ export default function CrearPublicacion() {
     setImages(prev => prev.filter((_, i) => i !== index))
   }
 
+  // Verificar si es admin
+  if (user?.role !== "ADMIN") {
+    return (
+      <Layout>
+        <div className="min-h-[70vh] flex items-center justify-center">
+          <Card className="max-w-md w-full border-2 border-[#FF6B81] shadow-2xl">
+            <CardContent className="p-8 text-center">
+              <div className="text-6xl mb-4">🚫</div>
+              <h2 className="text-2xl font-bold text-[#603060] mb-2">Acceso Denegado</h2>
+              <p className="text-gray-500">No tienes permisos para crear publicaciones.</p>
+              <Link to="/" className="mt-4 inline-block text-[#7D5FFF] hover:underline">Volver al inicio</Link>
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
+    )
+  }
+
   return (
     <Layout>
-      {/* ====== BREADCRUMB SHADCN ====== */}
+      {/* ====== BREADCRUMB ====== */}
       <div className="bg-[#FFD93D]/20 py-3 px-4 border-b-2 border-[#00D2D3]">
         <div className="max-w-6xl mx-auto">
           <Breadcrumb>
@@ -233,21 +279,21 @@ export default function CrearPublicacion() {
                         <span className="text-[#603060]">📂</span> Categoría *
                       </Label>
                       <Select
-                        value={formData.categoria}
-                        onValueChange={(value) => handleSelectChange("categoria", value)}
+                        value={formData.categoriaId}
+                        onValueChange={(value) => handleSelectChange("categoriaId", value)}
                       >
-                        <SelectTrigger className={`border-2 ${errors.categoria ? 'border-[#FF6B81]' : 'border-[#7D5FFF]'} focus:ring-2 focus:ring-[#FFD93D]`}>
+                        <SelectTrigger className={`w-full border-2 ${errors.categoriaId ? 'border-[#FF6B81]' : 'border-[#7D5FFF]'} focus:ring-2 focus:ring-[#FFD93D] bg-white`}>
                           <SelectValue placeholder="Seleccionar categoría..." />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="cabello">💇 Cabello</SelectItem>
-                          <SelectItem value="juguetes">🧸 Juguetes y Cumpleaños</SelectItem>
-                          <SelectItem value="hogar">🏠 Hogar</SelectItem>
-                          <SelectItem value="melamina">🍽️ Melamina</SelectItem>
-                          <SelectItem value="temporada">🍂 Temporada</SelectItem>
+                        <SelectContent className="bg-white border-2 border-[#7D5FFF] shadow-lg">
+                          <SelectItem value="1" className="hover:bg-[#F0F0C0] cursor-pointer">💇 Cabello</SelectItem>
+                          <SelectItem value="2" className="hover:bg-[#F0F0C0] cursor-pointer">🧸 Juguetes y Cumpleaños</SelectItem>
+                          <SelectItem value="3" className="hover:bg-[#F0F0C0] cursor-pointer">🏠 Hogar</SelectItem>
+                          <SelectItem value="4" className="hover:bg-[#F0F0C0] cursor-pointer">🍽️ Melamina</SelectItem>
+                          <SelectItem value="5" className="hover:bg-[#F0F0C0] cursor-pointer">🍂 Temporada</SelectItem>
                         </SelectContent>
                       </Select>
-                      {errors.categoria && <p className="text-[#FF6B81] text-sm mt-1">{errors.categoria}</p>}
+                      {errors.categoriaId && <p className="text-[#FF6B81] text-sm mt-1">{errors.categoriaId}</p>}
                     </div>
 
                     <div>
@@ -275,7 +321,7 @@ export default function CrearPublicacion() {
                 <CardContent className="p-6">
                   <h2 className="text-xl font-bold text-[#603060] mb-4">📸 Imagen del Producto</h2>
                   
-                  <div className={`border-2 border-dashed ${errors.images ? 'border-[#FF6B81]' : 'border-[#7D5FFF]'} rounded-lg p-6 text-center`}>
+                  <div className="border-2 border-dashed border-[#7D5FFF] rounded-lg p-6 text-center">
                     <div className="text-5xl mb-2">📷</div>
                     <p className="text-gray-500 text-sm">Haz clic para subir una imagen</p>
                     <p className="text-xs text-gray-400">(JPG, PNG, WEBP - Máx 2MB)</p>
@@ -287,7 +333,6 @@ export default function CrearPublicacion() {
                       className="mt-3 w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#7D5FFF] file:text-white hover:file:bg-[#603060]"
                     />
                   </div>
-                  {errors.images && <p className="text-[#FF6B81] text-sm mt-1">{errors.images}</p>}
 
                   {images.length > 0 && (
                     <div className="mt-4">
@@ -306,12 +351,6 @@ export default function CrearPublicacion() {
                           </div>
                         ))}
                       </div>
-                      <button
-                        type="button"
-                        className="mt-2 text-[#7D5FFF] text-sm font-medium hover:underline"
-                      >
-                        + Agregar otra imagen
-                      </button>
                     </div>
                   )}
                 </CardContent>
@@ -402,7 +441,7 @@ export default function CrearPublicacion() {
                     {formData.enOferta && (
                       <div>
                         <Label className="text-sm font-bold text-[#303030] flex items-center gap-2">
-                          <span className="text-[#FF6B81]">🔻</span> Descuento
+                          <span className="text-[#FF6B81]">🔻</span> Descuento (%)
                         </Label>
                         <Input
                           type="number"
@@ -426,13 +465,14 @@ export default function CrearPublicacion() {
           <Card className="mt-8 border-2 border-[#7D5FFF]">
             <CardContent className="p-6">
               <div className="flex flex-wrap gap-4">
-                <Button type="submit" className="bg-gradient-to-r from-[#00D2D3] to-[#7D5FFF] hover:from-[#7D5FFF] hover:to-[#00D2D3] text-white font-bold px-8 py-3 text-lg rounded-xl shadow-lg">
-                  🚀 Publicar producto
+                <Button 
+                  type="submit" 
+                  disabled={loading}
+                  className="bg-gradient-to-r from-[#00D2D3] to-[#7D5FFF] hover:from-[#7D5FFF] hover:to-[#00D2D3] text-white font-bold px-8 py-3 text-lg rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Publicando..." : "🚀 Publicar producto"}
                 </Button>
-                <Button type="button" variant="outline" className="border-[#FFD93D] text-[#FFD93D] hover:bg-[#FFD93D] hover:text-[#303030] font-bold px-8 py-3 text-lg rounded-xl">
-                  💾 Guardar como borrador
-                </Button>
-                <Link to="/productos">
+                <Link to="/admin/productos">
                   <Button type="button" variant="outline" className="border-[#FF6B81] text-[#FF6B81] hover:bg-[#FF6B81] hover:text-white font-bold px-8 py-3 text-lg rounded-xl">
                     ✖ Cancelar
                   </Button>
@@ -440,7 +480,6 @@ export default function CrearPublicacion() {
               </div>
               <div className="mt-4 text-sm text-gray-400">
                 <p>ℹ️ Al publicar, el producto será visible en la tienda.</p>
-                <p>ℹ️ Los borradores no son visibles para los clientes.</p>
               </div>
             </CardContent>
           </Card>

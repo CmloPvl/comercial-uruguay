@@ -1,0 +1,20 @@
+export const empresaConfig = {
+  nombre: 'Comercial Uruguay',
+  telefono: '+5697503324',
+  telefonoFijo: null,
+  email: 'comercialuruguayvalpo@gmail.com',
+  whatsapp: '5697503324',
+  direccion: 'Uruguay 660, Valparaíso',
+  comuna: 'Valparaíso',
+  region: 'Quinta Región',
+  facebook: 'https://www.facebook.com/ComercialUruguay',
+  instagram: 'https://www.instagram.com/comercial.uruguay_valpo',
+  tiktok: 'https://www.tiktok.com/@comercial.uruguay',
+  horario: {
+    lunesViernes: '9:00 - 18:30 hrs',
+    sabado: '10:00 - 15:00 hrs',
+    domingo: 'Cerrado',
+  },
+  año: new Date().getFullYear(),
+  descripcion: 'Todo lo que necesitas en un solo lugar. Más de 10 años en Valparaíso ofreciendo productos de calidad y atención cercana.',
+};

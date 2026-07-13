@@ -1,19 +1,13 @@
+import { useState, useEffect } from "react"
 import Layout from "../components/layout/Layout"
 import { Button } from "../components/ui/button"
 import { Link } from "react-router-dom"
 import Hero from "../components/home/Hero"
 import { Card, CardContent } from "../components/ui/card"
 import { Badge } from "../components/ui/badge"
-
-// Datos de ejemplo para productos destacados
-const featuredProducts = [
-  { id: 1, name: "Bufanda de Lana", price: 12990, image: "🧣", isOnSale: true, discount: 15 },
-  { id: 2, name: "Guantes de Cuero", price: 8500, image: "🧤", isOnSale: false },
-  { id: 3, name: "Gorro de Invierno", price: 25000, image: "🧢", isOnSale: true, discount: 20 },
-  { id: 4, name: "Set de Peinado", price: 3200, image: "💇", isOnSale: false },
-  { id: 5, name: "Juego de Mesa", price: 45000, image: "🎲", isOnSale: false },
-  { id: 6, name: "Bolsa de Regalo", price: 6800, image: "🎁", isOnSale: true, discount: 10 },
-]
+import { productService, type Product } from "../services/productService"
+import { useCart } from "../context/CartContext"
+import { useAuth } from "../context/AuthContext"
 
 // Categorías con colores variados
 const categories = [
@@ -34,6 +28,46 @@ const benefits = [
 ]
 
 export default function Home() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { user } = useAuth()
+  const { addItemById } = useCart()
+
+  useEffect(() => {
+    loadProducts()
+  }, [])
+
+  const loadProducts = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const data = await productService.getProducts()
+      setProducts(data?.products || [])
+    } catch (err: any) {
+      setError(err.message || "Error al cargar productos")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAddToCart = async (productId: string) => {
+    if (!user) {
+      alert("Inicia sesión para agregar al carrito")
+      return
+    }
+
+    try {
+      await addItemById(productId, 1)
+      alert("✅ Producto agregado al carrito")
+    } catch (err: any) {
+      alert("❌ " + err.message)
+    }
+  }
+
+  // Tomar primeros 6 productos para destacados
+  const featuredProducts = products.slice(0, 6)
+
   return (
     <Layout>
       {/* ====== HERO ====== */}
@@ -51,13 +85,14 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
             {categories.map((cat) => (
-              <div
+              <Link
+                to={`/productos?categoria=${cat.name}`}
                 key={cat.name}
                 className={`bg-white p-4 rounded-xl border-2 ${cat.color} shadow-md hover:shadow-xl transition-all hover:-translate-y-2 cursor-pointer group`}
               >
                 <div className="text-5xl mb-2 group-hover:scale-110 transition">{cat.icon}</div>
                 <p className="font-bold text-[#303030] text-sm group-hover:text-[#7D5FFF] transition">{cat.name}</p>
-              </div>
+              </Link>
             ))}
           </div>
           <div className="text-center mt-8">
@@ -78,38 +113,80 @@ export default function Home() {
             </h2>
             <p className="text-gray-500 mt-2">Los productos más populares del momento</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {featuredProducts.map((product) => (
-              <Card key={product.id} className="border-2 border-[#00D2D3] hover:border-[#7D5FFF] transition-all hover:shadow-xl hover:-translate-y-1 overflow-hidden group">
-                <CardContent className="p-4">
-                  <div className="relative bg-gradient-to-br from-[#FFD93D]/20 to-[#FF6B81]/20 h-40 rounded-lg flex items-center justify-center text-6xl group-hover:scale-105 transition">
-                    {product.image}
-                    {product.isOnSale && (
-                      <Badge className="absolute top-2 left-2 bg-[#FF6B81] text-white font-bold px-2 py-1 rounded-full animate-pulse">
-                        🔥 -{product.discount}%
-                      </Badge>
-                    )}
-                  </div>
-                  <h3 className="font-bold text-lg mt-3 text-[#303030] group-hover:text-[#7D5FFF] transition">
-                    {product.name}
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {product.isOnSale && (
-                      <span className="text-sm text-gray-400 line-through">
-                        ${(product.price * 1.2).toLocaleString()}
-                      </span>
-                    )}
-                    <p className={`font-bold text-xl ${product.isOnSale ? 'text-[#FF6B81]' : 'text-[#7D5FFF]'}`}>
-                      ${product.price.toLocaleString()}
-                    </p>
-                  </div>
-                  <Button className="w-full mt-3 bg-gradient-to-r from-[#00D2D3] to-[#7D5FFF] hover:from-[#7D5FFF] hover:to-[#00D2D3] text-white font-bold transition-all shadow-md hover:shadow-lg">
-                    🛒 Agregar
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7D5FFF] mx-auto"></div>
+              <p className="text-gray-500 mt-4">Cargando productos...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-[#FF6B81]">Error al cargar productos</p>
+              <button onClick={loadProducts} className="mt-2 text-[#7D5FFF] hover:underline">
+                Reintentar
+              </button>
+            </div>
+          ) : featuredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No hay productos disponibles.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {featuredProducts.map((product) => {
+                const finalPrice = product.isOnSale && product.discount > 0
+                  ? product.price * (1 - product.discount / 100)
+                  : product.price
+                const hasImage = product.images && Array.isArray(product.images) && product.images.length > 0
+
+                return (
+                  <Card key={product.id} className="border-2 border-[#00D2D3] hover:border-[#7D5FFF] transition-all hover:shadow-xl hover:-translate-y-1 overflow-hidden group">
+                    <CardContent className="p-4">
+                      <Link to={`/producto/${product.id}`}>
+                        <div className="relative bg-gradient-to-br from-[#FFD93D]/20 to-[#FF6B81]/20 h-40 rounded-lg flex items-center justify-center text-6xl group-hover:scale-105 transition">
+                          {hasImage ? (
+                            <img
+                              src={product.images[0]}
+                              alt={product.name}
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                          ) : (
+                            "📦"
+                          )}
+                          {product.isOnSale && product.discount > 0 && (
+                            <Badge className="absolute top-2 left-2 bg-[#FF6B81] text-white font-bold px-2 py-1 rounded-full animate-pulse">
+                              🔥 -{product.discount}%
+                            </Badge>
+                          )}
+                        </div>
+                      </Link>
+                      <Link to={`/producto/${product.id}`}>
+                        <h3 className="font-bold text-lg mt-3 text-[#303030] group-hover:text-[#7D5FFF] transition line-clamp-1">
+                          {product.name}
+                        </h3>
+                      </Link>
+                      <div className="flex items-center gap-2">
+                        {product.isOnSale && product.discount > 0 && (
+                          <span className="text-sm text-gray-400 line-through">
+                            ${product.price.toLocaleString('es-CL')}
+                          </span>
+                        )}
+                        <p className={`font-bold text-xl ${product.isOnSale ? 'text-[#FF6B81]' : 'text-[#7D5FFF]'}`}>
+                          ${Math.round(finalPrice).toLocaleString('es-CL')}
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => handleAddToCart(product.id)}
+                        className="w-full mt-3 bg-gradient-to-r from-[#00D2D3] to-[#7D5FFF] hover:from-[#7D5FFF] hover:to-[#00D2D3] text-white font-bold transition-all shadow-md hover:shadow-lg"
+                      >
+                        🛒 Agregar
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          )}
+
           <div className="text-center mt-8">
             <Link to="/productos" className="text-[#FF6B81] font-bold hover:underline hover:text-[#7D5FFF] transition text-lg">
               Ver todos los productos →
@@ -142,43 +219,40 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ====== UBICACIÓN ====== */}
-      <section className="py-16 px-4 bg-gradient-to-br from-[#FFD93D] via-[#F0C030] to-[#FF9F43] text-[#303030]">
-        <div className="max-w-6xl mx-auto text-center">
-          <Badge className="bg-[#7D5FFF] text-white mb-4 px-4 py-1 rounded-full">📍 Ubicación</Badge>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-[#603060] mb-2">📍 ENCUÉNTRANOS</h2>
-          <p className="text-lg text-[#303030]/80">Uruguay 660 esquina Colón, Valparaíso</p>
-          <Card className="bg-white/30 backdrop-blur-sm border-2 border-[#7D5FFF] shadow-xl my-6">
-            <CardContent className="p-6">
-              <div className="h-48 rounded-xl flex items-center justify-center text-[#303030]/60 text-sm border-2 border-dashed border-[#7D5FFF] bg-white/20">
-                🗺️ [ Google Maps ]
-              </div>
-            </CardContent>
-          </Card>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-            <Card className="bg-white/30 backdrop-blur-sm border-2 border-[#00D2D3] hover:shadow-[#00D2D3]/30 transition-shadow">
-              <CardContent className="p-3 flex items-center justify-center gap-2 font-medium">
-                <span className="text-2xl">🕐</span> Lun-Sáb 09:00 - 19:00 hrs
-              </CardContent>
-            </Card>
-            <Card className="bg-white/30 backdrop-blur-sm border-2 border-[#FF6B81] hover:shadow-[#FF6B81]/30 transition-shadow">
-              <CardContent className="p-3 flex items-center justify-center gap-2 font-medium">
-                <span className="text-2xl">📱</span> +56 9 1234 5678
-              </CardContent>
-            </Card>
-            <Card className="bg-white/30 backdrop-blur-sm border-2 border-[#00D2D3] hover:shadow-[#00D2D3]/30 transition-shadow">
-              <CardContent className="p-3 flex items-center justify-center gap-2 font-medium">
-                <span className="text-2xl">📞</span> 32 123 4567
-              </CardContent>
-            </Card>
-            <Card className="bg-white/30 backdrop-blur-sm border-2 border-[#FF6B81] hover:shadow-[#FF6B81]/30 transition-shadow">
-              <CardContent className="p-3 flex items-center justify-center gap-2 font-medium">
-                <span className="text-2xl">✉️</span> comercialuruguay@gmail.com
-              </CardContent>
-            </Card>
-          </div>
+ {/* ====== UBICACIÓN Y MAPA ====== */}
+<section className="py-16 px-4 bg-gradient-to-br from-background/50 via-light-lavender/30 to-pale-lemon/40">
+  <div className="max-w-4xl mx-auto text-center">
+    <Badge className="bg-purple-electric text-white mb-4 px-4 py-1 rounded-full font-bold">
+      📍 Ubicación
+    </Badge>
+    <h2 className="text-3xl md:text-4xl font-extrabold text-primary mb-2">📍 ENCUÉNTRANOS</h2>
+    <p className="text-lg text-charcoal/70 mb-6">Uruguay 660 esquina Colón, Valparaíso</p>
+
+    {/* Mapa - Único contenido relevante */}
+    <Card className="border-2 border-cyan/30 shadow-lg hover:shadow-xl transition-shadow bg-white/80 backdrop-blur-sm">
+      <CardContent className="p-6">
+        <div className="h-64 md:h-80 rounded-xl flex flex-col items-center justify-center text-charcoal/40 text-sm border-2 border-dashed border-purple-electric/30 bg-background/20">
+          <span className="text-5xl mb-3">🗺️</span>
+          <span className="text-primary font-medium">Google Maps</span>
+          <span className="text-xs text-charcoal/40 mt-1">Próximamente disponible</span>
         </div>
-      </section>
+      </CardContent>
+    </Card>
+
+    {/* Mini badges de referencia rápida */}
+    <div className="flex flex-wrap justify-center gap-3 mt-6">
+      <Badge className="bg-cyan/10 text-cyan border border-cyan/30 px-3 py-1.5 text-xs">
+        🕐 Lun-Vie 10:00-18:30, Sab 10:00 a 15:00 horas
+      </Badge>
+      <Badge className="bg-yellow-bright/10 text-charcoal border border-yellow-bright/30 px-3 py-1.5 text-xs">
+        🏪 Retiro en tienda
+      </Badge>
+      <Badge className="bg-mint-green/10 text-mint-green border border-mint-green/30 px-3 py-1.5 text-xs">
+        🚚 Envíos a regiones
+      </Badge>
+    </div>
+  </div>
+</section>
     </Layout>
   )
 }
