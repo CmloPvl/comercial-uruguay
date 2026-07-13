@@ -9,12 +9,18 @@ import categoryRoutes from './routes/category.routes';
 import cartRoutes from './routes/cart.routes';
 import orderRoutes from './routes/order.routes';
 import favoriteRoutes from './routes/favorite.routes';
-import adminRoutes from './routes/admin.routes'; // ✅ NUEVO
+import adminRoutes from './routes/admin.routes';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// =============================================
+// Configuración de Proxy (para Render)
+// =============================================
+// Habilita trust proxy para que express-rate-limit funcione correctamente detrás de un proxy
+app.set('trust proxy', true);
 
 // =============================================
 // Rate Limiting (Anti-DDoS / Anti-Fuerza Bruta)
@@ -64,7 +70,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/favorites', favoriteRoutes);
-app.use('/api/admin', adminRoutes); // ✅ NUEVO
+app.use('/api/admin', adminRoutes);
 
 // =============================================
 // Ruta de prueba
@@ -82,6 +88,7 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`📡 Health check: http://localhost:${PORT}/api/health`);
     console.log(`🔒 Rate Limiting activado: 100 peticiones/15min (general) | 5 intentos/15min (login)`);
     console.log(`👑 Admin routes activadas`);
+    console.log(`🛡️ Trust proxy habilitado para Render`);
   });
 }
 
