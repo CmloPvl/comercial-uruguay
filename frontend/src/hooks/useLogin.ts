@@ -40,10 +40,15 @@ export function useLogin() {
       } else {
         localStorage.removeItem("rememberedEmail");
       }
+      
+      // ✅ Si el login falla, el catch se ejecuta y no navega
       await login(data.email, data.password);
+      
+      // ✅ Solo navega si el login fue exitoso
       navigate("/perfil");
     } catch (err: any) {
       setError(err.message || "Credenciales incorrectas");
+      console.error("Login error:", err);
     }
   };
 
