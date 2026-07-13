@@ -22,7 +22,7 @@ export const register = async (req: Request, res: Response) => {
     // Hashear la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear usuario
+    // Crear usuario (✅ automáticamente guarda términos)
     const newUser = await UserModel.create({
       email,
       password: hashedPassword,
@@ -47,7 +47,8 @@ export const register = async (req: Request, res: Response) => {
           id: newUser.id,
           fullName: newUser.fullName,
           email: newUser.email,
-          role: newUser.role
+          role: newUser.role,
+          termsAccepted: newUser.termsAccepted  // ✅ Nuevo campo en respuesta
         }
       }
     });
@@ -70,7 +71,7 @@ export const login = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-       message: 'Credenciales incorrectas'
+        message: 'Credenciales incorrectas'
       });
     }
 
@@ -99,7 +100,8 @@ export const login = async (req: Request, res: Response) => {
           id: user.id,
           fullName: user.fullName,
           email: user.email,
-          role: user.role
+          role: user.role,
+          termsAccepted: user.termsAccepted  // ✅ Nuevo campo en respuesta
         }
       }
     });
