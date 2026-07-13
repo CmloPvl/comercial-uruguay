@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 5000;
 // =============================================
 // Configuración de Proxy (para Render)
 // =============================================
-// Habilita trust proxy para que express-rate-limit funcione correctamente detrás de un proxy
+// Render usa proxies, confiamos en ellos para obtener la IP real
 app.set('trust proxy', true);
 
 // =============================================
@@ -35,6 +35,7 @@ const apiLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // ❌ Eliminado: trustProxy: true,
 });
 
 const loginLimiter = rateLimit({
@@ -46,6 +47,7 @@ const loginLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // ❌ Eliminado: trustProxy: true,
 });
 
 // =============================================
