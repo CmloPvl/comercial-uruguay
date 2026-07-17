@@ -98,24 +98,24 @@ export default function CrearPublicacion() {
     try {
       setLoading(true)
       
-      // Preparar tags y variants como JSON string
+      // Preparar tags y variants como array
       const tags = formData.etiquetas ? formData.etiquetas.split(",").map(tag => tag.trim()).filter(Boolean) : []
       const variants = formData.variantes ? formData.variantes.split(",").map(v => v.trim()).filter(Boolean) : []
 
-  const productData = {
-  name: formData.nombre,
-  description: formData.descripcion,
-  sku: formData.sku,
-  categoryId: formData.categoriaId,
-  price: Number(formData.precio),
-  stock: Number(formData.stock),
-  images: images.length > 0 ? images : ["https://via.placeholder.com/300x300?text=Sin+Imagen"],
-  isOnSale: formData.enOferta,
-  discount: formData.enOferta ? Number(formData.descuento) : 0,
-  isActive: true,
-  tags: tags,  // ✅ Enviar como array, no como string
-  variants: variants,  // ✅ Enviar como array, no como string
-}
+      const productData = {
+        name: formData.nombre,
+        description: formData.descripcion,
+        sku: formData.sku,
+        categoryId: formData.categoriaId,
+        price: Number(formData.precio),
+        stock: Number(formData.stock),
+        images: images.length > 0 ? images : ["https://via.placeholder.com/300x300?text=Sin+Imagen"],
+        isOnSale: formData.enOferta,
+        discount: formData.enOferta ? Number(formData.descuento) : 0,
+        isActive: true,
+        tags: tags,      // ✅ Enviar como array, no string
+        variants: variants  // ✅ Enviar como array, no string
+      }
 
       await productService.createProduct(productData)
       alert("✅ Producto publicado exitosamente")

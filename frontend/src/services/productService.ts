@@ -18,9 +18,6 @@ export interface Product {
 }
 
 export const productService = {
-  // =============================================
-  // OBTENER TODOS LOS PRODUCTOS
-  // =============================================
   async getProducts(params?: { category?: string; search?: string; page?: number; limit?: number }) {
     const queryParams = new URLSearchParams();
     if (params?.category) queryParams.append('category', params.category);
@@ -32,17 +29,12 @@ export const productService = {
     return response.data.data;
   },
 
-  // =============================================
-  // OBTENER PRODUCTO POR ID
-  // =============================================
   async getProductById(id: string): Promise<Product> {
     const response = await api.get(`/products/${id}`);
     return response.data.data;
   },
 
-  // =============================================
-  // CREAR PRODUCTO (solo ADMIN)
-  // =============================================
+  // ✅ CREATE PRODUCT - RECIBE ARRAYS Y LOS CONVIERTE A JSON
   async createProduct(productData: {
     name: string;
     description: string;
@@ -53,25 +45,25 @@ export const productService = {
     images: string[];
     isOnSale?: boolean;
     discount?: number;
-    tags?: string[];     // ✅ Agregado
-    variants?: string[]; // ✅ Agregado
+    tags?: string[];     // ✅ Recibe array
+    variants?: string[]; // ✅ Recibe array
     isActive?: boolean;
   }): Promise<Product> {
-    const response = await api.post('/products', productData);
+    // Convertir arrays a JSON string antes de enviar al backend
+    const payload = {
+      ...productData,
+      tags: productData.tags ? JSON.stringify(productData.tags) : '[]',
+      variants: productData.variants ? JSON.stringify(productData.variants) : '[]',
+    };
+    const response = await api.post('/products', payload);
     return response.data.data;
   },
 
-  // =============================================
-  // ACTUALIZAR PRODUCTO
-  // =============================================
   async updateProduct(id: string, productData: Partial<Omit<Product, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Product> {
     const response = await api.put(`/products/${id}`, productData);
     return response.data.data;
   },
 
-  // =============================================
-  // ELIMINAR PRODUCTO
-  // =============================================
   async deleteProduct(id: string): Promise<void> {
     await api.delete(`/products/${id}`);
   },
