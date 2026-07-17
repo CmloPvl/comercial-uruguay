@@ -19,7 +19,7 @@ export interface Product {
 
 export const productService = {
   // =============================================
-  // OBTENER TODOS LOS PRODUCTOS (con filtros)
+  // OBTENER TODOS LOS PRODUCTOS
   // =============================================
   async getProducts(params?: { category?: string; search?: string; page?: number; limit?: number }) {
     const queryParams = new URLSearchParams();
@@ -53,8 +53,8 @@ export const productService = {
     images: string[];
     isOnSale?: boolean;
     discount?: number;
-    tags?: string[];
-    variants?: string[];
+    tags?: string[];     // ✅ Agregado
+    variants?: string[]; // ✅ Agregado
     isActive?: boolean;
   }): Promise<Product> {
     const response = await api.post('/products', productData);
@@ -62,7 +62,7 @@ export const productService = {
   },
 
   // =============================================
-  // ACTUALIZAR PRODUCTO (solo ADMIN)
+  // ACTUALIZAR PRODUCTO
   // =============================================
   async updateProduct(id: string, productData: Partial<Omit<Product, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Product> {
     const response = await api.put(`/products/${id}`, productData);
@@ -70,7 +70,7 @@ export const productService = {
   },
 
   // =============================================
-  // ELIMINAR PRODUCTO (solo ADMIN)
+  // ELIMINAR PRODUCTO
   // =============================================
   async deleteProduct(id: string): Promise<void> {
     await api.delete(`/products/${id}`);
