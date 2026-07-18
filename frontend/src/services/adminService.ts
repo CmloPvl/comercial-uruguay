@@ -21,11 +21,16 @@ export interface Order {
 export interface Product {
   id: string;
   name: string;
+  description: string;      // ✅ NUEVO
   price: number;
   stock: number;
   sku: string;
+  categoryId?: number;      // ✅ NUEVO
   category_name: string;
   isActive: boolean;
+  isOnSale: boolean;        // ✅ NUEVO
+  discount: number;         // ✅ NUEVO
+  images: string[];         // ✅ NUEVO
   createdAt: string;
 }
 
@@ -74,7 +79,13 @@ export const adminService = {
     if (search) params.append('search', search);
     
     const response = await api.get(`/admin/products?${params.toString()}`);
-    return response.data.data;
+    console.log('📦 AdminService - Respuesta completa:', response.data);
+    
+    const rawData = response.data.data;
+    return {
+      data: rawData.products || [],
+      pagination: rawData.pagination || { total: 0, page: 1, limit: 10, totalPages: 0 }
+    };
   },
 
   // =============================================
@@ -91,7 +102,11 @@ export const adminService = {
     if (status) params.append('status', status);
     
     const response = await api.get(`/admin/orders?${params.toString()}`);
-    return response.data.data;
+    const rawData = response.data.data;
+    return {
+      data: rawData.orders || [],
+      pagination: rawData.pagination || { total: 0, page: 1, limit: 10, totalPages: 0 }
+    };
   },
 
   /**

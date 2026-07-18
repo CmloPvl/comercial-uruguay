@@ -478,7 +478,7 @@ export default function CrearPublicacion() {
                   </Button>
                 </Link>
               </div>
-              <div className="mt-4 text-sm text-gray-400">
+              <div className="mt-4 text-sm text-gray-400"> 
                 <p>ℹ️ Al publicar, el producto será visible en la tienda.</p>
               </div>
             </CardContent>

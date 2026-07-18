@@ -43,7 +43,8 @@ export default function Home() {
       setLoading(true)
       setError(null)
       const data = await productService.getProducts()
-      setProducts(data?.products || [])
+      console.log("📦 Home - Datos recibidos:", data)
+      setProducts(data || []) // ✅ CORREGIDO
     } catch (err: any) {
       setError(err.message || "Error al cargar productos")
     } finally {
@@ -219,40 +220,38 @@ export default function Home() {
         </div>
       </section>
 
- {/* ====== UBICACIÓN Y MAPA ====== */}
-<section className="py-16 px-4 bg-gradient-to-br from-background/50 via-light-lavender/30 to-pale-lemon/40">
-  <div className="max-w-4xl mx-auto text-center">
-    <Badge className="bg-purple-electric text-white mb-4 px-4 py-1 rounded-full font-bold">
-      📍 Ubicación
-    </Badge>
-    <h2 className="text-3xl md:text-4xl font-extrabold text-primary mb-2">📍 ENCUÉNTRANOS</h2>
-    <p className="text-lg text-charcoal/70 mb-6">Uruguay 660 esquina Colón, Valparaíso</p>
+      {/* ====== UBICACIÓN Y MAPA ====== */}
+      <section className="py-16 px-4 bg-gradient-to-br from-background/50 via-light-lavender/30 to-pale-lemon/40">
+        <div className="max-w-4xl mx-auto text-center">
+          <Badge className="bg-purple-electric text-white mb-4 px-4 py-1 rounded-full font-bold">
+            📍 Ubicación
+          </Badge>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-primary mb-2">📍 ENCUÉNTRANOS</h2>
+          <p className="text-lg text-charcoal/70 mb-6">Uruguay 660 esquina Colón, Valparaíso</p>
 
-    {/* Mapa - Único contenido relevante */}
-    <Card className="border-2 border-cyan/30 shadow-lg hover:shadow-xl transition-shadow bg-white/80 backdrop-blur-sm">
-      <CardContent className="p-6">
-        <div className="h-64 md:h-80 rounded-xl flex flex-col items-center justify-center text-charcoal/40 text-sm border-2 border-dashed border-purple-electric/30 bg-background/20">
-          <span className="text-5xl mb-3">🗺️</span>
-          <span className="text-primary font-medium">Google Maps</span>
-          <span className="text-xs text-charcoal/40 mt-1">Próximamente disponible</span>
+          <Card className="border-2 border-cyan/30 shadow-lg hover:shadow-xl transition-shadow bg-white/80 backdrop-blur-sm">
+            <CardContent className="p-6">
+              <div className="h-64 md:h-80 rounded-xl flex flex-col items-center justify-center text-charcoal/40 text-sm border-2 border-dashed border-purple-electric/30 bg-background/20">
+                <span className="text-5xl mb-3">🗺️</span>
+                <span className="text-primary font-medium">Google Maps</span>
+                <span className="text-xs text-charcoal/40 mt-1">Próximamente disponible</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex flex-wrap justify-center gap-3 mt-6">
+            <Badge className="bg-cyan/10 text-cyan border border-cyan/30 px-3 py-1.5 text-xs">
+              🕐 Lun-Vie 10:00-18:30, Sab 10:00 a 15:00 horas
+            </Badge>
+            <Badge className="bg-yellow-bright/10 text-charcoal border border-yellow-bright/30 px-3 py-1.5 text-xs">
+              🏪 Retiro en tienda
+            </Badge>
+            <Badge className="bg-mint-green/10 text-mint-green border border-mint-green/30 px-3 py-1.5 text-xs">
+              🚚 Envíos a regiones
+            </Badge>
+          </div>
         </div>
-      </CardContent>
-    </Card>
-
-    {/* Mini badges de referencia rápida */}
-    <div className="flex flex-wrap justify-center gap-3 mt-6">
-      <Badge className="bg-cyan/10 text-cyan border border-cyan/30 px-3 py-1.5 text-xs">
-        🕐 Lun-Vie 10:00-18:30, Sab 10:00 a 15:00 horas
-      </Badge>
-      <Badge className="bg-yellow-bright/10 text-charcoal border border-yellow-bright/30 px-3 py-1.5 text-xs">
-        🏪 Retiro en tienda
-      </Badge>
-      <Badge className="bg-mint-green/10 text-mint-green border border-mint-green/30 px-3 py-1.5 text-xs">
-        🚚 Envíos a regiones
-      </Badge>
-    </div>
-  </div>
-</section>
+      </section>
     </Layout>
   )
 }

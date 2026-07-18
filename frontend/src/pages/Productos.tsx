@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react"
+
 import Layout from "../components/layout/Layout"
+import LoadingSpinner from "../components/common/LoadingSpinner";
+import ErrorMessage from "../components/common/ErrorMessage";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -48,17 +51,18 @@ export default function Productos() {
   }, [])
 
   const loadProducts = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const data = await productService.getProducts()
-      setProductos(data?.products || [])
-    } catch (err: any) {
-      setError(err.message || "Error al cargar productos")
-    } finally {
-      setLoading(false)
-    }
+  try {
+    setLoading(true)
+    setError(null)
+    const data = await productService.getProducts()
+    console.log("📦 Datos de productos:", data) // ✅ Array(6)
+    setProductos(data || []) // ✅ CORREGIDO: usar directamente el array
+  } catch (err: any) {
+    setError(err.message || "Error al cargar productos")
+  } finally {
+    setLoading(false)
   }
+}
 
   const loadFavorites = async () => {
     try {
@@ -135,42 +139,29 @@ export default function Productos() {
     setPriceRange({ min: "", max: "" })
   }
 
-  // =============================================
-  // ESTADO DE CARGA
-  // =============================================
-  if (loading) {
-    return (
-      <Layout>
-        <div className="min-h-[80vh] flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7D5FFF] mx-auto"></div>
-            <p className="text-gray-500 mt-4">Cargando productos...</p>
-          </div>
-        </div>
-      </Layout>
-    )
-  }
+ // =============================================
+// ESTADO DE CARGA
+// =============================================
+if (loading) {
+  return (
+    <Layout>
+      <LoadingSpinner fullScreen text="Cargando productos..." />
+    </Layout>
+  )
+}
 
-  // =============================================
-  // ERROR
-  // =============================================
-  if (error) {
-    return (
-      <Layout>
-        <div className="min-h-[60vh] flex flex-col items-center justify-center py-12 px-4">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-[#303030]">Error al cargar productos</h2>
-          <p className="text-gray-500 mt-2">{error}</p>
-          <button
-            onClick={loadProducts}
-            className="mt-4 bg-[#7D5FFF] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#603060] transition"
-          >
-            Reintentar
-          </button>
-        </div>
-      </Layout>
-    )
-  }
+// =============================================
+// ERROR
+// =============================================
+if (error) {
+  return (
+    <Layout>
+      <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
+        <ErrorMessage message={error} onRetry={loadProducts} />
+      </div>
+    </Layout>
+  )
+}
 
   return (
     <Layout>

@@ -12,12 +12,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../components/ui/breadcrumb"
-import { Card, CardContent } from "../components/ui/card"
 import { Badge } from "../components/ui/badge"
+import { Skeleton } from "../components/ui/skeleton"  // ✅ NUEVO
 import CartItem from "../components/cart/CartItem"
+import CartSummary from "../components/cart/CartSummary"
+import { empresaConfig } from "../config/empresa"
 
 export default function Carrito() {
-  const { items, totalItems, totalPrice, clearCart } = useCart()
+  const { items, totalItems, totalPrice, clearCart, loading } = useCart()  // ✅ Agregado loading
   const { user } = useAuth()
   const [deliveryOption, setDeliveryOption] = useState<"retiro" | "envio">("retiro")
 
@@ -28,7 +30,7 @@ export default function Carrito() {
       return `${index + 1}. ${item.name} (x${item.quantity}) - $${item.price.toLocaleString()} c/u → $${subtotal.toLocaleString()}`
     }).join("\n")
 
-    const message = `¡Hola Comercial Uruguay! 👋
+    const message = `¡Hola ${empresaConfig.nombre}! 👋
 
 Quiero hacer el siguiente pedido:
 
@@ -51,9 +53,54 @@ Teléfono: ${user?.phone || "No especificado"}
 
   const handleWhatsApp = () => {
     const message = generateWhatsAppMessage()
-    window.open(`https://wa.me/56912345678?text=${message}`, "_blank")
+    window.open(`https://wa.me/${empresaConfig.whatsapp}?text=${message}`, "_blank")
   }
 
+  // =============================================
+  // ESTADO DE CARGA (SKELETON)
+  // =============================================
+  if (loading) {
+    return (
+      <Layout>
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Skeleton de la lista de productos */}
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-6">
+                <Skeleton className="h-8 w-48" />
+                <Skeleton className="h-8 w-24" />
+              </div>
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex gap-4 p-4 border rounded-lg">
+                    <Skeleton className="w-24 h-24 rounded-lg" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-6 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-4 w-1/4" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Skeleton del resumen */}
+            <div className="lg:w-80 flex-shrink-0">
+              <div className="border-2 border-[#7D5FFF] rounded-lg p-6 space-y-4">
+                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
+
+  // =============================================
+  // CARRITO VACÍO
+  // =============================================
   if (items.length === 0) {
     return (
       <Layout>
@@ -144,63 +191,14 @@ Teléfono: ${user?.phone || "No especificado"}
             </div>
           </div>
 
-          {/* Resumen */}
-          <div className="lg:w-80 flex-shrink-0">
-            <Card className="border-2 border-[#7D5FFF] sticky top-4">
-              <CardContent className="p-6">
-                <h2 className="text-xl font-bold text-[#603060] mb-4">📋 Resumen</h2>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-[#303030]">Subtotal ({totalItems} productos)</span>
-                    <span className="font-bold text-[#7D5FFF]">${totalPrice.toLocaleString()}</span>
-                  </div>
-                  <div className="border-t border-gray-200 pt-3">
-                    <div className="flex justify-between font-bold text-lg">
-                      <span className="text-[#303030]">Total</span>
-                      <span className="text-[#603060]">${totalPrice.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Opción de entrega */}
-                <div className="mt-4 space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="delivery"
-                      value="retiro"
-                      checked={deliveryOption === "retiro"}
-                      onChange={() => setDeliveryOption("retiro")}
-                      className="accent-[#7D5FFF]"
-                    />
-                    <span className="text-sm text-[#303030]">🏪 Retiro en tienda</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="delivery"
-                      value="envio"
-                      checked={deliveryOption === "envio"}
-                      onChange={() => setDeliveryOption("envio")}
-                      className="accent-[#7D5FFF]"
-                    />
-                    <span className="text-sm text-[#303030]">📦 Envío a domicilio</span>
-                  </label>
-                </div>
-
-                <Button
-                  onClick={handleWhatsApp}
-                  className="w-full mt-6 bg-gradient-to-r from-[#00D2D3] to-[#7D5FFF] hover:from-[#7D5FFF] hover:to-[#00D2D3] text-white font-bold py-3 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all"
-                >
-                  💬 Enviar pedido por WhatsApp
-                </Button>
-                <p className="text-xs text-gray-400 text-center mt-2">
-                  El pedido se enviará para confirmar disponibilidad
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Resumen - usando CartSummary */}
+          <CartSummary
+            totalItems={totalItems}
+            totalPrice={totalPrice}
+            deliveryOption={deliveryOption}
+            onDeliveryChange={setDeliveryOption}
+            onWhatsApp={handleWhatsApp}
+          />
         </div>
       </div>
     </Layout>

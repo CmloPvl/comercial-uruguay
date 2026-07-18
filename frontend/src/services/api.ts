@@ -23,21 +23,26 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor para manejar errores de respuesta
+// ✅ Interceptor para manejar errores de respuesta (CORREGIDO)
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: AxiosError) => {
-    if (error.response?.status === 401) {
+    // ✅ Solo redirigir si NO es una petición de login
+    const isLoginRequest = error.config?.url?.includes('/auth/login');
+    
+    if (error.response?.status === 401 && !isLoginRequest) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+    
+    // ✅ Siempre rechazar el error para que el catch lo maneje
     return Promise.reject(error);
   }
 );
 
 // =============================================
-// ✅ SERVICIO DE AUTENTICACIÓN (NUEVO)
+// SERVICIO DE AUTENTICACIÓN
 // =============================================
 export const authService = {
   async login(credentials: { email: string; password: string }) {
