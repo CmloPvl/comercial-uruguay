@@ -12,6 +12,8 @@ export interface Product {
   isActive: boolean;
   isOnSale: boolean;
   discount: number;
+  tags: string[];
+  variants: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,6 +28,8 @@ export interface ProductInput {
   categoryId?: number;
   isOnSale?: boolean;
   discount?: number;
+  tags?: string[];
+  variants?: string[];
 }
 
 export const ProductModel = {
@@ -52,12 +56,54 @@ export const ProductModel = {
   },
 
   async create(product: ProductInput): Promise<Product> {
-    const { name, description, price, sku, stock, images, categoryId, isOnSale, discount } = product;
+    const { 
+      name, 
+      description, 
+      price, 
+      sku, 
+      stock, 
+      images, 
+      categoryId, 
+      isOnSale, 
+      discount,
+      tags,
+      variants
+    } = product;
+    
+    // ✅ Convertir arrays a JSON string para PostgreSQL
+    const imagesJson = images && images.length > 0 ? JSON.stringify(images) : '[]';
+    const tagsJson = tags && tags.length > 0 ? JSON.stringify(tags) : '[]';
+    const variantsJson = variants && variants.length > 0 ? JSON.stringify(variants) : '[]';
+    
     const result = await pool.query(
-      `INSERT INTO products (name, description, price, sku, stock, images, "categoryId", "isOnSale", discount)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO products (
+        name, 
+        description, 
+        price, 
+        sku, 
+        stock, 
+        images, 
+        "categoryId", 
+        "isOnSale", 
+        discount,
+        tags,
+        variants
+      )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING *`,
-      [name, description, price, sku, stock, images || [], categoryId || null, isOnSale || false, discount || 0]
+      [
+        name, 
+        description, 
+        price, 
+        sku, 
+        stock, 
+        imagesJson,    // ✅ JSON string
+        categoryId || null, 
+        isOnSale || false, 
+        discount || 0,
+        tagsJson,
+        variantsJson
+      ]
     );
     return result.rows[0];
   },
@@ -89,7 +135,7 @@ export const ProductModel = {
     }
     if (product.images !== undefined) {
       fields.push(`images = $${index++}`);
-      values.push(product.images);
+      values.push(JSON.stringify(product.images));
     }
     if (product.categoryId !== undefined) {
       fields.push(`"categoryId" = $${index++}`);
@@ -102,6 +148,14 @@ export const ProductModel = {
     if (product.discount !== undefined) {
       fields.push(`discount = $${index++}`);
       values.push(product.discount);
+    }
+    if (product.tags !== undefined) {
+      fields.push(`tags = $${index++}`);
+      values.push(JSON.stringify(product.tags));
+    }
+    if (product.variants !== undefined) {
+      fields.push(`variants = $${index++}`);
+      values.push(JSON.stringify(product.variants));
     }
 
     if (fields.length === 0) {
