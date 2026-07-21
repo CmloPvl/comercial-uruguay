@@ -188,6 +188,11 @@ export default function AdminDashboard() {
                     📋 Gestionar Productos
                   </Button>
                 </Link>
+                <Link to="/admin/categorias">
+  <Button className="bg-gradient-to-r from-[#FFD93D] to-[#F0C030] hover:from-[#F0C030] hover:to-[#FFD93D] text-[#303030] font-bold">
+    📂 Gestionar Categorías
+  </Button>
+</Link>
               </div>
             </CardContent>
           </Card>

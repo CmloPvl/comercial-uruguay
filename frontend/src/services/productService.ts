@@ -9,6 +9,7 @@ export interface Product {
   stock: number;
   images: string[];
   categoryId: string;
+  category_name?: string;  // ✅ NUEVO - viene del JOIN en el backend
   category?: { id: string; name: string };
   isActive: boolean;
   isOnSale: boolean;

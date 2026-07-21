@@ -10,6 +10,11 @@ interface CartItemProps {
 export default function CartItem({ item }: CartItemProps) {
   const { updateQuantity, removeItem } = useCart()
 
+  // ✅ Función para formatear precio sin duplicar el signo
+  const formatPrice = (price: number) => {
+    return price.toLocaleString('es-CL')
+  }
+
   return (
     <Card className="border-2 border-[#00D2D3] hover:border-[#7D5FFF] transition">
       <CardContent className="p-4 flex flex-col sm:flex-row items-center gap-4">
@@ -21,7 +26,7 @@ export default function CartItem({ item }: CartItemProps) {
         {/* Info */}
         <div className="flex-1 text-center sm:text-left">
           <h3 className="font-bold text-[#303030]">{item.name}</h3>
-          <p className="text-[#7D5FFF] font-bold">${item.price.toLocaleString()} c/u</p>
+          <p className="text-[#7D5FFF] font-bold">${formatPrice(item.price)} c/u</p>
         </div>
 
         {/* Cantidad */}
@@ -44,7 +49,7 @@ export default function CartItem({ item }: CartItemProps) {
         {/* Subtotal y eliminar */}
         <div className="flex items-center gap-4">
           <p className="font-bold text-[#603060] min-w-[80px] text-right">
-            ${(item.price * item.quantity).toLocaleString()}
+            ${formatPrice(item.price * item.quantity)}
           </p>
           <Button
             variant="ghost"

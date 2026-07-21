@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
-
+import { useSearchParams } from "react-router-dom"
+import toast from 'react-hot-toast'
 import Layout from "../components/layout/Layout"
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import ErrorMessage from "../components/common/ErrorMessage";
@@ -13,24 +14,39 @@ import {
 } from "../components/ui/breadcrumb"
 import { Badge } from "../components/ui/badge"
 import { productService, type Product } from "../services/productService"
+import { categoryService, type Category } from "../services/categoryService"
 import { favoriteService } from "../services/favoriteService"
 import { useAuth } from "../context/AuthContext"
 import { useCart } from "../context/CartContext"
 import ProductList from "../components/products/ProductList"
 import ProductFilters from "../components/products/ProductFilters"
 
-// Categorías con colores
-const categories = [
-  { id: "cabello", name: "Cabello", icon: "💇", color: "hover:bg-[#FF6B81]/20 hover:border-[#FF6B81]" },
-  { id: "juguetes", name: "Juguetes", icon: "🧸", color: "hover:bg-[#C06060]/20 hover:border-[#C06060]" },
-  { id: "cumpleanos", name: "Cumpleaños", icon: "🎂", color: "hover:bg-[#FFD93D]/20 hover:border-[#FFD93D]" },
-  { id: "hogar", name: "Hogar", icon: "🏠", color: "hover:bg-[#7D5FFF]/20 hover:border-[#7D5FFF]" },
-  { id: "melamina", name: "Melamina", icon: "🍽️", color: "hover:bg-[#FF9F43]/20 hover:border-[#FF9F43]" },
-  { id: "temporada", name: "Temporada", icon: "🍂", color: "hover:bg-[#603060]/20 hover:border-[#C06060]" },
+// 🎨 Iconos por defecto para categorías (si no tienen icono en la BD)
+const defaultCategoryIcons: Record<string, string> = {
+  'Cabello': '💇',
+  'Juguetes': '🧸',
+  'Cumpleaños': '🎂',
+  'Hogar': '🏠',
+  'Melamina': '🍽️',
+  'Temporada': '🍂',
+}
+
+// 🎨 Colores de la nueva paleta para categorías
+const categoryColors = [
+  { color: "hover:bg-[#FF6B81]/20 hover:border-[#FF6B81]" },
+  { color: "hover:bg-[#C06060]/20 hover:border-[#C06060]" },
+  { color: "hover:bg-[#FFD93D]/20 hover:border-[#FFD93D]" },
+  { color: "hover:bg-[#7D5FFF]/20 hover:border-[#7D5FFF]" },
+  { color: "hover:bg-[#FF9F43]/20 hover:border-[#FF9F43]" },
+  { color: "hover:bg-[#603060]/20 hover:border-[#603060]" },
 ]
 
 export default function Productos() {
+  const [searchParams] = useSearchParams()
+  const searchQuery = searchParams.get("search") || ""
+  
   const [productos, setProductos] = useState<Product[]>([])
+  const [categorias, setCategorias] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>("")
@@ -41,28 +57,37 @@ export default function Productos() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
 
   // =============================================
-  // CARGAR PRODUCTOS
+  // CARGAR PRODUCTOS Y CATEGORÍAS
   // =============================================
   useEffect(() => {
     loadProducts()
+    loadCategories()
     if (user) {
       loadFavorites()
     }
-  }, [])
+  }, [searchQuery])
 
   const loadProducts = async () => {
-  try {
-    setLoading(true)
-    setError(null)
-    const data = await productService.getProducts()
-    console.log("📦 Datos de productos:", data) // ✅ Array(6)
-    setProductos(data || []) // ✅ CORREGIDO: usar directamente el array
-  } catch (err: any) {
-    setError(err.message || "Error al cargar productos")
-  } finally {
-    setLoading(false)
+    try {
+      setLoading(true)
+      setError(null)
+      const data = await productService.getProducts({ search: searchQuery })
+      setProductos(data || [])
+    } catch (err: any) {
+      setError(err.message || "Error al cargar productos")
+    } finally {
+      setLoading(false)
+    }
   }
-}
+
+  const loadCategories = async () => {
+    try {
+      const data = await categoryService.getCategories()
+      setCategorias(data)
+    } catch (error) {
+      console.error("Error al cargar categorías:", error)
+    }
+  }
 
   const loadFavorites = async () => {
     try {
@@ -74,11 +99,11 @@ export default function Productos() {
   }
 
   // =============================================
-  // MANEJAR FAVORITOS
+  // MANEJAR FAVORITOS (con toast)
   // =============================================
   const handleToggleFavorite = async (productId: string) => {
     if (!user) {
-      alert("Inicia sesión para guardar favoritos")
+      toast.error("Inicia sesión para guardar favoritos")
       return
     }
 
@@ -90,42 +115,44 @@ export default function Productos() {
           newSet.delete(productId)
           return newSet
         })
+        toast.success("Producto eliminado de favoritos")
       } else {
         await favoriteService.addFavorite(productId)
         setFavorites(prev => new Set([...prev, productId]))
+        toast.success("Producto agregado a favoritos ❤️")
       }
     } catch (err: any) {
-      alert("Error: " + err.message)
+      toast.error(err.message || "Error al guardar favoritos")
     }
   }
 
   // =============================================
-  // MANEJAR CARRITO
+  // MANEJAR CARRITO (con toast)
   // =============================================
   const handleAddToCart = async (productId: string) => {
     if (!user) {
-      alert("Inicia sesión para agregar al carrito")
+      toast.error("Inicia sesión para agregar al carrito")
       return
     }
 
     try {
       await addItemById(productId, 1)
-      alert("✅ Producto agregado al carrito")
+      toast.success("✅ Producto agregado al carrito")
     } catch (err: any) {
-      alert("❌ " + err.message)
+      toast.error(err.message || "Error al agregar al carrito")
     }
   }
 
-  // =============================================
-  // FILTRAR PRODUCTOS
-  // =============================================
-  const filteredProducts = productos.filter(p => {
-    const matchesCategory = !selectedCategory || p.category?.name === selectedCategory
-    const minPrice = priceRange.min !== "" ? Number(priceRange.min) : 0
-    const maxPrice = priceRange.max !== "" ? Number(priceRange.max) : Infinity
-    const matchesPrice = p.price >= minPrice && p.price <= maxPrice
-    return matchesCategory && matchesPrice
-  })
+// =============================================
+// FILTRAR PRODUCTOS
+// =============================================
+const filteredProducts = productos.filter(p => {
+  const matchesCategory = !selectedCategory || p.category_name === selectedCategory
+  const minPrice = priceRange.min !== "" ? Number(priceRange.min) : 0
+  const maxPrice = priceRange.max !== "" ? Number(priceRange.max) : Infinity
+  const matchesPrice = p.price >= minPrice && p.price <= maxPrice
+  return matchesCategory && matchesPrice
+})
 
   // =============================================
   // MANEJAR FILTROS
@@ -137,31 +164,42 @@ export default function Productos() {
   const handleClearFilters = () => {
     setSelectedCategory("")
     setPriceRange({ min: "", max: "" })
+    toast.success("Filtros limpiados")
   }
 
- // =============================================
-// ESTADO DE CARGA
-// =============================================
-if (loading) {
-  return (
-    <Layout>
-      <LoadingSpinner fullScreen text="Cargando productos..." />
-    </Layout>
-  )
-}
+  // =============================================
+  // ESTADO DE CARGA
+  // =============================================
+  if (loading) {
+    return (
+      <Layout>
+        <LoadingSpinner fullScreen text="Cargando productos..." />
+      </Layout>
+    )
+  }
 
-// =============================================
-// ERROR
-// =============================================
-if (error) {
-  return (
-    <Layout>
-      <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
-        <ErrorMessage message={error} onRetry={loadProducts} />
-      </div>
-    </Layout>
-  )
-}
+  // =============================================
+  // ERROR
+  // =============================================
+  if (error) {
+    return (
+      <Layout>
+        <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
+          <ErrorMessage message={error} onRetry={loadProducts} />
+        </div>
+      </Layout>
+    )
+  }
+
+  // =============================================
+  // CATEGORÍAS PARA EL BANNER (con íconos)
+  // =============================================
+  const displayCategories = categorias.length > 0 ? categorias : []
+  const categoriesWithIcons = displayCategories.map((cat, index) => ({
+    ...cat,
+    icon: cat.icon || defaultCategoryIcons[cat.name] || '📦',
+    color: categoryColors[index % categoryColors.length].color
+  }))
 
   return (
     <Layout>
@@ -171,13 +209,13 @@ if (error) {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/" className="text-[#603060] hover:text-[#FF6B81]">
+                <BreadcrumbLink href="/" className="text-[#603060] hover:text-[#00D2D3]">
                   Inicio
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="text-[#FF6B81]" />
+              <BreadcrumbSeparator className="text-[#7D5FFF]" />
               <BreadcrumbItem>
-                <BreadcrumbPage className="text-[#FF6B81] font-bold">
+                <BreadcrumbPage className="text-[#00D2D3] font-bold">
                   Tienda
                 </BreadcrumbPage>
               </BreadcrumbItem>
@@ -187,7 +225,7 @@ if (error) {
       </div>
 
       {/* ====== BANNER ====== */}
-      <div className="bg-gradient-to-r from-[#603060] via-[#C06060] to-[#FF6B81] text-white py-10 px-4">
+      <div className="bg-gradient-to-r from-[#603060] via-[#7D5FFF] to-[#00D2D3] text-white py-10 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <Badge className="bg-[#FFD93D] text-[#303030] mb-3 px-4 py-1 rounded-full">
             🛍️ Tienda
@@ -196,10 +234,10 @@ if (error) {
           <p className="text-white/80 mt-2">Encuentra miles de productos para tu hogar y familia.</p>
           
           <div className="flex flex-wrap justify-center gap-2 mt-4">
-            {categories.map(cat => (
+            {categoriesWithIcons.map((cat) => (
               <button
                 key={cat.id}
-                onClick={() => setSelectedCategory(cat.name)}
+                onClick={() => setSelectedCategory(selectedCategory === cat.name ? "" : cat.name)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all hover:scale-105 border-2 ${
                   selectedCategory === cat.name
                     ? 'bg-[#FFD93D] text-[#303030] border-[#FFD93D]'
@@ -220,7 +258,7 @@ if (error) {
           {/* ====== FILTROS (Desktop) ====== */}
           <div className="hidden md:block w-64 flex-shrink-0">
             <ProductFilters
-              categories={categories}
+              categories={categoriesWithIcons}
               selectedCategory={selectedCategory}
               onCategoryChange={setSelectedCategory}
               priceRange={priceRange}
@@ -268,9 +306,14 @@ if (error) {
             </div>
 
             <div className="space-y-4">
-              {categories.map(cat => (
+              {categoriesWithIcons.map((cat) => (
                 <label key={cat.id} className="flex items-center gap-2 py-1 cursor-pointer hover:text-[#FF6B81] transition">
-                  <input type="checkbox" className="accent-[#FF6B81] w-4 h-4" />
+                  <input 
+                    type="checkbox" 
+                    checked={selectedCategory === cat.name}
+                    onChange={() => setSelectedCategory(selectedCategory === cat.name ? "" : cat.name)}
+                    className="accent-[#FF6B81] w-4 h-4" 
+                  />
                   <span>{cat.icon} {cat.name}</span>
                 </label>
               ))}

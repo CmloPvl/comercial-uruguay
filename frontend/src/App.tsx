@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { Toaster } from 'react-hot-toast'  // ✅ NUEVO
 import Home from "./pages/Home"
 import Login from "./pages/auth/Login"
 import Registro from "./pages/auth/Registro"
@@ -7,7 +8,7 @@ import Perfil from "./pages/Perfil"
 import Productos from "./pages/Productos"
 import ProductoDetalle from "./pages/ProductoDetalle"
 import CrearPublicacion from "./pages/admin/CrearPublicacion"
-import EditarPublicacion from "./pages/admin/EditarPublicacion"  // ✅ NUEVO
+import EditarPublicacion from "./pages/admin/EditarPublicacion"
 import Carrito from "./pages/Carrito"
 import Terminos from './pages/Terminos'
 import Privacidad from './pages/Privacidad'
@@ -23,10 +24,39 @@ import Contacto from './pages/Contacto'
 import Envios from './pages/Envios'
 import RetiroTienda from './pages/RetiroTienda'
 import Ofertas from './pages/Ofertas'
+import AdminCategorias from './pages/admin/AdminCategorias'
 
 function App() {
   return (
     <BrowserRouter>
+      {/* ✅ Toaster para notificaciones */}
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+            borderRadius: '12px',
+            padding: '16px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: '#4ade80',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            duration: 4000,
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
       <Routes>
         {/* ====== PÁGINAS PÚBLICAS ====== */}
         <Route path="/" element={<Home />} />
@@ -81,7 +111,7 @@ function App() {
             <AdminProductos />
           </ProtectedRoute>
         } />
-        <Route path="/admin/productos/:id/editar" element={  // ✅ NUEVO RUTA DE EDICIÓN
+        <Route path="/admin/productos/:id/editar" element={
           <ProtectedRoute requireAdmin>
             <EditarPublicacion />
           </ProtectedRoute>
@@ -91,7 +121,11 @@ function App() {
             <AdminPedidos />
           </ProtectedRoute>
         } />
-        
+        <Route path="/admin/categorias" element={
+          <ProtectedRoute requireAdmin>
+            <AdminCategorias />
+          </ProtectedRoute>
+        } />
         {/* ====== 404 - SIEMPRE AL FINAL ====== */}
         <Route path="*" element={<NotFound />} />
       </Routes>

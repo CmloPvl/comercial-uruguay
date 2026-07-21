@@ -1,0 +1,16 @@
+
+C:\Users\camil\OneDrive\Desktop\comercial-uruguay
+├── backend
+├── docs
+├── estructura.txt
+├── frontend
+├── node_modules
+├── package-lock.json
+├── package.json
+└── README.md
+
+directory: 4 file: 4
+
+
+
+[2K[1G
