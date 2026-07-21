@@ -197,14 +197,15 @@ export default function EditarPublicacion() {
           <p className="text-gray-500 mt-1">Actualiza los datos del producto.</p>
         </div>
 
-        <ProductForm
-          product={product}
-          onSubmit={handleSubmit}
-          loading={submitting}
-          title="Editar Producto"
-          submitText="💾 Actualizar producto"
-          categories={categories}
-        />
+     <ProductForm
+  product={product}
+  onSubmit={handleSubmit}
+  loading={submitting}
+  title="Editar Producto"
+  submitText="💾 Actualizar producto"
+  categories={categories}
+  categoriesLoading={loadingCategories}  // ← Agrega esta línea
+/>
       </div>
     </Layout>
   );
