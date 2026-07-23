@@ -136,9 +136,9 @@ export default function Hero() {
           <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight text-[#303030]">
             Todo lo que necesitas
             <br />
-            <span className="bg-gradient-to-r from-[#603060] via-[#7D5FFF] via-[#00D2D3] to-[#FF6B81] bg-clip-text text-transparent">
-              en un solo lugar
-            </span>
+           <span className="bg-gradient-to-r from-[#603060] via-[#7D5FFF] to-[#FF6B81] bg-clip-text text-transparent">
+  en un solo lugar
+</span>
           </h1>
 
           <p className="text-base sm:text-lg text-[#6A757C] max-w-lg mx-auto lg:mx-0 leading-relaxed">
