@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { UserModel } from '../models/User';
 import { registerSchema, loginSchema } from '../schemas/auth.schema';
+import { sendPasswordResetEmail } from '../services/email.services';
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -105,7 +107,7 @@ export const login = async (req: Request, res: Response) => {
 };
 
 // =============================================
-// RECUPERAR CONTRASEÑA
+// RECUPERAR CONTRASEÑA (VERSIÓN SIMPLE)
 // =============================================
 export const recoverPassword = async (req: Request, res: Response) => {
   try {
@@ -129,6 +131,117 @@ export const recoverPassword = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: 'Error al procesar la solicitud'
+    });
+  }
+};
+
+// =============================================
+// 🔐 RECUPERAR CONTRASEÑA CON EMAIL (PASO 1)
+// =============================================
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'El correo electrónico es obligatorio'
+      });
+    }
+
+    const user = await UserModel.findByEmail(email);
+
+    // 🔒 Seguridad: Siempre devolver el mismo mensaje
+    if (!user) {
+      return res.json({
+        success: true,
+        message: 'Si el correo existe, recibirás un enlace para restablecer tu contraseña.'
+      });
+    }
+
+    // ✅ Generar token único (32 bytes en hexadecimal)
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hora
+
+    // ✅ Guardar token en la base de datos
+    await UserModel.saveResetToken(user.id, resetToken, resetTokenExpiry);
+
+    // ✅ Enviar email con Resend
+    const emailResult = await sendPasswordResetEmail({
+      to: user.email,
+      name: user.fullName,
+      token: resetToken,
+    });
+
+    if (!emailResult.success) {
+      console.error('❌ Error enviando email:', emailResult.error);
+      // No revelar el error al usuario por seguridad
+    }
+
+    return res.json({
+      success: true,
+      message: 'Si el correo existe, recibirás un enlace para restablecer tu contraseña.'
+    });
+
+  } catch (error: any) {
+    console.error('❌ Error en forgotPassword:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error al procesar la solicitud'
+    });
+  }
+};
+
+// =============================================
+// 🔐 RESTABLECER CONTRASEÑA (PASO 2)
+// =============================================
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token y nueva contraseña son obligatorios'
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'La contraseña debe tener al menos 8 caracteres'
+      });
+    }
+
+    // ✅ Buscar usuario por token (válido y no expirado)
+    const user = await UserModel.findByResetToken(token);
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token inválido o expirado'
+      });
+    }
+
+    // ✅ Hashear nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // ✅ Actualizar contraseña y limpiar token
+    await UserModel.update(user.id, { password: hashedPassword });
+    await UserModel.clearResetToken(user.id);
+
+    console.log(`✅ Contraseña restablecida para: ${user.email}`);
+
+    return res.json({
+      success: true,
+      message: 'Contraseña actualizada exitosamente'
+    });
+
+  } catch (error: any) {
+    console.error('❌ Error en resetPassword:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error al restablecer la contraseña'
     });
   }
 };

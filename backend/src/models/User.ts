@@ -9,9 +9,11 @@ export interface User {
   address?: string;
   role: 'CLIENTE' | 'ADMIN';
   isActive: boolean;
-  termsAccepted: boolean;        // ✅ NUEVO: Si aceptó términos
-  termsAcceptedAt: Date | null;  // ✅ NUEVO: Cuándo aceptó
-  termsVersion: string | null;   // ✅ NUEVO: Versión de términos
+  termsAccepted: boolean;
+  termsAcceptedAt: Date | null;
+  termsVersion: string | null;
+  resetToken: string | null;
+  resetTokenExpiry: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -59,9 +61,9 @@ export const UserModel = {
         userData.fullName,
         userData.phone || null,
         userData.address || null,
-        true,                    // termsAccepted: true por defecto
-        new Date(),              // termsAcceptedAt: ahora
-        '1.0.0'                  // termsVersion: versión inicial
+        true,
+        new Date(),
+        '1.0.0'
       ]
     );
     return result.rows[0];
@@ -93,5 +95,36 @@ export const UserModel = {
       [id, version]
     );
     return result.rows[0] || null;
-  }
+  },
+
+  // ✅ NUEVO: Guardar token de recuperación
+  async saveResetToken(id: number, token: string, expiry: Date): Promise<void> {
+    await pool.query(
+      `UPDATE users 
+       SET "resetToken" = $1, "resetTokenExpiry" = $2 
+       WHERE id = $3`,
+      [token, expiry, id]
+    );
+  },
+
+  // ✅ NUEVO: Buscar usuario por token de recuperación
+  async findByResetToken(token: string): Promise<User | null> {
+    const result = await pool.query(
+      `SELECT * FROM users 
+       WHERE "resetToken" = $1 
+       AND "resetTokenExpiry" > NOW()`,
+      [token]
+    );
+    return result.rows[0] || null;
+  },
+
+  // ✅ NUEVO: Limpiar token después de usarlo
+  async clearResetToken(id: number): Promise<void> {
+    await pool.query(
+      `UPDATE users 
+       SET "resetToken" = NULL, "resetTokenExpiry" = NULL 
+       WHERE id = $1`,
+      [id]
+    );
+  },
 };

@@ -25,6 +25,9 @@ import Envios from './pages/Envios'
 import RetiroTienda from './pages/RetiroTienda'
 import Ofertas from './pages/Ofertas'
 import AdminCategorias from './pages/admin/AdminCategorias'
+// ✅ Agregar import
+import ResetPassword from "./pages/auth/ResetPassword";
+
 
 function App() {
   return (
@@ -63,6 +66,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
         <Route path="/recuperar" element={<RecuperarContrasena />} />
+        <Route path="/reset-password" element={<ResetPassword />} />  // ✅ NUEVA RUTA
         <Route path="/productos" element={<Productos />} />
         <Route path="/producto/:id" element={<ProductoDetalle />} />
         <Route path="/ofertas" element={<Ofertas />} />
