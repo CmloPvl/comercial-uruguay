@@ -55,6 +55,13 @@ export const authService = {
     return response.data;
   },
 
+  // ✅ NUEVO: Recuperación de contraseña con email
+  async forgotPassword(email: string) {
+    const response = await api.post('/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  // ⚠️ Opcional: Si quieres mantener la versión antigua
   async recoverPassword(email: string) {
     const response = await api.post('/auth/recover', { email });
     return response.data;

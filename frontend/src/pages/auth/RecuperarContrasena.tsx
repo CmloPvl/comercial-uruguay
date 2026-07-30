@@ -1,4 +1,12 @@
-import { useState } from "react";
+// 📁 frontend/src/pages/auth/RecuperarContrasena.tsx
+
+/**
+ * 📌 PÁGINA DE RECUPERACIÓN DE CONTRASEÑA
+ * 
+ * Componente de diseño (UI) que usa el hook useRecoverPassword.
+ * Separación de responsabilidades: diseño aquí, lógica en el hook.
+ */
+
 import { Link } from "react-router-dom";
 import Layout from "../../components/layout/Layout";
 import { Button } from "../../components/ui/button";
@@ -15,32 +23,10 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Badge } from "../../components/ui/badge";
 import { Separator } from "../../components/ui/separator";
-import { authService } from "../../services/api";
+import { useRecoverPassword } from "../../hooks/useRecoverPassword";
 
 export default function RecuperarContrasena() {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) {
-      setError("Por favor, ingresa tu correo electrónico");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-      await authService.recoverPassword(email);
-      setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || "Error al enviar el correo de recuperación");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { email, setEmail, loading, success, error, handleSubmit } = useRecoverPassword();
 
   return (
     <Layout>
@@ -75,7 +61,6 @@ export default function RecuperarContrasena() {
       <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 bg-gradient-to-br from-[#FFD93D]/20 via-[#F0C0F0]/30 to-[#00D2D3]/10">
         <Card className="max-w-md w-full border-2 border-[#7D5FFF] shadow-2xl hover:shadow-[#7D5FFF]/30 transition-shadow duration-300">
           <CardContent className="p-8">
-            
             {/* Header */}
             <div className="text-center mb-8">
               <Badge className="bg-gradient-to-r from-[#FFD93D] to-[#F0C030] text-[#303030] mb-3 px-4 py-1.5 rounded-full font-bold">
@@ -119,7 +104,7 @@ export default function RecuperarContrasena() {
                     placeholder="tucorreo@ejemplo.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="mt-1 border-2 border-[#7D5FFF] focus:ring-2 focus:ring-[#FFD93D] focus:border-[#FFD93D] transition-all"
+                    className="mt-1 border-2 border-[#7D5FFF] focus:ring-2 focus:ring-[#FFD93D] focus:border-[#FFD93D] transition-all rounded-xl"
                     required
                   />
                 </div>

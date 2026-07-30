@@ -43,9 +43,30 @@ async getProducts(params?: { category?: string; search?: string; page?: number; 
   
   const response = await api.get(`/products?${queryParams.toString()}`);
   console.log('🛒 [productService] Respuesta completa:', response.data);
+  console.log('🛒 [productService] Tipo de respuesta:', typeof response.data);
+  console.log('🛒 [productService] ¿Es array?', Array.isArray(response.data));
   
-  // ✅ Devuelve el array directamente
-  return response.data.data;  // ← Esto es el array de productos
+  // ✅ Si la respuesta es { success: true, data: [...] }
+  if (response.data && response.data.success && Array.isArray(response.data.data)) {
+    console.log('🛒 [productService] ✅ Usando response.data.data');
+    return response.data.data;
+  }
+  
+  // ✅ Si la respuesta es directamente un array
+  if (Array.isArray(response.data)) {
+    console.log('🛒 [productService] ✅ Usando response.data directamente');
+    return response.data;
+  }
+  
+  // ✅ Si la respuesta tiene data pero es un array
+  if (response.data && Array.isArray(response.data.data)) {
+    console.log('🛒 [productService] ✅ Usando response.data.data (alternativo)');
+    return response.data.data;
+  }
+  
+  // ✅ Si nada funciona, devolver array vacío
+  console.warn('🛒 [productService] ⚠️ Respuesta inesperada:', response.data);
+  return [];
 },
 
   // =============================================
