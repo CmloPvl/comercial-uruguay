@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
-import { Toaster } from 'react-hot-toast'  // ✅ NUEVO
+import { Toaster } from 'react-hot-toast'
 import Home from "./pages/Home"
 import Login from "./pages/auth/Login"
 import Registro from "./pages/auth/Registro"
@@ -21,18 +21,16 @@ import MisPedidos from './pages/MisPedidos'
 import ProtectedRoute from './components/common/ProtectedRoute'
 import Nosotros from './pages/Nosotros'
 import Contacto from './pages/Contacto'
-import Envios from './pages/Envios'
+// ❌ ELIMINADO: import Envios from './pages/Envios'
 import RetiroTienda from './pages/RetiroTienda'
 import Ofertas from './pages/Ofertas'
 import AdminCategorias from './pages/admin/AdminCategorias'
-// ✅ Agregar import
-import ResetPassword from "./pages/auth/ResetPassword";
-
+import ResetPassword from "./pages/auth/ResetPassword"
+import EnviosYRetiros from "./pages/EnviosYRetiros"
 
 function App() {
   return (
     <BrowserRouter>
-      {/* ✅ Toaster para notificaciones */}
       <Toaster 
         position="top-right"
         toastOptions={{
@@ -61,12 +59,11 @@ function App() {
         }}
       />
       <Routes>
-        {/* ====== PÁGINAS PÚBLICAS ====== */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
         <Route path="/recuperar" element={<RecuperarContrasena />} />
-        <Route path="/reset-password" element={<ResetPassword />} />  // ✅ NUEVA RUTA
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/productos" element={<Productos />} />
         <Route path="/producto/:id" element={<ProductoDetalle />} />
         <Route path="/ofertas" element={<Ofertas />} />
@@ -74,10 +71,10 @@ function App() {
         <Route path="/privacidad" element={<Privacidad />} />
         <Route path="/nosotros" element={<Nosotros />} />
         <Route path="/contacto" element={<Contacto />} />
-        <Route path="/envios" element={<Envios />} />
+        {/* ❌ ELIMINADO: <Route path="/envios" element={<Envios />} /> */}
         <Route path="/retiro" element={<RetiroTienda />} />
+        <Route path="/envios-y-retiros" element={<EnviosYRetiros />} />
         
-        {/* ====== PÁGINAS PROTEGIDAS (requieren autenticación) ====== */}
         <Route path="/perfil" element={
           <ProtectedRoute>
             <Perfil />
@@ -99,7 +96,6 @@ function App() {
           </ProtectedRoute>
         } />
         
-        {/* ====== PÁGINAS DE ADMINISTRACIÓN (requieren autenticación + ADMIN) ====== */}
         <Route path="/crear-publicacion" element={
           <ProtectedRoute requireAdmin>
             <CrearPublicacion />
@@ -130,7 +126,7 @@ function App() {
             <AdminCategorias />
           </ProtectedRoute>
         } />
-        {/* ====== 404 - SIEMPRE AL FINAL ====== */}
+        
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

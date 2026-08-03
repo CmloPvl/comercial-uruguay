@@ -1,122 +1,136 @@
-import { Link } from 'react-router-dom';
-import { FaFacebook, FaInstagram, FaTiktok, FaWhatsapp, FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaTruck, FaStore } from 'react-icons/fa';
-import { empresaConfig } from '../../config/empresa';
+// 📁 frontend/src/components/layout/Footer.tsx
+
+/**
+ * 📌 FOOTER — VERSIÓN PROFESIONAL
+ * 
+ * Inspirado en los footers de Falabella y Ripley.
+ * Estructura de 4 columnas con información clara y organizada.
+ */
+
+import { Link } from "react-router-dom";
+import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaWhatsapp, FaTruck, FaStore } from "react-icons/fa";
+import { empresaConfig } from "../../config/empresa";
+import Logo from "../common/Logo";
+import { FooterSocial } from "./FooterSocial";
 
 export default function Footer() {
   return (
     <footer className="bg-gradient-to-br from-[#603060] via-[#7D5FFF] to-[#00D2D3] text-white pt-12 pb-6">
       <div className="max-w-6xl mx-auto px-6">
-        
-        {/* ====== GRID PRINCIPAL ====== */}
+        {/* ====== GRID PRINCIPAL (4 columnas) ====== */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-white/20">
           
-          {/* Columna 1: Logo y descripción */}
+          {/* =============================================
+          COLUMNA 1: Logo + descripción + redes sociales
+          ============================================= */}
           <div className="col-span-1 md:col-span-1">
-            <h3 className="text-2xl font-bold flex items-center gap-2">
-              <span className="animate-bounce">🏪</span> {empresaConfig.nombre}
-            </h3>
-            <p className="text-white/80 mt-3 text-sm leading-relaxed">
+            <Logo className="h-12 w-auto mb-3" />
+            <p className="text-white/80 text-sm leading-relaxed">
               {empresaConfig.descripcion}
             </p>
-            
-            {/* Redes Sociales con colores reales */}
-            <div className="flex gap-3 mt-4">
-              <a 
-                href={empresaConfig.facebook} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="bg-[#1877F2] hover:bg-[#1877F2]/80 text-white p-2 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg"
-                aria-label="Facebook"
-              >
-                <FaFacebook size={18} />
-              </a>
-              <a 
-                href={empresaConfig.instagram} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="bg-[#E4405F] hover:bg-[#E4405F]/80 text-white p-2 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg"
-                aria-label="Instagram"
-              >
-                <FaInstagram size={18} />
-              </a>
-              <a 
-                href={empresaConfig.tiktok} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="bg-[#000000] hover:bg-[#000000]/80 text-white p-2 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg"
-                aria-label="TikTok"
-              >
-                <FaTiktok size={18} />
-              </a>
-              <a 
-                href={`https://wa.me/${empresaConfig.whatsapp}`} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="bg-[#25D366] hover:bg-[#25D366]/80 text-white p-2 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg"
-                aria-label="WhatsApp"
-              >
-                <FaWhatsapp size={18} />
-              </a>
-            </div>
+            <p className="text-white/60 text-sm mt-2">
+              Más de 10 años de experiencia en Valparaíso.
+            </p>
+            <FooterSocial social={empresaConfig} />
           </div>
 
-          {/* Columna 2: Navegación */}
+          {/* =============================================
+          COLUMNA 2: Te ayudamos (inspirado en Falabella)
+          ============================================= */}
           <div>
             <h4 className="font-bold text-[#FFD93D] text-lg mb-4 flex items-center gap-2">
-              <span>🔗</span> Navegación
+              <span>💡</span> Te ayudamos
             </h4>
-            <ul className="space-y-2">
-              <li><a href="/" className="text-white/80 hover:text-[#FFD93D] transition-colors hover:translate-x-1 inline-block">Inicio</a></li>
-              <li><a href="/productos" className="text-white/80 hover:text-[#FFD93D] transition-colors hover:translate-x-1 inline-block">Tienda</a></li>
-              <li><a href="/ofertas" className="text-white/80 hover:text-[#FFD93D] transition-colors hover:translate-x-1 inline-block">Ofertas</a></li>
-              <li><a href="/nosotros" className="text-white/80 hover:text-[#FFD93D] transition-colors hover:translate-x-1 inline-block">Nosotros</a></li>
-              <li><a href="/contacto" className="text-white/80 hover:text-[#FFD93D] transition-colors hover:translate-x-1 inline-block">Contacto</a></li>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/contacto" className="text-white/80 hover:text-[#FFD93D] transition-colors hover:translate-x-1 inline-block">
+                  📞 Contáctanos
+                </Link>
+              </li>
+              <li>
+                <Link to="/envios-y-retiros" className="text-white/80 hover:text-[#FFD93D] transition-colors hover:translate-x-1 inline-block">
+                  🚚 Envíos y retiros
+                </Link>
+              </li>
+              <li>
+                <Link to="/terminos" className="text-white/80 hover:text-[#FFD93D] transition-colors hover:translate-x-1 inline-block">
+                  📋 Términos y condiciones
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacidad" className="text-white/80 hover:text-[#FFD93D] transition-colors hover:translate-x-1 inline-block">
+                  🔒 Política de privacidad
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Columna 3: Categorías */}
+          {/* =============================================
+          COLUMNA 3: Comercial Uruguay (inspirado en Ripley)
+          ============================================= */}
           <div>
-            <h4 className="font-bold text-[#FF6B81] text-lg mb-4 flex items-center gap-2">
-              <span>📂</span> Categorías
+            <h4 className="font-bold text-[#FFD93D] text-lg mb-4 flex items-center gap-2">
+              <span>🏪</span> Comercial Uruguay
             </h4>
-            <ul className="space-y-2">
-              <li className="text-white/80 hover:text-[#FF6B81] transition-colors cursor-pointer hover:translate-x-1 inline-block">💇 Cabello</li>
-              <li className="text-white/80 hover:text-[#FF6B81] transition-colors cursor-pointer hover:translate-x-1 inline-block">🧸 Juguetes</li>
-              <li className="text-white/80 hover:text-[#FF6B81] transition-colors cursor-pointer hover:translate-x-1 inline-block">🎂 Cumpleaños</li>
-              <li className="text-white/80 hover:text-[#FF6B81] transition-colors cursor-pointer hover:translate-x-1 inline-block">🏠 Hogar</li>
-              <li className="text-white/80 hover:text-[#FF6B81] transition-colors cursor-pointer hover:translate-x-1 inline-block">🍽️ Melamina</li>
-              <li className="text-white/80 hover:text-[#FF6B81] transition-colors cursor-pointer hover:translate-x-1 inline-block">🍂 Temporada</li>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/nosotros" className="text-white/80 hover:text-[#FFD93D] transition-colors hover:translate-x-1 inline-block">
+                  👥 Sobre nosotros
+                </Link>
+              </li>
+              <li>
+                <Link to="/productos" className="text-white/80 hover:text-[#FFD93D] transition-colors hover:translate-x-1 inline-block">
+                  🛍️ Nuestra tienda
+                </Link>
+              </li>
+              <li>
+                <Link to="/ofertas" className="text-white/80 hover:text-[#FFD93D] transition-colors hover:translate-x-1 inline-block">
+                  🔥 Ofertas
+                </Link>
+              </li>
+              <li>
+                <a
+                  href={`https://wa.me/${empresaConfig.whatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/80 hover:text-[#FFD93D] transition-colors hover:translate-x-1 inline-block"
+                >
+                  💬 WhatsApp
+                </a>
+              </li>
             </ul>
           </div>
 
-          {/* Columna 4: Contacto y ubicación */}
+          {/* =============================================
+          COLUMNA 4: Contacto y ubicación
+          ============================================= */}
           <div>
-            <h4 className="font-bold text-[#00D2D3] text-lg mb-4 flex items-center gap-2">
+            <h4 className="font-bold text-[#FFD93D] text-lg mb-4 flex items-center gap-2">
               <span>📍</span> Contacto
             </h4>
-            <ul className="space-y-3 text-white/80">
+            <ul className="space-y-3 text-white/80 text-sm">
               <li className="flex items-start gap-2 hover:text-white transition">
-                <FaMapMarkerAlt className="text-[#FF6B81] text-lg mt-0.5" />
+                <FaMapMarkerAlt className="text-[#FF6B81] text-lg mt-0.5 flex-shrink-0" />
                 <span>{empresaConfig.direccion}</span>
               </li>
               <li className="flex items-center gap-2 hover:text-[#FFD93D] transition">
-                <FaPhone className="text-[#FFD93D] text-lg" />
+                <FaPhone className="text-[#FFD93D] text-lg flex-shrink-0" />
                 <a href={`tel:${empresaConfig.telefono}`} className="hover:text-[#FFD93D] transition-colors">
                   {empresaConfig.telefono}
                 </a>
               </li>
               <li className="flex items-center gap-2 hover:text-[#FF6B81] transition">
-                <FaEnvelope className="text-[#FF6B81] text-lg" />
+                <FaEnvelope className="text-[#FF6B81] text-lg flex-shrink-0" />
                 <a href={`mailto:${empresaConfig.email}`} className="hover:text-[#FF6B81] transition-colors">
                   {empresaConfig.email}
                 </a>
               </li>
-              <li className="flex items-start gap-2 hover:text-white transition text-sm">
-                <FaClock className="text-[#00D2D3] text-lg mt-0.5" />
+              <li className="flex items-start gap-2 hover:text-white transition">
+                <FaClock className="text-[#00D2D3] text-lg mt-0.5 flex-shrink-0" />
                 <div>
                   <div>Lun-Vie: {empresaConfig.horario.lunesViernes}</div>
                   <div>Sáb: {empresaConfig.horario.sabado}</div>
-                  <div>Dom: {empresaConfig.horario.domingo}</div>
+                  <div>Dom: Cerrado</div>
                 </div>
               </li>
             </ul>
@@ -125,22 +139,15 @@ export default function Footer() {
 
         {/* ====== FRANJA DE SERVICIOS ====== */}
         <div className="flex flex-wrap items-center justify-center gap-4 py-4 border-b border-white/10">
-          <a 
-            href={`https://wa.me/${empresaConfig.whatsapp}?text=Hola%20${empresaConfig.nombre}%2C%20quiero%20consultar%20sobre...`}
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#25D366]/80 text-white font-bold px-5 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 text-sm"
-          >
-            <FaWhatsapp size={18} />
-            Gestiona tu pedido por WhatsApp
-          </a>
-          <span className="text-white/30">|</span>
-          <span className="inline-flex items-center gap-2 bg-[#90C090] hover:bg-[#90C090]/80 text-white font-bold px-5 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 text-sm">
+          <span className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#25D366]/80 text-white font-bold px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 text-sm">
+            <FaWhatsapp size={16} />
+            WhatsApp
+          </span>
+          <span className="inline-flex items-center gap-2 bg-[#90C090] hover:bg-[#90C090]/80 text-white font-bold px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 text-sm">
             <FaTruck size={16} />
             Envíos a todo Chile
           </span>
-          <span className="text-white/30">|</span>
-          <span className="inline-flex items-center gap-2 bg-[#FF6B81] hover:bg-[#FF6B81]/80 text-white font-bold px-5 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 text-sm">
+          <span className="inline-flex items-center gap-2 bg-[#FF6B81] hover:bg-[#FF6B81]/80 text-white font-bold px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 text-sm">
             <FaStore size={16} />
             Retiro en tienda
           </span>
