@@ -87,3 +87,143 @@ Footer.tsx
 └── Franja inferior
 ├── Copyright
 └── Enlaces legales (Privacidad, Términos, Contacto)
+
+---
+
+📁 Estructura actual del catalogo
+
+Productos.tsx (Página)
+├── useProductos.ts (Lógica)
+│ ├── Estados (productos, categorias, loading, error, filtros, favoritos)
+│ ├── Funciones (loadProducts, handleAddToCart, handleToggleFavorite)
+│ ├── Filtros (filteredProducts, categoriesWithIcons)
+│ └── Efectos (useEffect)
+│
+└── UI (Diseño)
+├── Breadcrumb
+├── Banner
+├── ProductFilters (Desktop)
+├── ProductList
+└── Filtros móvil
+
+    Productos (Tienda)
+
+├── useProductos.ts (Lógica)
+│ ├── Estados: productos, categorias, loading, error, filtros, favoritos
+│ ├── Funciones: loadProducts, handleAddToCart, handleToggleFavorite
+│ ├── Filtros: filteredProducts, categoriesWithIcons
+│ └── Efectos: useEffect para cargar datos
+│
+└── Productos.tsx (UI)
+├── Layout
+├── Breadcrumb
+├── Banner (con categorías)
+├── ProductFilters (Desktop)
+├── ProductList → ProductGrid → ProductCard
+└── Filtros móvil
+
+📁 Estructura actual del carrito
+
+Carrito (Página)
+├── useCarrito.ts (Lógica)
+│ ├── Estado: deliveryOption
+│ ├── Funciones: generateWhatsAppMessage, handleWhatsApp
+│ ├── Contextos: useCart(), useAuth()
+│ └── Datos derivados: items, totalItems, totalPrice
+│
+├── Carrito.tsx (UI)
+│ ├── Breadcrumb
+│ ├── Lista de CartItem
+│ ├── CartSummary
+│ └── Botones (Vaciar, Seguir comprando)
+│
+├── components/cart/
+│ ├── CartItem.tsx (UI) ✅ Ya existe
+│ └── CartSummary.tsx (UI) ✅ Ya existe
+│
+└── context/
+└── CartContext.tsx (Lógica global) ✅ Ya existe
+
+Carrito.tsx (Página)
+│
+├── totalItems ← Calculado en CartContext
+├── totalPrice ← Calculado en CartContext
+├── deliveryOption ← Estado local en useCarrito
+├── setDeliveryOption ← Función para cambiar opción
+└── handleWhatsApp ← Función para enviar mensaje
+│
+▼
+CartSummary.tsx (UI)
+│
+├── Muestra subtotal y total
+├── Muestra opciones de entrega
+└── Botón WhatsApp
+
+📁 Estructura actual de favoritos
+
+Favoritos (Página)
+├── useFavoritos.ts (Lógica)
+│ ├── Estados: favorites, loading, error
+│ ├── Funciones: loadFavorites, handleRemoveFavorite
+│ ├── Contexto: useAuth()
+│ └── Efectos: useEffect
+│
+└── Favoritos.tsx (UI)
+├── Estado de carga (Spinner)
+├── No autenticado (Login)
+├── Sin favoritos (Mensaje + botón)
+└── Lista de favoritos (Grid)
+
+📁 Estructura actual de perfil cliente
+
+Perfil (Página)
+├── utils/perfilUtils.ts (Utilidades)
+│ ├── getInitials()
+│ ├── getAvatarColor()
+│ ├── formatDate()
+│ └── getOrderStatus()
+│
+├── hooks/usePerfil.ts (Lógica)
+│ ├── Estados: formData, passwordData, orders, loading, error, success
+│ ├── Funciones: handleSave, handlePasswordChange
+│ └── Efectos: useEffect
+│
+└── Perfil.tsx (UI)
+├── Sidebar (Avatar + nombre + email + logout)
+└── Tabs (shadcn/ui)
+├── Datos Personales
+├── Seguridad
+└── Mis Pedidos
+
+📁 Estructura actual de Dashboard
+
+Dashboard (Página)
+├── hooks/useAdminDashboard.ts (Lógica)
+│ ├── Estados: stats, loading, recentOrders, error
+│ ├── Funciones: loadDashboardData
+│ └── Efectos: useEffect
+│
+├── components/admin/DashboardStats.tsx (UI)
+│ └── Tarjetas de estadísticas
+│
+└── Dashboard.tsx (UI)
+├── Header (título + badges)
+├── DashboardStats (5 tarjetas)
+├── Acciones rápidas + Resumen
+└── Últimos pedidos (tabla)
+
+📁 Estructura actual de admin productos
+
+AdminProductos (Página)
+├── hooks/useAdminProductos.ts (Lógica)
+│ ├── Estados: products, loading, error
+│ ├── Funciones: loadProducts, handleDelete, handleToggleActive
+│ └── Efectos: useEffect
+│
+├── components/admin/AdminProductosSkeleton.tsx (UI)
+│ └── Esqueleto de carga
+│
+└── AdminProductos.tsx (UI)
+├── Header (título + badge + botón crear)
+├── Tabla de productos
+└── Acciones (editar, activar, eliminar)

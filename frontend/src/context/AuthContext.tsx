@@ -1,5 +1,24 @@
+// 📁 frontend/src/context/AuthContext.tsx
+
+/**
+ * 📌 AUTH CONTEXT
+ * 
+ * Contexto global de autenticación.
+ * Provee el estado del usuario y funciones de autenticación.
+ * 
+ * ✅ Buenas prácticas:
+ * - Contexto tipado con TypeScript
+ * - Persistencia de sesión con localStorage
+ * - Manejo de errores consistente
+ * - Separación de responsabilidades
+ */
+
 import { createContext, useContext, useState, type ReactNode, useEffect } from "react";
 import api from "../services/api";
+
+// =============================================
+// 📌 INTERFAZ DE USUARIO
+// =============================================
 
 interface User {
   id: number;
@@ -7,18 +26,23 @@ interface User {
   fullName: string;
   email: string;
   phone?: string;
-  address?: string;  // ✅ NUEVO
+  address?: string;
   role: "CLIENTE" | "ADMIN";
+  createdAt?: string; // ✅ Fecha de creación del usuario
 }
+
+// =============================================
+// 📌 INTERFAZ DEL CONTEXTO
+// =============================================
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (userData: { 
-    fullName: string; 
-    email: string; 
-    password: string; 
-    phone?: string; 
+  register: (userData: {
+    fullName: string;
+    email: string;
+    password: string;
+    phone?: string;
     address?: string;
     termsAccepted?: boolean;
   }) => Promise<void>;
@@ -27,26 +51,47 @@ interface AuthContextType {
   loading: boolean;
 }
 
+// =============================================
+// 🎯 CONTEXTO
+// =============================================
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// =============================================
+// 🧠 PROVIDER
+// =============================================
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // =============================================
+  // 💾 CARGAR SESIÓN GUARDADA
+  // =============================================
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
     if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error("Error al cargar usuario:", error);
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
     }
     setLoading(false);
   }, []);
 
+  // =============================================
+  // 🔐 LOGIN
+  // =============================================
   const login = async (email: string, password: string) => {
     try {
       const response = await api.post("/auth/login", { email, password });
       const { token, user } = response.data.data;
-      
+
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
       setUser(user);
@@ -55,11 +100,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (userData: { 
-    fullName: string; 
-    email: string; 
-    password: string; 
-    phone?: string; 
+  // =============================================
+  // 📝 REGISTER
+  // =============================================
+  const register = async (userData: {
+    fullName: string;
+    email: string;
+    password: string;
+    phone?: string;
     address?: string;
     termsAccepted?: boolean;
   }) => {
@@ -70,20 +118,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // =============================================
+  // 🚪 LOGOUT
+  // =============================================
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
   };
 
+  // =============================================
+  // 🔍 ESTADO DE AUTENTICACIÓN
+  // =============================================
   const isAuthenticated = user !== null;
 
+  // =============================================
+  // 📦 EXPORTACIÓN
+  // =============================================
   return (
     <AuthContext.Provider value={{ user, login, register, logout, isAuthenticated, loading }}>
       {children}
     </AuthContext.Provider>
   );
 }
+
+// =============================================
+// 🪝 HOOK PERSONALIZADO
+// =============================================
 
 export function useAuth() {
   const context = useContext(AuthContext);

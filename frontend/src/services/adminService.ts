@@ -21,16 +21,16 @@ export interface Order {
 export interface Product {
   id: string;
   name: string;
-  description: string;      // ✅ NUEVO
+  description: string;
   price: number;
   stock: number;
   sku: string;
-  categoryId?: number;      // ✅ NUEVO
+  categoryId?: number;
   category_name: string;
   isActive: boolean;
-  isOnSale: boolean;        // ✅ NUEVO
-  discount: number;         // ✅ NUEVO
-  images: string[];         // ✅ NUEVO
+  isOnSale: boolean;
+  discount: number;
+  images: string[];
   createdAt: string;
 }
 
@@ -86,6 +86,25 @@ export const adminService = {
       data: rawData.products || [],
       pagination: rawData.pagination || { total: 0, page: 1, limit: 10, totalPages: 0 }
     };
+  },
+
+  // =============================================
+  // ✅ NUEVOS MÉTODOS PARA PRODUCTOS
+  // =============================================
+
+  /**
+   * ✅ ELIMINAR PRODUCTO
+   */
+  async deleteProduct(id: string): Promise<void> {
+    await api.delete(`/admin/products/${id}`);
+  },
+
+  /**
+   * ✅ ACTUALIZAR PRODUCTO
+   */
+  async updateProduct(id: string, data: Partial<Product>): Promise<Product> {
+    const response = await api.put(`/admin/products/${id}`, data);
+    return response.data.data;
   },
 
   // =============================================
