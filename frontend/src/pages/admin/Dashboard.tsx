@@ -11,6 +11,10 @@
  * - Componentes reutilizables
  * - Código limpio y fácil de leer
  * - Estados de carga y error
+ * - Breadcrumb para navegación
+ * - Skeleton de shadcn/ui para carga
+ * - Tooltips en botones de acciones rápidas
+ * - Componentes shadcn/ui consistentes
  */
 
 import { Link } from "react-router-dom";
@@ -18,8 +22,67 @@ import Layout from "../../components/layout/Layout";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
+import { Skeleton } from "../../components/ui/skeleton";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "../../components/ui/breadcrumb";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../components/ui/tooltip";
 import { DashboardStats } from "../../components/admin/DashboardStats";
 import { useAdminDashboard } from "../../hooks/useAdminDashboard";
+
+// =============================================
+// 🎯 SKELETON DEL DASHBOARD
+// =============================================
+const DashboardSkeleton = () => (
+  <div className="max-w-7xl mx-auto px-4 py-8">
+    {/* Breadcrumb skeleton */}
+    <div className="bg-[#FF6B81]/10 py-3 px-4 border-b-2 border-[#FF6B81] -mx-4">
+      <div className="max-w-7xl mx-auto">
+        <Skeleton className="h-5 w-48" />
+      </div>
+    </div>
+
+    {/* Header skeleton */}
+    <div className="mb-8 mt-8">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-5 w-48 mt-2" />
+        </div>
+        <div className="flex gap-3">
+          <Skeleton className="h-8 w-24 rounded-full" />
+          <Skeleton className="h-8 w-20 rounded-full" />
+        </div>
+      </div>
+    </div>
+
+    {/* Stats skeleton (5 tarjetas) */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      {[...Array(5)].map((_, i) => (
+        <Skeleton key={i} className="h-28 w-full rounded-xl" />
+      ))}
+    </div>
+
+    {/* Acciones rápidas + Resumen skeleton */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
+      <Skeleton className="h-48 w-full rounded-xl" />
+      <Skeleton className="h-48 w-full rounded-xl" />
+    </div>
+
+    {/* Últimos pedidos skeleton */}
+    <Skeleton className="h-64 w-full rounded-xl" />
+  </div>
+);
 
 export default function AdminDashboard() {
   // =============================================
@@ -66,17 +129,12 @@ export default function AdminDashboard() {
   }
 
   // =============================================
-  // 🔄 ESTADO DE CARGA
+  // 🔄 ESTADO DE CARGA (con Skeleton shadcn)
   // =============================================
   if (loading) {
     return (
       <Layout title="Panel Administrador">
-        <div className="min-h-[70vh] flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7D5FFF] mx-auto"></div>
-            <p className="text-[#6A757C] mt-4">Cargando panel...</p>
-          </div>
-        </div>
+        <DashboardSkeleton />
       </Layout>
     );
   }
@@ -86,6 +144,29 @@ export default function AdminDashboard() {
   // =============================================
   return (
     <Layout title="Panel Administrador">
+      {/* =============================================
+      📍 BREADCRUMB
+      ============================================= */}
+      <div className="bg-[#FF6B81]/10 py-3 px-4 border-b-2 border-[#FF6B81]">
+        <div className="max-w-7xl mx-auto">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/" className="text-[#603060] hover:text-[#00D2D3]">
+                  Inicio
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="text-[#7D5FFF]" />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="text-[#00D2D3] font-bold">
+                  Dashboard
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* =============================================
         📌 HEADER
@@ -140,26 +221,65 @@ export default function AdminDashboard() {
                 ✨ Acciones Rápidas
               </h3>
               <div className="flex flex-wrap gap-3">
-                <Link to="/crear-publicacion">
-                  <Button className="bg-gradient-to-r from-[#7D5FFF] to-[#603060] hover:from-[#603060] hover:to-[#7D5FFF] text-white font-bold">
-                    ➕ Crear Producto
-                  </Button>
-                </Link>
-                <Link to="/admin/pedidos">
-                  <Button className="bg-gradient-to-r from-[#00D2D3] to-[#0098A8] hover:from-[#0098A8] hover:to-[#00D2D3] text-white font-bold">
-                    📦 Ver Pedidos
-                  </Button>
-                </Link>
-                <Link to="/admin/productos">
-                  <Button className="bg-gradient-to-r from-[#FFD93D] to-[#F0C030] hover:from-[#F0C030] hover:to-[#FFD93D] text-[#303030] font-bold">
-                    📋 Gestionar Productos
-                  </Button>
-                </Link>
-                <Link to="/admin/categorias">
-                  <Button className="bg-gradient-to-r from-[#FFD93D] to-[#F0C030] hover:from-[#F0C030] hover:to-[#FFD93D] text-[#303030] font-bold">
-                    📂 Gestionar Categorías
-                  </Button>
-                </Link>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link to="/crear-publicacion">
+                        <Button className="bg-gradient-to-r from-[#7D5FFF] to-[#603060] hover:from-[#603060] hover:to-[#7D5FFF] text-white font-bold">
+                          ➕ Crear Producto
+                        </Button>
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Crear un nuevo producto para la tienda</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link to="/admin/pedidos">
+                        <Button className="bg-gradient-to-r from-[#00D2D3] to-[#0098A8] hover:from-[#0098A8] hover:to-[#00D2D3] text-white font-bold">
+                          📦 Ver Pedidos
+                        </Button>
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Ver todos los pedidos de la tienda</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link to="/admin/productos">
+                        <Button className="bg-gradient-to-r from-[#FFD93D] to-[#F0C030] hover:from-[#F0C030] hover:to-[#FFD93D] text-[#303030] font-bold">
+                          📋 Gestionar Productos
+                        </Button>
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Administrar el catálogo de productos</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link to="/admin/categorias">
+                        <Button className="bg-gradient-to-r from-[#FFD93D] to-[#F0C030] hover:from-[#F0C030] hover:to-[#FFD93D] text-[#303030] font-bold">
+                          📂 Gestionar Categorías
+                        </Button>
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Administrar las categorías de productos</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </CardContent>
           </Card>
@@ -185,24 +305,32 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-[#F0F0C0]/30 p-3 rounded-lg text-center">
-                    <p className="text-sm text-[#6A757C]">Productos activos</p>
-                    <p className="text-2xl font-bold text-[#603060]">{stats.totalProducts}</p>
-                  </div>
-                  <div className="bg-[#F0C0F0]/30 p-3 rounded-lg text-center">
-                    <p className="text-sm text-[#6A757C]">Pedidos totales</p>
-                    <p className="text-2xl font-bold text-[#00D2D3]">{stats.totalOrders}</p>
-                  </div>
-                  <div className="bg-[#D4F0D4]/30 p-3 rounded-lg text-center">
-                    <p className="text-sm text-[#6A757C]">Ventas del mes</p>
-                    <p className="text-2xl font-bold text-[#90C090]">
-                      ${stats.monthlySales.toLocaleString("es-CL")}
-                    </p>
-                  </div>
-                  <div className="bg-[#FFE0D4]/30 p-3 rounded-lg text-center">
-                    <p className="text-sm text-[#6A757C]">Pendientes</p>
-                    <p className="text-2xl font-bold text-[#FF6B81]">{stats.pendingOrders}</p>
-                  </div>
+                  <Card className="bg-[#F0F0C0]/30 border-0 shadow-none">
+                    <CardContent className="p-3 text-center">
+                      <p className="text-sm text-[#6A757C]">Productos activos</p>
+                      <p className="text-2xl font-bold text-[#603060]">{stats.totalProducts}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-[#F0C0F0]/30 border-0 shadow-none">
+                    <CardContent className="p-3 text-center">
+                      <p className="text-sm text-[#6A757C]">Pedidos totales</p>
+                      <p className="text-2xl font-bold text-[#00D2D3]">{stats.totalOrders}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-[#D4F0D4]/30 border-0 shadow-none">
+                    <CardContent className="p-3 text-center">
+                      <p className="text-sm text-[#6A757C]">Ventas del mes</p>
+                      <p className="text-2xl font-bold text-[#90C090]">
+                        ${stats.monthlySales.toLocaleString("es-CL")}
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-[#FFE0D4]/30 border-0 shadow-none">
+                    <CardContent className="p-3 text-center">
+                      <p className="text-sm text-[#6A757C]">Pendientes</p>
+                      <p className="text-2xl font-bold text-[#FF6B81]">{stats.pendingOrders}</p>
+                    </CardContent>
+                  </Card>
                 </div>
               )}
             </CardContent>
