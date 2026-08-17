@@ -1,6 +1,13 @@
-📋 Registro de Mejoras
+📦 ARCHIVO: MEJORAS.md
+markdown
 
-📁 Estructura actual del Navbar
+# 📋 Registro de Mejoras
+
+---
+
+## 📁 Navbar
+
+**Estructura actual:**
 
 Navbar.tsx (Estructura principal)
 ├── useNavbar.ts (Lógica: autenticación, carrito, búsqueda, menú)
@@ -8,155 +15,167 @@ Navbar.tsx (Estructura principal)
 ├── NavbarUserMenu.tsx (UI: Menú de usuario)
 ├── NavbarGuestMenu.tsx (UI: Menú de invitado)
 └── NavbarMobile.tsx (UI: Menú móvil)
+text
 
-✅ Mejoras realizadas
-| Componente | Cambio
+**Mejoras realizadas:**
 
---- | --- | ---
-1 | useNavbar.ts | ✅ Lógica extraída del Navbar
-2 | NavbarAdminMenu.tsx | ✅ Menú de administración aislado
-3 | NavbarUserMenu.tsx | ✅ Menú de usuario aislado
-4 | NavbarGuestMenu.tsx | ✅ Menú de invitado aislado
-5 | NavbarMobile.tsx | ✅ Menú móvil aislado
-6 | Navbar.tsx | ✅ Solo diseño (UI)
+| #   | Componente            | Cambio                            |
+| --- | --------------------- | --------------------------------- |
+| 1   | `useNavbar.ts`        | ✅ Lógica extraída del Navbar     |
+| 2   | `NavbarAdminMenu.tsx` | ✅ Menú de administración aislado |
+| 3   | `NavbarUserMenu.tsx`  | ✅ Menú de usuario aislado        |
+| 4   | `NavbarGuestMenu.tsx` | ✅ Menú de invitado aislado       |
+| 5   | `NavbarMobile.tsx`    | ✅ Menú móvil aislado             |
+| 6   | `Navbar.tsx`          | ✅ Solo diseño (UI)               |
 
-📁 Estructura actual del Home
+---
+
+## 📁 Home
+
+**Estructura actual:**
 
 frontend/src/
-├── components/
-│ └── home/
-│ ├── Hero.tsx ✅ Componente de UI (banner principal)
-│ ├── CategoriesSection.tsx ✅ Sección de categorías (estática)
-│ ├── FeaturedProductsSection.tsx ✅ Sección de productos destacados
-│ ├── BenefitsSection.tsx ✅ Sección de beneficios (estática)
-│ └── LocationSection.tsx ✅ Sección de ubicación (estática)
-│
+├── components/home/
+│ ├── Hero.tsx ✅ Banner principal (UI)
+│ ├── CategoriesSection.tsx ✅ Sección de categorías (UI)
+│ ├── FeaturedProductsSection.tsx ✅ Productos destacados (UI)
+│ ├── BenefitsSection.tsx ✅ Sección de beneficios (UI)
+│ └── LocationSection.tsx ✅ Sección de ubicación (UI)
 ├── hooks/
-│ └── useHome.ts 🧠 Lógica de la página (API, estados, funciones)
-│
+│ └── useHome.ts 🧠 Lógica (API, estados, funciones)
 └── pages/
-└── Home.tsx 🔗 Página principal (conecta lógica + UI)
+└── Home.tsx 🔗 Conexión (lógica + UI)
+text
 
-📁 Estructura actual del Footer
+---
+
+## 📁 Footer
+
+**Estructura actual:**
 
 Footer.tsx
 ├── Columna 1: Logo + Descripción + Redes Sociales
 │ ├── Logo (componente real)
-│ ├── Descripción del negocio (desde empresaConfig)
+│ ├── Descripción (desde empresaConfig)
 │ └── FooterSocial (Facebook, Instagram, TikTok, WhatsApp)
-│
 ├── Columna 2: Te ayudamos
 │ ├── Contáctanos
 │ ├── Envíos y retiros
 │ ├── Términos y condiciones
 │ └── Política de privacidad
-│
 ├── Columna 3: Comercial Uruguay
 │ ├── Sobre nosotros
 │ ├── Nuestra tienda
 │ ├── Ofertas
 │ └── WhatsApp
-│
 ├── Columna 4: Contacto y ubicación
 │ ├── Dirección
 │ ├── Teléfono
 │ ├── Email
 │ └── Horarios de atención
-│
-├── Franja de servicios (FooterServices)
-│ ├── WhatsApp
-│ ├── Envíos a todo Chile
-│ └── Retiro en tienda
-│
-└── Franja inferior
-├── Copyright
-└── Enlaces legales (Privacidad, Términos, Contacto)
+├── FooterServices (WhatsApp, Envíos, Retiro)
+└── Franja inferior (Copyright + Enlaces legales)
+text
 
-📁 Estructura actual del Catálogo (Productos)
+---
 
-Productos.tsx (Página)
+## 📁 Catálogo (Productos)
+
+**Estructura actual:**
+
+Productos.tsx
 ├── useProductos.ts (Lógica)
 │ ├── Estados: productos, categorias, loading, error, filtros, favoritos
 │ ├── Funciones: loadProducts, handleAddToCart, handleToggleFavorite
 │ ├── Filtros: filteredProducts, categoriesWithIcons
 │ └── Efectos: useEffect
-│
 └── Productos.tsx (UI)
 ├── Breadcrumb
 ├── Banner (con categorías)
 ├── ProductFilters (Desktop)
 ├── ProductList → ProductGrid → ProductCard
 └── Filtros móvil
+text
 
-📁 Estructura actual del Carrito
+---
 
-Carrito (Página)
+## 📁 Carrito
+
+**Estructura actual:**
+
+Carrito.tsx
 ├── useCarrito.ts (Lógica)
 │ ├── Estado: deliveryOption
 │ ├── Funciones: generateWhatsAppMessage, handleWhatsApp
 │ ├── Contextos: useCart(), useAuth()
 │ └── Datos derivados: items, totalItems, totalPrice
-│
 ├── Carrito.tsx (UI)
 │ ├── Breadcrumb
 │ ├── Lista de CartItem
 │ ├── CartSummary
 │ └── Botones (Vaciar, Seguir comprando)
-│
 ├── components/cart/
 │ ├── CartItem.tsx (UI) ✅
 │ └── CartSummary.tsx (UI) ✅
-│
 └── context/
 └── CartContext.tsx (Lógica global) ✅
+text
 
-📁 Estructura actual de Favoritos
+---
 
-Favoritos (Página)
+## 📁 Favoritos
+
+**Estructura actual:**
+
+Favoritos.tsx
 ├── useFavoritos.ts (Lógica)
 │ ├── Estados: favorites, loading, error
 │ ├── Funciones: loadFavorites, handleRemoveFavorite
 │ ├── Contexto: useAuth()
 │ └── Efectos: useEffect
-│
 └── Favoritos.tsx (UI)
 ├── Estado de carga (Spinner)
 ├── No autenticado (Login)
 ├── Sin favoritos (Mensaje + botón)
 └── Lista de favoritos (Grid)
+text
 
-📁 Estructura actual de Perfil Cliente
+---
 
-Perfil (Página)
+## 📁 Perfil Cliente
+
+**Estructura actual:**
+
+Perfil.tsx
 ├── utils/perfilUtils.ts (Utilidades)
 │ ├── getInitials()
 │ ├── getAvatarColor()
 │ ├── formatDate()
 │ └── getOrderStatus()
-│
-├── hooks/usePerfil.ts (Lógica)
+├── usePerfil.ts (Lógica)
 │ ├── Estados: formData, passwordData, orders, loading, error, success
 │ ├── Funciones: handleSave, handlePasswordChange
 │ └── Efectos: useEffect
-│
 └── Perfil.tsx (UI)
 ├── Sidebar (Avatar + nombre + email + logout)
 └── Tabs (shadcn/ui)
 ├── Datos Personales
 ├── Seguridad
 └── Mis Pedidos
+text
 
-📁 Estructura actual del Dashboard
+---
 
-Dashboard (Página)
-├── hooks/useAdminDashboard.ts (Lógica)
+## 📁 Dashboard Admin
+
+**Estructura actual:**
+
+Dashboard.tsx
+├── useAdminDashboard.ts (Lógica)
 │ ├── Estados: stats, loading, recentOrders, error, hasData
-│ ├── Funciones: loadDashboardData
-│ └── Efectos: useEffect
-│
+│ └── Funciones: loadDashboardData
 ├── components/admin/DashboardStats.tsx (UI)
 │ └── Tarjetas de estadísticas (5 tarjetas)
-│
 └── Dashboard.tsx (UI)
 ├── Breadcrumb (Inicio / Dashboard)
 ├── Header (título + badges)
@@ -166,20 +185,23 @@ Dashboard (Página)
 ├── Últimos pedidos (Tabla)
 ├── Skeleton de shadcn/ui
 └── Tooltips en botones
+text
 
-📁 Estructura actual de Admin Productos
+---
 
-AdminProductos (Página)
-├── hooks/useAdminProductos.ts (Lógica)
+## 📁 Admin Productos
+
+**Estructura actual:**
+
+AdminProductos.tsx
+├── useAdminProductos.ts (Lógica)
 │ ├── Estados: products, loading, error, searchTerm, currentPage
-│ ├── Estados (Modales): deleteDialogOpen, toggleDialogOpen, selectedProduct
+│ ├── Modales: deleteDialogOpen, toggleDialogOpen, selectedProduct
 │ ├── Datos derivados: filteredProducts, paginatedProducts, totalPages, activeCount, inactiveCount
-│ ├── Funciones: loadProducts, openDeleteDialog, openToggleDialog, confirmDelete, confirmToggle, closeDialogs, handleSearch
-│ └── Efectos: useEffect
-│
+│ └── Funciones: loadProducts, openDeleteDialog, openToggleDialog, confirmDelete, confirmToggle, closeDialogs, handleSearch
 └── AdminProductos.tsx (UI)
 ├── Breadcrumb (Inicio / Dashboard / Gestionar Productos)
-├── Header (título + badge + contadores activos/inactivos + botón volver Dashboard + botón crear)
+├── Header (título + badge + contadores + volver Dashboard + crear)
 ├── Buscador (Input)
 ├── Tabla de productos (con Tooltips)
 ├── Paginación (Anterior/Siguiente)
@@ -187,94 +209,105 @@ AdminProductos (Página)
 ├── Estados de error y vacíos
 ├── AlertDialog (Eliminar)
 └── AlertDialog (Activar/Desactivar)
+text
 
-📁 Estructura actual de Admin Categorías
+---
 
-AdminCategorias (Página)
-├── hooks/useAdminCategorias.ts (Lógica)
+## 📁 Admin Categorías
+
+**Estructura actual:**
+
+AdminCategorias.tsx
+├── useAdminCategorias.ts (Lógica)
 │ ├── Estados: categories, loading, error, searchTerm
-│ ├── Estados (Modales): isDialogOpen, deleteDialogOpen, editingCategory, formData, categoryToDelete
+│ ├── Modales: isDialogOpen, deleteDialogOpen, editingCategory, formData, categoryToDelete
 │ ├── Datos derivados: filteredCategories, totalCategories
-│ ├── Funciones: loadCategories, handleSubmit, handleEdit, openCreateDialog, openDeleteDialog, confirmDelete, handleSearch, closeDialogs
-│ └── Efectos: useEffect
-│
+│ └── Funciones: loadCategories, handleSubmit, handleEdit, openCreateDialog, openDeleteDialog, confirmDelete, handleSearch, closeDialogs
 └── AdminCategorias.tsx (UI)
 ├── Breadcrumb (Inicio / Dashboard / Gestionar Categorías)
-├── Header (título + badge + botón volver Dashboard + botón nueva categoría)
+├── Header (título + badge + volver Dashboard + nueva categoría)
 ├── Buscador (Input)
 ├── Grid de categorías (con Tooltips)
 ├── Skeleton de shadcn/ui
 ├── Estados de error y vacíos
 ├── Dialog (Crear/Editar categoría)
 └── AlertDialog (Eliminar categoría)
+text
 
-📁 Estructura actual de Admin Pedidos
+---
 
-AdminPedidos (Página)
-├── hooks/useAdminPedidos.ts (Lógica)
+## 📁 Admin Pedidos
+
+**Estructura actual:**
+
+Pedidos.tsx
+├── useAdminPedidos.ts (Lógica)
 │ ├── Estados: orders, loading, error, statusFilter, currentPage
-│ ├── Estados (Modales): statusDialogOpen, selectedOrder, newStatus
+│ ├── Modales: statusDialogOpen, selectedOrder, newStatus
 │ ├── Datos derivados: filteredOrders, paginatedOrders, totalPages
-│ ├── Funciones: loadOrders, handleFilterChange, handlePageChange, openStatusDialog, confirmStatusChange, closeDialogs
-│ └── Efectos: useEffect
-│
+│ └── Funciones: loadOrders, handleFilterChange, handlePageChange, openStatusDialog, confirmStatusChange, closeDialogs
 └── Pedidos.tsx (UI)
 ├── Breadcrumb (Inicio / Dashboard / Gestionar Pedidos)
-├── Header (título + badge + botón volver Dashboard)
+├── Header (título + badge + volver Dashboard)
 ├── Filtro por estado (Select)
 ├── Tabla de pedidos
 ├── Paginación (Anterior/Siguiente)
 ├── Skeleton de shadcn/ui
 ├── Estados de error y vacíos
 └── AlertDialog (Cambiar estado del pedido)
+text
 
-📁 Estructura actual de Crear Publicación
+---
 
-CrearPublicacion (Página)
-├── hooks/useCrearPublicacion.ts (Lógica)
-│ ├── Estados: loading, categories, loadingCategories, formData, errors, images
-│ ├── Funciones: handleChange, handleSelectChange, handleSubmit, handleImageUpload, removeImage, loadCategories
-│ └── Efectos: useEffect
-│
+## 📁 Crear Publicación
+
+**Estructura actual:**
+
+CrearPublicacion.tsx
+├── useCrearPublicacion.ts (Lógica)
+│ ├── Estados: loading, categories, loadingCategories
+│ └── Funciones: handleSubmit, loadCategories
 └── CrearPublicacion.tsx (UI)
 ├── Breadcrumb (Inicio / Dashboard / Gestionar Productos / Crear Nuevo Producto)
 ├── Header (título + badges)
-├── Formulario (Nombre, Descripción, SKU, Categoría, Etiquetas)
-├── Imagen del producto (Upload + lista de imágenes)
-├── Precio y Stock (Precio, Stock, Variantes)
-├── Opciones Avanzadas (Destacar, En oferta, Descuento)
+├── ProductForm (reutilizable) ✅
 ├── Skeleton de shadcn/ui
-├── Estados de error y validación
-└── Botones (Publicar, Cancelar)
+└── Estados de error y validación
+text
 
-📁 Estructura actual de Editar Publicación
+---
 
-EditarPublicacion (Página)
-├── hooks/useEditarPublicacion.ts (Lógica)
+## 📁 Editar Publicación
+
+**Estructura actual:**
+
+EditarPublicacion.tsx
+├── useEditarPublicacion.ts (Lógica)
 │ ├── Estados: product, loading, loadingCategories, submitting, error, categories
-│ ├── Funciones: loadProduct, loadCategories, handleSubmit
-│ └── Efectos: useEffect
-│
+│ └── Funciones: loadProduct, loadCategories, handleSubmit
 └── EditarPublicacion.tsx (UI)
 ├── Breadcrumb (Inicio / Dashboard / Gestionar Productos / Editar Producto)
 ├── Header (título + badges)
-├── ProductForm (reutilizable)
+├── ProductForm (reutilizable) ✅
 ├── Skeleton de shadcn/ui
 └── Estados de error
+text
 
-📁 Estructura actual de Admin Usuarios
+---
 
-AdminUsuarios (Página)
-├── hooks/useAdminUsuarios.ts (Lógica)
+## 📁 Admin Usuarios
+
+**Estructura actual:**
+
+Usuarios.tsx
+├── useAdminUsuarios.ts (Lógica)
 │ ├── Estados: users, loading, error, searchTerm, currentPage
-│ ├── Estados (Modales): roleDialogOpen, deleteDialogOpen, toggleDialogOpen, selectedUser, newRole
+│ ├── Modales: roleDialogOpen, deleteDialogOpen, toggleDialogOpen, selectedUser, newRole
 │ ├── Datos derivados: filteredUsers, paginatedUsers, totalPages, totalUsers, activeCount, inactiveCount, adminCount, clienteCount
-│ ├── Funciones: loadUsers, handleSearch, handlePageChange, openRoleDialog, openDeleteDialog, openToggleDialog, confirmRoleChange, confirmDelete, confirmToggle, closeDialogs
-│ └── Efectos: useEffect
-│
+│ └── Funciones: loadUsers, handleSearch, handlePageChange, openRoleDialog, openDeleteDialog, openToggleDialog, confirmRoleChange, confirmDelete, confirmToggle, closeDialogs
 └── Usuarios.tsx (UI)
 ├── Breadcrumb (Inicio / Dashboard / Gestionar Usuarios)
-├── Header (título + badges: total, activos, inactivos, admin, clientes + botón volver Dashboard)
+├── Header (título + badges: total, activos, inactivos, admin, clientes + volver Dashboard)
 ├── Buscador (Input)
 ├── Tabla de usuarios (con Tooltips)
 ├── Paginación (Anterior/Siguiente)
@@ -283,67 +316,69 @@ AdminUsuarios (Página)
 ├── AlertDialog (Cambiar rol)
 ├── AlertDialog (Eliminar usuario)
 └── AlertDialog (Activar/Desactivar usuario)
+text
 
-📁 Backend - Estructura y Mejoras
+---
+
+## 📁 Backend — Estructura y Mejoras
 
 backend/src/
 ├── config/
 │ └── database.ts ✅ Conexión a PostgreSQL
-│
 ├── controllers/
-│ ├── auth.controller.ts ✅ Autenticación (registro, login, recuperación)
+│ ├── auth.controller.ts ✅ Autenticación
 │ ├── product.controller.ts ✅ Productos
 │ ├── category.controller.ts ✅ Categorías
 │ ├── cart.controller.ts ✅ Carrito
 │ ├── order.controller.ts ✅ Pedidos
 │ ├── favorite.controller.ts ✅ Favoritos
 │ ├── admin.controller.ts ✅ Dashboard admin
-│ └── user.controller.ts ✅ Gestión de usuarios (NUEVO)
-│
+│ └── user.controller.ts ✅ Gestión de usuarios
 ├── routes/
-│ ├── auth.routes.ts ✅ Autenticación
-│ ├── product.routes.ts ✅ Productos
-│ ├── category.routes.ts ✅ Categorías
-│ ├── cart.routes.ts ✅ Carrito
-│ ├── order.routes.ts ✅ Pedidos
-│ ├── favorite.routes.ts ✅ Favoritos
-│ ├── admin.routes.ts ✅ Dashboard admin
-│ └── user.routes.ts ✅ Gestión de usuarios (NUEVO)
-│
+│ ├── auth.routes.ts ✅
+│ ├── product.routes.ts ✅
+│ ├── category.routes.ts ✅
+│ ├── cart.routes.ts ✅
+│ ├── order.routes.ts ✅
+│ ├── favorite.routes.ts ✅
+│ ├── admin.routes.ts ✅
+│ └── user.routes.ts ✅
 ├── models/
-│ ├── User.ts ✅ Usuarios
-│ ├── Product.ts ✅ Productos
-│ ├── Category.ts ✅ Categorías
-│ ├── Cart.ts ✅ Carrito
-│ ├── Order.ts ✅ Pedidos
-│ └── Favorite.ts ✅ Favoritos
-│
+│ ├── User.ts ✅
+│ ├── Product.ts ✅
+│ ├── Category.ts ✅
+│ ├── Cart.ts ✅
+│ ├── Order.ts ✅
+│ └── Favorite.ts ✅
 ├── middlewares/
-│ ├── auth.middleware.ts ✅ Autenticación y admin
-│ ├── rateLimit.middleware.ts ✅ Límite de peticiones
-│ └── sanitize.middleware.ts ✅ Sanitización
-│
+│ ├── auth.middleware.ts ✅
+│ ├── rateLimit.middleware.ts ✅
+│ └── sanitize.middleware.ts ✅
 ├── schemas/
-│ └── auth.schema.ts ✅ Validaciones
-│
+│ └── auth.schema.ts ✅
 ├── services/
-│ └── email.services.ts ✅ Resend (correos)
-│
-└── server.ts ✅ Punto de entrada (rutas actualizadas)
+│ └── email.services.ts ✅
+└── server.ts ✅ Punto de entrada
+text
 
-📋 Resumen de Estado
-Módulo Frontend (UI) Hook Backend (API) Estado
-Navbar ✅ ✅ useNavbar.ts - ✅
-Home ✅ ✅ useHome.ts - ✅
-Footer ✅ - - ✅
-Productos (Catálogo) ✅ ✅ useProductos.ts ✅ ✅
-Carrito ✅ ✅ useCarrito.ts ✅ ✅
-Favoritos ✅ ✅ useFavoritos.ts ✅ ✅
-Perfil ✅ ✅ usePerfil.ts ✅ ✅
-Dashboard Admin ✅ ✅ useAdminDashboard.ts ✅ ✅
-Admin Productos ✅ ✅ useAdminProductos.ts ✅ ✅
-Admin Categorías ✅ ✅ useAdminCategorias.ts ✅ ✅
-Admin Pedidos ✅ ✅ useAdminPedidos.ts ✅ ✅
-Crear Publicación ✅ ✅ useCrearPublicacion.ts ✅ ✅
-Editar Publicación ✅ ✅ useEditarPublicacion.ts ✅ ✅
-Admin Usuarios ✅ ✅ useAdminUsuarios.ts ✅ ✅
+---
+
+## 📊 Resumen de Estado (SoC)
+
+| Módulo             | UI  | Hook | Backend | Estado |
+| ------------------ | --- | ---- | ------- | ------ |
+| Navbar             | ✅  | ✅   | -       | ✅     |
+| Home               | ✅  | ✅   | -       | ✅     |
+| Footer             | ✅  | -    | -       | ✅     |
+| Productos (tienda) | ✅  | ✅   | ✅      | ✅     |
+| Carrito            | ✅  | ✅   | ✅      | ✅     |
+| Favoritos          | ✅  | ✅   | ✅      | ✅     |
+| Perfil             | ✅  | ✅   | ✅      | ✅     |
+| Dashboard Admin    | ✅  | ✅   | ✅      | ✅     |
+| Admin Productos    | ✅  | ✅   | ✅      | ✅     |
+| Admin Categorías   | ✅  | ✅   | ✅      | ✅     |
+| Admin Pedidos      | ✅  | ✅   | ✅      | ✅     |
+| Admin Usuarios     | ✅  | ✅   | ✅      | ✅     |
+| Crear Publicación  | ✅  | ✅   | ✅      | ✅     |
+| Editar Publicación | ✅  | ✅   | ✅      | ✅     |
+| Producto Detalle   | ✅  | ✅   | ✅      | ✅     |

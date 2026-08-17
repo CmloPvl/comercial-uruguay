@@ -1,36 +1,81 @@
+// 📁 frontend/src/components/admin/ProductTable.tsx
+
+/**
+ * 📌 COMPONENTE: ProductTable
+ * 
+ * Tabla reutilizable para mostrar productos en el panel de administración.
+ * 
+ * ✅ Buenas prácticas:
+ * - Componente presentacional (solo UI)
+ * - Estados de carga y vacío
+ * - Paleta de colores consistente
+ * - Acciones: Editar y Eliminar
+ * 
+ * 🎯 Propósito:
+ * - Mostrar lista de productos en AdminProductos
+ * - Permitir acciones rápidas (editar/eliminar)
+ * - Feedback visual con Badges de estado y stock
+ * 
+ * @param {Object} props
+ * @param {Product[]} props.products - Lista de productos a mostrar
+ * @param {Function} props.onDelete - Callback al eliminar un producto
+ * @param {boolean} props.loading - Estado de carga
+ */
+
 import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import type { Product } from "../../services/adminService";
 
+// =============================================
+// 📋 INTERFACE DE PROPS
+// =============================================
 interface ProductTableProps {
+  /** Lista de productos a mostrar */
   products: Product[];
+  /** Callback al eliminar un producto */
   onDelete: (id: string) => void;
+  /** Estado de carga */
   loading?: boolean;
 }
 
+// =============================================
+// 🧠 COMPONENTE PRINCIPAL
+// =============================================
 export default function ProductTable({ products, onDelete, loading = false }: ProductTableProps) {
+  // =============================================
+  // 🔄 ESTADO DE CARGA (Spinner)
+  // =============================================
   if (loading) {
     return (
       <div className="text-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7D5FFF] mx-auto"></div>
-        <p className="text-gray-500 mt-2">Cargando productos...</p>
+        <p className="text-[#6A757C] mt-2">Cargando productos...</p>
       </div>
     );
   }
 
+  // =============================================
+  // 📭 ESTADO VACÍO
+  // =============================================
   if (products.length === 0) {
     return (
       <div className="text-center py-12">
         <p className="text-4xl mb-3">📦</p>
-        <p className="text-gray-500 font-medium">No hay productos creados</p>
-        <Link to="/crear-publicacion" className="mt-4 inline-block text-[#7D5FFF] hover:underline">
+        <p className="text-[#6A757C] font-medium">No hay productos creados</p>
+        <Link 
+          to="/crear-publicacion" 
+          className="mt-4 inline-block text-[#7D5FFF] hover:underline transition-colors"
+        >
           Crear el primer producto →
         </Link>
       </div>
     );
   }
 
+  // =============================================
+  // 🖥️ RENDER PRINCIPAL
+  // =============================================
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
@@ -47,34 +92,69 @@ export default function ProductTable({ products, onDelete, loading = false }: Pr
         <tbody>
           {products.map((product) => (
             <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
+              {/* ====== Nombre del producto ====== */}
               <td className="py-3 px-4 font-medium text-[#303030]">{product.name}</td>
-              <td className="py-3 px-4 text-gray-500">{product.sku}</td>
+
+              {/* ====== SKU ====== */}
+              <td className="py-3 px-4 text-[#6A757C]">{product.sku}</td>
+
+              {/* ====== Precio (formateado en CLP) ====== */}
               <td className="py-3 px-4 font-bold text-[#603060]">
                 ${Number(product.price).toLocaleString('es-CL')}
               </td>
+
+              {/* ====== Stock (con colores según cantidad) ====== */}
               <td className="py-3 px-4">
-                <Badge className={product.stock > 10 ? 'bg-[#90C090] text-white' : product.stock > 0 ? 'bg-[#FFD93D] text-[#303030]' : 'bg-[#FF6B81] text-white'}>
+                <Badge 
+                  className={
+                    product.stock > 10 
+                      ? 'bg-[#90C090] text-white' 
+                      : product.stock > 0 
+                        ? 'bg-[#FFD93D] text-[#303030]' 
+                        : 'bg-[#FF6B81] text-white'
+                  }
+                >
                   {product.stock > 0 ? `${product.stock} unidades` : 'Sin stock'}
                 </Badge>
               </td>
+
+              {/* ====== Estado (Activo/Inactivo) ====== */}
               <td className="py-3 px-4">
-                <Badge className={product.isActive ? 'bg-[#00D2D3] text-white' : 'bg-gray-400 text-white'}>
-                  {product.isActive ? 'Activo' : 'Inactivo'}
+                <Badge 
+                  className={
+                    product.isActive 
+                      ? 'bg-[#00D2D3] text-white' 
+                      : 'bg-[#6A757C] text-white'
+                  }
+                >
+                  {product.isActive ? '✅ Activo' : '⏸️ Inactivo'}
                 </Badge>
               </td>
+
+              {/* ====== Acciones ====== */}
               <td className="py-3 px-4">
                 <div className="flex gap-2">
+                  {/* ✏️ Editar - Redirige a Editar Publicación */}
                   <Link to={`/admin/productos/${product.id}/editar`}>
-                    <Button variant="outline" size="sm" className="border-[#00D2D3] text-[#00D2D3] hover:bg-[#00D2D3]/10">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="border-[#00D2D3] text-[#00D2D3] hover:bg-[#00D2D3] hover:text-white transition"
+                      title="Editar producto"
+                    >
                       ✏️
                     </Button>
                   </Link>
+
+                  {/* 🗑️ Eliminar - Con confirmación */}
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="border-[#FF6B81] text-[#FF6B81] hover:bg-[#FF6B81]/10"
+                    className="border-[#FF6B81] text-[#FF6B81] hover:bg-[#FF6B81] hover:text-white transition"
+                    title="Eliminar producto"
                     onClick={() => {
-                      if (confirm('¿Eliminar este producto?')) {
+                      // ⚠️ Confirmación antes de eliminar
+                      if (window.confirm(`¿Estás seguro de eliminar "${product.name}"?`)) {
                         onDelete(product.id);
                       }
                     }}

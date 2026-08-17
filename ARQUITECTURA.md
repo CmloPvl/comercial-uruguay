@@ -1,153 +1,207 @@
-📁 ARQUITECTURA DEL PROYECTO — COMERCIAL URUGUAY
+📦 ARCHIVO: ARQUITECTURA.md
+markdown
 
-🏗️ Principio fundamental: Separación de Lógica y Diseño
+# 🏗️ Arquitectura del Proyecto — Comercial Uruguay
 
-Capa Responsabilidad Ejemplo
-components/ Diseño (UI) — Solo JSX, estilos, estructura visual Login.tsx
-hooks/ Lógica — Estados, API, validaciones, manejo de errores useLogin.ts
-pages/ Conexión — Une diseño + lógica LoginPage.tsx
-context/ Estado Global — Datos compartidos AuthContext.tsx
-services/ API — Comunicación con el backend auth.service.ts
+---
 
-📂 Frontend — Estructura completa
+## 🧠 Principio fundamental: Separación de Lógica y Diseño (SoC)
+
+| Capa          | Responsabilidad                                        | Ejemplo           |
+| ------------- | ------------------------------------------------------ | ----------------- |
+| `components/` | Diseño (UI) — Solo JSX, estilos, estructura visual     | `Login.tsx`       |
+| `hooks/`      | Lógica — Estados, API, validaciones, manejo de errores | `useLogin.ts`     |
+| `pages/`      | Conexión — Une diseño + lógica                         | `LoginPage.tsx`   |
+| `context/`    | Estado Global — Datos compartidos                      | `AuthContext.tsx` |
+| `services/`   | API — Comunicación con el backend                      | `auth.service.ts` |
+
+---
+
+## 📂 Frontend — Estructura completa
 
 frontend/src/
 ├── components/ # 🎨 Diseño (UI)
-│ ├── layout/ # Navbar, Footer, Layout
-│ │ ├── Navbar.tsx ✅ Diseño (UI)
-│ │ ├── NavbarAdminMenu.tsx ✅ Diseño (UI)
-│ │ ├── NavbarUserMenu.tsx ✅ Diseño (UI)
-│ │ ├── NavbarGuestMenu.tsx ✅ Diseño (UI)
-│ │ ├── NavbarMobile.tsx ✅ Diseño (UI)
-│ │ ├── Footer.tsx ✅ Diseño (UI)
-│ │ ├── FooterColumn.tsx ✅ Diseño (UI)
-│ │ ├── FooterSocial.tsx ✅ Diseño (UI)
-│ │ ├── FooterServices.tsx ✅ Diseño (UI)
-│ │ └── Layout.tsx ✅ Diseño (UI)
-│ │
+│ ├── admin/ # Panel administración
+│ │ ├── products/ # Componentes de productos
+│ │ │ ├── ProductForm.tsx
+│ │ │ ├── ProductFormHeader.tsx
+│ │ │ ├── ProductFormActions.tsx
+│ │ │ ├── ProductFormLeftColumn.tsx
+│ │ │ ├── ProductFormRightColumn.tsx
+│ │ │ ├── ProductFormAdvancedOptions.tsx
+│ │ │ ├── ProductFormSkeleton.tsx
+│ │ │ └── ProductTable.tsx
+│ │ ├── DashboardStats.tsx
+│ │ └── ImageUploader.tsx # Subida a Supabase
+│ ├── common/
+│ │ └── AppBreadcrumb.tsx # Breadcrumb universal
 │ ├── home/ # Secciones del Home
-│ │ ├── Hero.tsx ✅ Diseño (UI)
-│ │ ├── CategoriesSection.tsx ✅ Diseño (UI)
-│ │ ├── FeaturedProductsSection.tsx ✅ Diseño (UI)
-│ │ ├── BenefitsSection.tsx ✅ Diseño (UI)
-│ │ └── LocationSection.tsx ✅ Diseño (UI)
-│ │
+│ │ ├── Hero.tsx
+│ │ ├── CategoriesSection.tsx
+│ │ ├── FeaturedProductsSection.tsx
+│ │ ├── BenefitsSection.tsx
+│ │ └── LocationSection.tsx
+│ ├── layout/ # Layout principal
+│ │ ├── Layout.tsx
+│ │ ├── Navbar.tsx
+│ │ └── Footer.tsx
 │ ├── auth/ # Componentes de autenticación
-│ │ ├── Login.tsx ✅ Diseño (UI)
-│ │ ├── Registro.tsx ✅ Diseño (UI)
-│ │ └── RecuperarContrasena.tsx ✅ Diseño (UI)
-│ │
-│ ├── products/ # Componentes de productos
-│ │ ├── ProductList.tsx ✅ Diseño (UI)
-│ │ ├── ProductCard.tsx ✅ Diseño (UI)
-│ │ └── ProductFilters.tsx ✅ Diseño (UI)
-│ │
-│ ├── common/ # Componentes reutilizables
-│ │ ├── Logo.tsx ✅ Diseño (UI)
-│ │ ├── LoadingSpinner.tsx ✅ Diseño (UI)
-│ │ └── ProtectedRoute.tsx ✅ Diseño (UI)
-│ │
-│ └── ui/ # shadcn/ui (Button, Card, Input...)
-│ ├── button.tsx ✅ Diseño (UI)
-│ ├── card.tsx ✅ Diseño (UI)
-│ ├── input.tsx ✅ Diseño (UI)
-│ └── ... (otros componentes)
+│ │ ├── Login.tsx
+│ │ ├── Registro.tsx
+│ │ └── RecuperarContrasena.tsx
+│ ├── products/ # Componentes de tienda
+│ │ ├── ProductList.tsx
+│ │ ├── ProductCard.tsx
+│ │ └── ProductFilters.tsx
+│ └── ui/ # shadcn/ui + custom
+│ ├── form-field.tsx # Campo reutilizable
+│ ├── button.tsx
+│ ├── card.tsx
+│ └── ...
 │
 ├── hooks/ # 🧠 Lógica reutilizable
-│ ├── useAuth.ts ✅ Lógica (autenticación)
-│ ├── useCart.ts ✅ Lógica (carrito)
-│ ├── useLogin.ts ✅ Lógica (login)
-│ ├── useRegister.ts ✅ Lógica (registro)
-│ ├── useRecoverPassword.ts ✅ Lógica (recuperación)
-│ ├── useNavbar.ts ✅ Lógica (navbar)
-│ └── useHome.ts ✅ Lógica (home)
+│ ├── useAdminDashboard.ts
+│ ├── useAdminProductos.ts
+│ ├── useAdminCategorias.ts
+│ ├── useAdminPedidos.ts
+│ ├── useAdminUsuarios.ts
+│ ├── useCrearPublicacion.ts
+│ ├── useEditarPublicacion.ts
+│ ├── useProductoDetalle.ts
+│ ├── useAuth.ts
+│ ├── useCart.ts
+│ ├── useLogin.ts
+│ ├── useRegister.ts
+│ ├── useNavbar.ts
+│ └── useHome.ts
 │
 ├── context/ # 🌐 Estado global
-│ ├── AuthContext.tsx ✅ Lógica (usuario)
-│ └── CartContext.tsx ✅ Lógica (carrito)
+│ ├── AuthContext.tsx
+│ └── CartContext.tsx
 │
 ├── services/ # 📡 API
-│ ├── api.ts ✅ Lógica (configuración Axios)
-│ ├── auth.service.ts ✅ Lógica (autenticación)
-│ ├── product.service.ts ✅ Lógica (productos)
-│ ├── cart.service.ts ✅ Lógica (carrito)
-│ ├── category.service.ts ✅ Lógica (categorías)
-│ └── favorite.service.ts ✅ Lógica (favoritos)
+│ ├── api.ts
+│ ├── auth.service.ts
+│ ├── product.service.ts
+│ ├── cart.service.ts
+│ ├── category.service.ts
+│ ├── favorite.service.ts
+│ └── adminService.ts
 │
-├── pages/ # 📄 Páginas (conectan lógica + diseño)
-│ ├── Home.tsx ✅ Conexión (lógica + UI)
-│ ├── Productos.tsx 🔄 Pendiente de separar
-│ ├── Carrito.tsx 🔄 Pendiente de separar
-│ ├── Perfil.tsx 🔄 Pendiente de separar
-│ ├── Favoritos.tsx 🔄 Pendiente de separar
-│ ├── MisPedidos.tsx 🔄 Pendiente de separar
-│ ├── EnviosYRetiros.tsx ✅ Diseño (UI)
-│ ├── auth/ # Páginas de autenticación
-│ │ ├── Login.tsx ✅ Conexión (lógica + UI)
-│ │ ├── Registro.tsx ✅ Conexión (lógica + UI)
-│ │ ├── RecuperarContrasena.tsx ✅ Conexión (lógica + UI)
-│ │ └── ResetPassword.tsx 🔄 Pendiente de separar
-│ └── admin/ # Páginas de administración
-│ ├── Dashboard.tsx 🔄 Pendiente de separar
-│ ├── Productos.tsx 🔄 Pendiente de separar
-│ ├── Pedidos.tsx 🔄 Pendiente de separar
-│ ├── Categorias.tsx 🔄 Pendiente de separar
-│ ├── CrearPublicacion.tsx 🔄 Pendiente de separar
-│ └── EditarPublicacion.tsx 🔄 Pendiente de separar
+├── pages/ # 📄 Páginas
+│ ├── admin/
+│ │ ├── Dashboard.tsx
+│ │ ├── AdminProductos.tsx
+│ │ ├── AdminCategorias.tsx
+│ │ ├── Pedidos.tsx
+│ │ ├── Usuarios.tsx
+│ │ ├── CrearPublicacion.tsx
+│ │ └── EditarPublicacion.tsx
+│ ├── auth/
+│ │ ├── Login.tsx
+│ │ ├── Registro.tsx
+│ │ ├── RecuperarContrasena.tsx
+│ │ └── ResetPassword.tsx
+│ ├── Home.tsx
+│ ├── Productos.tsx
+│ ├── ProductoDetalle.tsx
+│ ├── Carrito.tsx
+│ ├── Perfil.tsx
+│ ├── Favoritos.tsx
+│ ├── MisPedidos.tsx
+│ └── EnviosYRetiros.tsx
 │
 ├── schemas/ # 📌 Validaciones (Zod)
-│ └── auth.schema.ts ✅ Lógica (validaciones)
+│ └── auth.schema.ts
 │
 ├── types/ # 📌 Tipos TypeScript
-│ ├── product.types.ts ✅ Lógica (tipos)
-│ └── auth.types.ts ✅ Lógica (tipos)
+│ ├── product.types.ts
+│ └── auth.types.ts
 │
-└── utils/ # 🛠️ Utilidades
-├── formatPrice.ts ✅ Utilidad
-└── validators.ts ✅ Utilidad
+├── utils/ # 🛠️ Utilidades
+│ ├── categoryUtils.ts
+│ ├── formatPrice.ts
+│ └── validators.ts
+│
+├── lib/ # 📦 Clientes externos
+│ └── supabase.ts
+│
+└── config/ # ⚙️ Configuraciones
+└── empresa.ts
+text
 
-    📂 Backend — Estructura completa
+---
 
-    backend/src/
+## 📂 Backend — Estructura completa
 
+backend/src/
 ├── config/ # ⚙️ Configuraciones
-│ └── database.ts ✅ Conexión a Supabase
+│ └── database.ts # Conexión a PostgreSQL
 │
 ├── controllers/ # 🧠 Lógica de negocio
-│ ├── auth.controller.ts ✅ Autenticación
-│ ├── product.controller.ts ✅ Productos
-│ ├── category.controller.ts ✅ Categorías
-│ ├── cart.controller.ts ✅ Carrito
-│ ├── order.controller.ts ✅ Pedidos
-│ ├── favorite.controller.ts ✅ Favoritos
-│ └── admin.controller.ts ✅ Administración
+│ ├── auth.controller.ts
+│ ├── product.controller.ts
+│ ├── category.controller.ts
+│ ├── cart.controller.ts
+│ ├── order.controller.ts
+│ ├── favorite.controller.ts
+│ ├── admin.controller.ts
+│ └── user.controller.ts
 │
 ├── routes/ # 🚪 Rutas de la API
-│ ├── auth.routes.ts ✅ Autenticación
-│ ├── product.routes.ts ✅ Productos
-│ ├── category.routes.ts ✅ Categorías
-│ ├── cart.routes.ts ✅ Carrito
-│ ├── order.routes.ts ✅ Pedidos
-│ ├── favorite.routes.ts ✅ Favoritos
-│ └── admin.routes.ts ✅ Administración
+│ ├── auth.routes.ts
+│ ├── product.routes.ts
+│ ├── category.routes.ts
+│ ├── cart.routes.ts
+│ ├── order.routes.ts
+│ ├── favorite.routes.ts
+│ ├── admin.routes.ts
+│ └── user.routes.ts
 │
-├── models/ # 🗄️ Acceso a la base de datos
-│ ├── User.ts ✅ Usuarios
-│ ├── Product.ts ✅ Productos
-│ ├── Category.ts ✅ Categorías
-│ ├── Cart.ts ✅ Carrito
-│ ├── Order.ts ✅ Pedidos
-│ └── Favorite.ts ✅ Favoritos
+├── models/ # 🗄️ Acceso a base de datos
+│ ├── User.ts
+│ ├── Product.ts
+│ ├── Category.ts
+│ ├── Cart.ts
+│ ├── Order.ts
+│ └── Favorite.ts
 │
 ├── middlewares/ # 🛡️ Middlewares
-│ ├── auth.middleware.ts ✅ Autenticación
-│ ├── rateLimit.middleware.ts ✅ Límite de peticiones
-│ └── sanitize.middleware.ts ✅ Sanitización
+│ ├── auth.middleware.ts
+│ ├── rateLimit.middleware.ts
+│ └── sanitize.middleware.ts
 │
 ├── schemas/ # 📌 Validaciones (Zod)
-│ └── auth.schema.ts ✅ Validaciones
+│ └── auth.schema.ts
 │
 ├── services/ # 📧 Servicios externos
-│ └── email.service.ts ✅ Resend (correos)
+│ └── email.services.ts
 │
 └── server.ts # 🚀 Punto de entrada
+text
+
+---
+
+## 📊 Resumen de Estado (SoC)
+
+| Módulo             | Frontend (UI) | Hook | Backend (API) | Estado |
+| ------------------ | ------------- | ---- | ------------- | ------ |
+| Navbar             | ✅            | ✅   | -             | ✅     |
+| Home               | ✅            | ✅   | -             | ✅     |
+| Footer             | ✅            | -    | -             | ✅     |
+| Login              | ✅            | ✅   | ✅            | ✅     |
+| Registro           | ✅            | ✅   | ✅            | ✅     |
+| Recuperar          | ✅            | ✅   | ✅            | ✅     |
+| ResetPassword      | ✅            | ✅   | ✅            | ✅     |
+| Productos (tienda) | ✅            | ✅   | ✅            | ✅     |
+| Carrito            | ✅            | ✅   | ✅            | ✅     |
+| Favoritos          | ✅            | ✅   | ✅            | ✅     |
+| Perfil             | ✅            | ✅   | ✅            | ✅     |
+| Producto Detalle   | ✅            | ✅   | ✅            | ✅     |
+| Dashboard Admin    | ✅            | ✅   | ✅            | ✅     |
+| Admin Productos    | ✅            | ✅   | ✅            | ✅     |
+| Admin Categorías   | ✅            | ✅   | ✅            | ✅     |
+| Admin Pedidos      | ✅            | ✅   | ✅            | ✅     |
+| Admin Usuarios     | ✅            | ✅   | ✅            | ✅     |
+| Crear Publicación  | ✅            | ✅   | ✅            | ✅     |
+| Editar Publicación | ✅            | ✅   | ✅            | ✅     |
