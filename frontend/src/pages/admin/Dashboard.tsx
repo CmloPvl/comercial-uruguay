@@ -18,7 +18,6 @@
  */
 
 import { Link } from "react-router-dom";
-import Layout from "../../components/layout/Layout";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -103,28 +102,26 @@ export default function AdminDashboard() {
   // =============================================
   if (user?.role !== "ADMIN") {
     return (
-      <Layout title="Acceso Denegado">
-        <div className="min-h-[70vh] flex items-center justify-center py-12 px-4">
-          <Card className="max-w-md w-full border-2 border-[#FF6B81] shadow-2xl">
-            <CardContent className="p-8 text-center">
-              <div className="text-6xl mb-4">🚫</div>
-              <h2 className="text-2xl font-bold text-[#603060] mb-2">
-                Acceso Denegado
-              </h2>
-              <p className="text-[#6A757C] mb-6">
-                No tienes permisos para acceder al panel de administración.
-                <br />
-                Esta sección es solo para administradores.
-              </p>
-              <Link to="/">
-                <Button className="w-full bg-gradient-to-r from-[#7D5FFF] to-[#603060] hover:from-[#603060] hover:to-[#7D5FFF] text-white font-bold py-3 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]">
-                  🏠 Volver al Inicio
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-      </Layout>
+      <div className="min-h-[70vh] flex items-center justify-center py-12 px-4">
+        <Card className="max-w-md w-full border-2 border-[#FF6B81] shadow-2xl">
+          <CardContent className="p-8 text-center">
+            <div className="text-6xl mb-4">🚫</div>
+            <h2 className="text-2xl font-bold text-[#603060] mb-2">
+              Acceso Denegado
+            </h2>
+            <p className="text-[#6A757C] mb-6">
+              No tienes permisos para acceder al panel de administración.
+              <br />
+              Esta sección es solo para administradores.
+            </p>
+            <Link to="/">
+              <Button className="w-full bg-gradient-to-r from-[#7D5FFF] to-[#603060] hover:from-[#603060] hover:to-[#7D5FFF] text-white font-bold py-3 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]">
+                🏠 Volver al Inicio
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -132,18 +129,14 @@ export default function AdminDashboard() {
   // 🔄 ESTADO DE CARGA (con Skeleton shadcn)
   // =============================================
   if (loading) {
-    return (
-      <Layout title="Panel Administrador">
-        <DashboardSkeleton />
-      </Layout>
-    );
+    return <DashboardSkeleton />;
   }
 
   // =============================================
   // 🖥️ RENDER PRINCIPAL
   // =============================================
   return (
-    <Layout title="Panel Administrador">
+    <>
       {/* =============================================
       📍 BREADCRUMB
       ============================================= */}
@@ -410,6 +403,6 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    </>
   );
 }

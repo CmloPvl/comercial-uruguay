@@ -10,11 +10,17 @@
  * - Manejo de estado (email, loading, success, error)
  * - Llamada a la API
  * - Validación básica
- * - Toasts integrados
+ * - Toasts centralizados con el helper errorMessages
+ * - Mensajes consistentes y controlados
  */
 
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { 
+  showErrorToastWithFallback, 
+  showSuccessToast, 
+  successMessages,
+  authErrors,
+} from "../utils/errorMessages";
 import { authService } from "../services/api";
 
 export function useRecoverPassword() {
@@ -26,16 +32,11 @@ export function useRecoverPassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email) {
-      setError("Por favor, ingresa tu correo electrónico");
-      toast.error("❌ Correo electrónico requerido", {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+    // Validación: email requerido
+    if (!email || !email.trim()) {
+      const msg = "Por favor, ingresa tu correo electrónico";
+      setError(msg);
+      showErrorToastWithFallback(new Error(msg), authErrors.emailNotVerified);
       return;
     }
 
@@ -43,29 +44,17 @@ export function useRecoverPassword() {
       setLoading(true);
       setError(null);
 
-      // ✅ Usar la ruta correcta: forgot-password
+      // ✅ Llamar a la API
       await authService.forgotPassword(email);
 
       setSuccess(true);
-      toast.success("✅ Revisa tu correo para restablecer tu contraseña", {
-        style: {
-          border: "2px solid #00D2D3",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      showSuccessToast(successMessages.passwordRecoverySent);
+
     } catch (err: any) {
-      const errorMessage = err.message || "Error al enviar el correo de recuperación";
-      setError(errorMessage);
-      toast.error(`❌ ${errorMessage}`, {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      // ✅ Mostrar error con fallback del helper
+      const errorMsg = err.message || "Error al enviar el correo de recuperación";
+      setError(errorMsg);
+      showErrorToastWithFallback(err, "Error al enviar el correo de recuperación");
     } finally {
       setLoading(false);
     }

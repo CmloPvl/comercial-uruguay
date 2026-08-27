@@ -27,14 +27,12 @@ import { Checkbox } from "../../components/ui/checkbox";
 import { Separator } from "../../components/ui/separator";
 import { useLogin } from "../../hooks/useLogin";
 import { Eye, EyeOff, Sparkles, LogIn, ArrowLeft, ShieldCheck } from "lucide-react";
-import toast from "react-hot-toast";
 
 export default function Login() {
   const { 
     register, 
     handleSubmit, 
     errors, 
-    error, 
     isSubmitting, 
     remember, 
     setRemember,
@@ -49,27 +47,11 @@ export default function Login() {
       const email = getValues("email");
       if (email) {
         localStorage.setItem("rememberedEmail", email);
-        toast.success("📧 Email guardado", {
-          icon: "🔖",
-          style: {
-            border: "2px solid #7D5FFF",
-            padding: "16px",
-            backgroundColor: "#FAF9E2",
-            color: "#303030",
-          },
-        });
+        // ✅ El toast se muestra desde el hook (onSubmit)
       }
     } else {
       localStorage.removeItem("rememberedEmail");
-      toast("🗑️ Email olvidado", {
-        icon: "👋",
-        style: {
-          border: "2px solid #FF9F43",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      // ✅ El toast se muestra desde el hook (onSubmit)
     }
   };
 
@@ -103,7 +85,7 @@ export default function Login() {
       ============================================= */}
       <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 relative overflow-hidden bg-gradient-to-br from-[#FFD93D]/15 via-[#F0C0F0]/20 to-[#00D2D3]/10">
         
-        {/* 🎨 Formas decorativas flotantes (más colores) */}
+        {/* 🎨 Formas decorativas flotantes */}
         <div className="absolute top-20 left-10 w-64 h-64 bg-[#FF6B81]/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-80 h-80 bg-[#7D5FFF]/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#00D2D3]/10 rounded-full blur-2xl"></div>
@@ -111,12 +93,11 @@ export default function Login() {
         <div className="absolute bottom-40 left-20 w-48 h-48 bg-[#90C090]/20 rounded-full blur-3xl animate-pulse delay-2000"></div>
         <div className="absolute top-10 right-10 w-32 h-32 bg-[#603060]/15 rounded-full blur-3xl"></div>
 
-        {/* 🃏 TARJETA DE LOGIN con efecto glass */}
+        {/* 🃏 TARJETA DE LOGIN */}
         <Card className="max-w-md w-full border-2 border-[#7D5FFF]/40 shadow-2xl hover:shadow-[#7D5FFF]/30 transition-all duration-500 backdrop-blur-sm bg-white/90 relative overflow-hidden">
           
-          {/* 🎨 Borde decorativo superior con gradiente de 5 colores */}
-          {/* 🎨 Borde decorativo superior - Gradiente de 3 colores contrastantes */}
-<div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#FFD93D] via-[#7D5FFF] to-[#FF6B81]"></div>
+          {/* 🎨 Borde decorativo superior */}
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#FFD93D] via-[#7D5FFF] to-[#FF6B81]"></div>
           
           <CardContent className="p-8 relative z-10">
             
@@ -138,16 +119,6 @@ export default function Login() {
                 <Sparkles className="w-4 h-4 text-[#00D2D3]" />
               </p>
             </div>
-
-            {/* =============================================
-            ❌ ERROR GENERAL
-            ============================================= */}
-            {error && (
-              <div className="bg-[#FF6B81]/10 border-2 border-[#FF6B81] text-[#FF6B81] px-4 py-3 rounded-xl mb-6 flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
-                <span className="text-xl">⚠️</span>
-                <span className="font-medium">{error}</span>
-              </div>
-            )}
 
             {/* =============================================
             📝 FORMULARIO

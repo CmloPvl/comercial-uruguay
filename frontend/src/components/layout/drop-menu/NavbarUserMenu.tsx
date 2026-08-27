@@ -6,11 +6,13 @@
  * COMPONENTE DE DISEÑO
  * 
  * Muestra el menú desplegable del usuario autenticado.
- * Incluye: perfil, pedidos, favoritos y cerrar sesión.
+ * Incluye: perfil, pedidos, favoritos, panel admin (si es admin) y cerrar sesión.
  * 
  * ✅ Buenas prácticas:
  * - Componente aislado y reutilizable
- * - Recibe todas las props necesarias (no usa contextos directamente)
+ * - Atributos ARIA para accesibilidad
+ * - Redirección a página anterior después de acciones
+ * - Cierre automático del menú al hacer clic
  * - Fácil de testear
  * 
  * @param {Object} props
@@ -21,7 +23,7 @@
  * @param {Function} props.onClose - Función para cerrar el menú (mobile)
  */
 
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,9 +31,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../../components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "../../components/ui/avatar";
-import { User, Package, Heart, LogOut } from "lucide-react";
+} from "../../ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "../../ui/avatar";
+import { User, Package, Heart, LogOut, LayoutDashboard } from "lucide-react";
 
 interface NavbarUserMenuProps {
   user: {
@@ -42,7 +44,7 @@ interface NavbarUserMenuProps {
   logout: () => void;
   randomColor: string;
   getInitials: (name: string) => string;
-  onClose?: () => void; // Para cerrar el menú en mobile
+  onClose?: () => void;
 }
 
 export function NavbarUserMenu({ 
@@ -52,11 +54,19 @@ export function NavbarUserMenu({
   getInitials, 
   onClose 
 }: NavbarUserMenuProps) {
+  const location = useLocation();
+  const isAdmin = user.role === "ADMIN";
+
   return (
     <DropdownMenu>
       {/* 🔹 Botón que abre el menú (Avatar + nombre) */}
       <DropdownMenuTrigger asChild>
-        <div className="flex items-center gap-1 sm:gap-2 cursor-pointer hover:opacity-80 transition hover:scale-105">
+        <div 
+          className="flex items-center gap-1 sm:gap-2 cursor-pointer hover:opacity-80 transition hover:scale-105"
+          aria-label="Abrir menú de usuario"
+          role="button"
+          tabIndex={0}
+        >
           <Avatar className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 ring-2 ring-white/50 hover:ring-[#FFD93D] transition-all">
             <AvatarFallback className={`${randomColor} text-white font-bold text-xs sm:text-sm`}>
               {getInitials(user.fullName)}
@@ -69,16 +79,29 @@ export function NavbarUserMenu({
       </DropdownMenuTrigger>
 
       {/* 🔹 Contenido del menú desplegable */}
-      <DropdownMenuContent align="end" className="w-52 sm:w-56 border-2 border-[#7D5FFF] shadow-xl rounded-xl bg-white p-1">
+      <DropdownMenuContent 
+        align="end" 
+        className="w-52 sm:w-56 border-2 border-[#7D5FFF] shadow-xl rounded-xl bg-white p-1"
+        onSelect={() => onClose?.()}
+      >
         
         {/* 📌 Header: Datos del usuario */}
         <DropdownMenuLabel className="font-normal bg-gradient-to-r from-[#F0F0C0] to-[#F0C0F0] rounded-lg p-3">
           <div className="flex flex-col space-y-0.5">
             <p className="text-sm font-bold text-[#603060]">{user.fullName}</p>
             <p className="text-xs text-[#6A757C] truncate">{user.email}</p>
-            <p className="text-xs text-[#7D5FFF] font-medium">
-              {user.role === "ADMIN" ? "👑 Administrador" : "🛒 Cliente"}
-            </p>
+            {isAdmin ? (
+              <Link 
+                to="/admin" 
+                state={{ from: location.pathname }}
+                className="text-xs text-[#7D5FFF] font-medium hover:underline flex items-center gap-1"
+                onClick={onClose}
+              >
+                <LayoutDashboard className="w-3 h-3" /> 👑 Administrador → Ir al panel
+              </Link>
+            ) : (
+              <p className="text-xs text-[#7D5FFF] font-medium">🛒 Cliente</p>
+            )}
           </div>
         </DropdownMenuLabel>
 
@@ -86,21 +109,36 @@ export function NavbarUserMenu({
 
         {/* 👤 Mi Perfil */}
         <DropdownMenuItem asChild className="hover:bg-[#7D5FFF]/10 cursor-pointer rounded-lg text-sm">
-          <Link to="/perfil" className="text-[#303030] hover:text-[#7D5FFF]" onClick={onClose}>
+          <Link 
+            to="/perfil" 
+            state={{ from: location.pathname }}
+            className="text-[#303030] hover:text-[#7D5FFF]"
+            onClick={onClose}
+          >
             <User className="w-4 h-4 mr-2" /> Mi Perfil
           </Link>
         </DropdownMenuItem>
 
         {/* 📦 Mis Pedidos */}
         <DropdownMenuItem asChild className="hover:bg-[#00D2D3]/10 cursor-pointer rounded-lg text-sm">
-          <Link to="/mis-pedidos" className="text-[#303030] hover:text-[#00D2D3]" onClick={onClose}>
+          <Link 
+            to="/mis-pedidos" 
+            state={{ from: location.pathname }}
+            className="text-[#303030] hover:text-[#00D2D3]"
+            onClick={onClose}
+          >
             <Package className="w-4 h-4 mr-2" /> Mis Pedidos
           </Link>
         </DropdownMenuItem>
 
         {/* ❤️ Favoritos */}
         <DropdownMenuItem asChild className="hover:bg-[#FF6B81]/10 cursor-pointer rounded-lg text-sm">
-          <Link to="/favoritos" className="text-[#303030] hover:text-[#FF6B81]" onClick={onClose}>
+          <Link 
+            to="/favoritos" 
+            state={{ from: location.pathname }}
+            className="text-[#303030] hover:text-[#FF6B81]"
+            onClick={onClose}
+          >
             <Heart className="w-4 h-4 mr-2" /> Favoritos
           </Link>
         </DropdownMenuItem>

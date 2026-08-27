@@ -1,9 +1,7 @@
-// 📁 frontend/src/components/layout/NavbarMobile.tsx
+// 📁 frontend/src/components/layout/NavbarMenu.tsx
 
 /**
- * 📌 NAVBAR MOBILE
- * 
- * COMPONENTE DE DISEÑO
+ * 📌 NAVBAR MENU (antes NavbarMobile)
  * 
  * Menú lateral (Sheet) para dispositivos móviles.
  * Contiene: logo, buscador, navegación principal, usuario y admin.
@@ -12,6 +10,8 @@
  * - Componente aislado y reutilizable
  * - Recibe todas las props necesarias
  * - Fácil de mantener
+ * - Buscador reutilizable (SearchBar)
+ * - Accesible con aria-label
  * 
  * @param {Object} props
  * @param {boolean} props.isOpen - Estado del menú
@@ -28,12 +28,12 @@
  */
 
 import { Link } from "react-router-dom";
-import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/sheet";
-import { Button } from "../../components/ui/button";
-import { Avatar, AvatarFallback } from "../../components/ui/avatar";
+import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
+import { Button } from "../ui/button";
+import { Avatar, AvatarFallback } from "../ui/avatar";
 import Logo from "../common/Logo";
+import { SearchBar } from "../common/SearchBar";
 import {
-  Search,
   Heart,
   ShoppingCart,
   User,
@@ -47,7 +47,7 @@ import {
   Menu,
 } from "lucide-react";
 
-interface NavbarMobileProps {
+interface NavbarMenuProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   searchQuery: string;
@@ -65,7 +65,7 @@ interface NavbarMobileProps {
   onClose: () => void;
 }
 
-export function NavbarMobile({
+export function NavbarMenu({
   isOpen,
   onOpenChange,
   searchQuery,
@@ -77,7 +77,7 @@ export function NavbarMobile({
   randomColor,
   getInitials,
   onClose,
-}: NavbarMobileProps) {
+}: NavbarMenuProps) {
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
@@ -85,6 +85,7 @@ export function NavbarMobile({
           variant="ghost"
           size="icon"
           className="text-white hover:bg-white/10 hover:text-[#FFD93D] transition hover:scale-105 h-9 w-9 sm:h-10 sm:w-10"
+          aria-label="Abrir menú de navegación"
         >
           <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
         </Button>
@@ -97,7 +98,6 @@ export function NavbarMobile({
             <div className="flex items-center gap-3">
               <Logo className="h-10 w-auto" />
               <span className="text-lg font-bold bg-gradient-to-r from-[#603060] to-[#7D5FFF] bg-clip-text text-transparent">
-                
               </span>
             </div>
             <Button
@@ -105,23 +105,20 @@ export function NavbarMobile({
               size="icon"
               onClick={onClose}
               className="text-[#603060] hover:bg-[#603060]/10 hover:scale-105 h-8 w-8"
+              aria-label="Cerrar menú"
             >
-              
             </Button>
           </div>
 
           {/* 🔹 Buscador */}
           <div className="p-4 border-b border-gray-100">
-            <form onSubmit={handleSearch} className="relative">
-              <input
-                type="text"
-                placeholder="Buscar productos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-full bg-[#F0F0C0] text-[#303030] placeholder-[#6A757C] border-2 border-[#7D5FFF] focus:outline-none focus:ring-2 focus:ring-[#FFD93D] focus:border-[#FFD93D] transition text-sm"
-              />
-              <Search className="absolute right-3 top-2.5 text-[#6A757C] w-4 h-4" />
-            </form>
+            <SearchBar
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSubmit={handleSearch}
+              variant="menu"
+              placeholder="Buscar productos..."
+            />
           </div>
 
           {/* 🔹 Navegación */}
@@ -165,6 +162,7 @@ export function NavbarMobile({
                       onClose();
                     }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#FF6B81] hover:bg-[#FF6B81]/10 transition font-semibold text-sm"
+                    aria-label="Cerrar sesión"
                   >
                     <LogOut className="w-5 h-5" /> Cerrar Sesión
                   </button>

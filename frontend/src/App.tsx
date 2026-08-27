@@ -8,12 +8,13 @@
  * ✅ Estructura:
  * - Rutas públicas (acceso sin autenticación)
  * - Rutas protegidas (requieren inicio de sesión)
- * - Rutas de administración (requieren rol ADMIN)
+ * - Rutas de administración (requieren rol ADMIN) con AdminLayout
  * - Ruta 404 (NotFound)
  * 
  * ✅ Buenas prácticas:
  * - Separación clara de rutas por tipo
  * - Protección de rutas con ProtectedRoute
+ * - AdminLayout para todas las páginas admin
  * - Toaster global para notificaciones
  * - Comentarios explicativos por sección
  */
@@ -59,14 +60,15 @@ import AdminDashboard from './pages/admin/Dashboard';
 import AdminProductos from './pages/admin/AdminProductos';
 import AdminCategorias from './pages/admin/AdminCategorias';
 import AdminPedidos from './pages/admin/Pedidos';
-import AdminUsuarios from './pages/admin/Usuarios'; // ✅ NUEVA RUTA
+import AdminUsuarios from './pages/admin/Usuarios';
 import CrearPublicacion from "./pages/admin/CrearPublicacion";
 import EditarPublicacion from "./pages/admin/EditarPublicacion";
 
 // =============================================
-// 🛡️ COMPONENTES DE PROTECCIÓN
+// 🛡️ COMPONENTES DE PROTECCIÓN Y LAYOUT
 // =============================================
 import ProtectedRoute from './components/common/ProtectedRoute';
+import AdminLayout from './components/layout/AdminLayout';
 
 // =============================================
 // 🚀 APP
@@ -170,49 +172,63 @@ function App() {
         {/* 📊 Dashboard - Panel principal del administrador */}
         <Route path="/admin" element={
           <ProtectedRoute requireAdmin>
-            <AdminDashboard />
+            <AdminLayout title="Dashboard">
+              <AdminDashboard />
+            </AdminLayout>
           </ProtectedRoute>
         } />
         
         {/* 📦 Productos - Gestión de productos */}
         <Route path="/admin/productos" element={
           <ProtectedRoute requireAdmin>
-            <AdminProductos />
+            <AdminLayout title="Productos">
+              <AdminProductos />
+            </AdminLayout>
           </ProtectedRoute>
         } />
         
         {/* ✏️ Editar Producto - Formulario de edición */}
         <Route path="/admin/productos/:id/editar" element={
           <ProtectedRoute requireAdmin>
-            <EditarPublicacion />
+            <AdminLayout title="Editar Producto">
+              <EditarPublicacion />
+            </AdminLayout>
           </ProtectedRoute>
         } />
         
         {/* 📂 Categorías - Gestión de categorías */}
         <Route path="/admin/categorias" element={
           <ProtectedRoute requireAdmin>
-            <AdminCategorias />
+            <AdminLayout title="Categorías">
+              <AdminCategorias />
+            </AdminLayout>
           </ProtectedRoute>
         } />
         
         {/* 📦 Pedidos - Gestión de pedidos */}
         <Route path="/admin/pedidos" element={
           <ProtectedRoute requireAdmin>
-            <AdminPedidos />
+            <AdminLayout title="Pedidos">
+              <AdminPedidos />
+            </AdminLayout>
           </ProtectedRoute>
         } />
         
-        {/* 👥 Usuarios - Gestión de usuarios ✅ NUEVA RUTA */}
+        {/* 👥 Usuarios - Gestión de usuarios */}
         <Route path="/admin/usuarios" element={
           <ProtectedRoute requireAdmin>
-            <AdminUsuarios />
+            <AdminLayout title="Usuarios">
+              <AdminUsuarios />
+            </AdminLayout>
           </ProtectedRoute>
         } />
         
         {/* ✨ Crear Publicación - Crear nuevo producto */}
         <Route path="/crear-publicacion" element={
           <ProtectedRoute requireAdmin>
-            <CrearPublicacion />
+            <AdminLayout title="Crear Producto">
+              <CrearPublicacion />
+            </AdminLayout>
           </ProtectedRoute>
         } />
 

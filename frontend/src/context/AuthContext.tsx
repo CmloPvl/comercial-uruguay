@@ -11,6 +11,7 @@
  * - Persistencia de sesión con localStorage
  * - Manejo de errores consistente
  * - Separación de responsabilidades
+ * - login() devuelve el usuario para redirección inmediata
  */
 
 import { createContext, useContext, useState, type ReactNode, useEffect } from "react";
@@ -28,7 +29,7 @@ interface User {
   phone?: string;
   address?: string;
   role: "CLIENTE" | "ADMIN";
-  createdAt?: string; // ✅ Fecha de creación del usuario
+  createdAt?: string;
 }
 
 // =============================================
@@ -37,7 +38,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>; // ✅ Ahora devuelve User
   register: (userData: {
     fullName: string;
     email: string;
@@ -87,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // =============================================
   // 🔐 LOGIN
   // =============================================
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<User> => {
     try {
       const response = await api.post("/auth/login", { email, password });
       const { token, user } = response.data.data;
@@ -95,6 +96,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
       setUser(user);
+      
+      return user; // ✅ Devuelve el usuario para redirección inmediata
     } catch (error: any) {
       throw new Error(error.response?.data?.message || "Error al iniciar sesión");
     }

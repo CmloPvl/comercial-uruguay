@@ -1,27 +1,37 @@
 /**
  * 📌 HOOK PERSONALIZADO: useLogin
  * 
- * Este hook encapsula toda la lógica de autenticación para la página de login.
- * Sigue el principio de "Separación de Responsabilidades":
- * - La lógica (estados, validaciones, peticiones) está aquí.
- * - El diseño (UI) está en el componente Login.tsx.
+ * Encapsula toda la lógica de autenticación para la página de login.
  * 
- * ✅ Buenas prácticas aplicadas:
- * - Uso de react-hook-form para manejo de formularios
- * - Validación con Zod (loginSchema)
- * - Manejo de errores con try/catch
- * - Persistencia de "Recordarme" con localStorage
- * - Toasts para feedback al usuario
+ * ✅ Principios aplicados:
+ * - Separación de Responsabilidades (SoC): La lógica está aquí, la UI en Login.tsx
+ * - Centralización de mensajes: Todos los mensajes vienen del helper errorMessages
  * - Tipado fuerte con TypeScript
+ * - Persistencia de sesión con localStorage
+ * - Redirección según rol (ADMIN → /admin, CLIENTE → /perfil)
  * 
- * @returns {Object} Objeto con funciones y estados para el login
+ * @returns {Object} {
+ *   register,      // Registra campos en react-hook-form
+ *   handleSubmit,  // Maneja el envío del formulario
+ *   errors,        // Errores de validación (Zod)
+ *   isSubmitting,  // Estado de carga
+ *   remember,      // Estado del checkbox "Recordarme"
+ *   setRemember    // Actualiza el estado de "Recordarme"
+ * }
  */
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import toast from "react-hot-toast";
+
+// ✅ Helper de toasts (centraliza TODOS los mensajes y estilos)
+import { 
+  showErrorToastWithFallback,
+  showSuccessToast, 
+  successMessages,
+  authErrors,
+} from "../utils/errorMessages";
 
 // =============================================
 // 📦 IMPORTACIONES LOCALES
@@ -29,42 +39,26 @@ import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import { loginSchema, type LoginFormData } from "../schemas/auth.schema";
 
-/**
- * 🎯 HOOK PRINCIPAL
- * 
- * @returns {Object} {
- *   register,      // Registra campos en react-hook-form
- *   handleSubmit,  // Maneja el envío del formulario
- *   errors,        // Errores de validación
- *   error,         // Error general de autenticación
- *   isSubmitting,  // Estado de carga
- *   remember,      // Estado del checkbox "Recordarme"
- *   setRemember    // Actualiza el estado de "Recordarme"
- * }
- */
 export function useLogin() {
   // =============================================
   // 🔧 ESTADOS LOCALES
   // =============================================
   
-  /** Estado para errores de autenticación (ej: credenciales incorrectas) */
-  const [error, setError] = useState<string>("");
-  
-  /** Estado del checkbox "Recordarme" */
+  /** Estado del checkbox "Recordarme" - persiste el email del usuario */
   const [remember, setRemember] = useState(false);
 
   // =============================================
   // 🔐 CONTEXTOS Y HOOKS
   // =============================================
   
-  /** Función de login desde el contexto de autenticación */
-  const { login } = useAuth();
+  /** Función de login desde el contexto global de autenticación */
+  const { login } = useAuth(); // ✅ Ya no necesitamos user del contexto
   
-  /** Hook de navegación de React Router */
+  /** Hook de navegación de React Router - redirige después del login */
   const navigate = useNavigate();
 
   // =============================================
-  // 📝 REACT-HOOK-FORM
+  // 📝 REACT-HOOK-FORM + ZOD
   // 
   // Configuración del formulario con validación Zod.
   // - resolver: Conecta react-hook-form con Zod
@@ -74,7 +68,7 @@ export function useLogin() {
     register,
     handleSubmit,
     setValue,
-    getValues, // ✅ Agregamos getValues para manejar "Recordarme"
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -103,62 +97,39 @@ export function useLogin() {
   // 
   // 1. Guarda el email en localStorage si "Recordarme" está activo
   // 2. Intenta autenticar al usuario con el backend
-  // 3. Si es exitoso, redirige al perfil
-  // 4. Si falla, muestra un toast con el error
+  // 3. login() devuelve el usuario → lo usamos para redirigir
+  // 4. Si falla, muestra toast de error con mensaje del helper
   // =============================================
   const onSubmit = async (data: LoginFormData) => {
-    // Resetear error antes de intentar
-    setError("");
-
     try {
       // ✅ Guardar email si "Recordarme" está activo
       if (remember) {
         localStorage.setItem("rememberedEmail", data.email);
-        toast.success("📧 Email guardado", {
-          icon: "🔖",
-          style: {
-            border: "2px solid #7D5FFF",
-            padding: "16px",
-            backgroundColor: "#FAF9E2",
-            color: "#303030",
-          },
-        });
+        showSuccessToast("📧 Email guardado");
       } else {
         localStorage.removeItem("rememberedEmail");
       }
 
       // ✅ Intentar autenticar al usuario
-      await login(data.email, data.password);
+      // ✅ login() ahora devuelve el usuario
+      const loggedUser = await login(data.email, data.password);
 
       // ✅ Si llega aquí, el login fue exitoso
-      toast.success("✅ ¡Bienvenido de vuelta!", {
-        icon: "👋",
-        style: {
-          border: "2px solid #00D2D3",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      showSuccessToast(successMessages.loginSuccess);
 
-      // ✅ Redirigir al perfil del usuario
-      navigate("/perfil");
+      // ✅ Redirigir según el rol del usuario (usando el usuario devuelto)
+      if (loggedUser?.role === "ADMIN") {
+        navigate("/admin");
+      } else {
+        navigate("/perfil");
+      }
 
     } catch (err: any) {
-      // ✅ Mostrar error al usuario
-      const errorMessage = err.message || "Credenciales incorrectas";
-      setError(errorMessage);
-      
-      toast.error(`❌ ${errorMessage}`, {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      // ✅ El helper decide cómo mostrar el error
+      // ✅ El hook solo pasa el error y el fallback específico del contexto
+      showErrorToastWithFallback(err, authErrors.invalidCredentials);
 
-      // ✅ Log para debugging
+      // ✅ Log para debugging en desarrollo
       console.error("Login error:", err);
     }
   };
@@ -172,10 +143,9 @@ export function useLogin() {
     register,
     handleSubmit: handleSubmit(onSubmit),
     errors,
-    error,
     isSubmitting,
     remember,
     setRemember,
-    getValues, // ✅ Para manejar "Recordarme" desde el componente
+    getValues,
   };
 }

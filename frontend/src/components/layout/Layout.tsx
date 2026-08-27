@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
-import Footer from "./Footer";
+import Footer from "./footer/Footer";
 
 interface LayoutProps {
   children: ReactNode;

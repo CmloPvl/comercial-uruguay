@@ -5,6 +5,8 @@
  * 
  * Componente de diseño (UI) que usa el hook useRecoverPassword.
  * Separación de responsabilidades: diseño aquí, lógica en el hook.
+ * 
+ * ✅ Los mensajes de éxito/error se muestran SOLO con toasts (no en la UI)
  */
 
 import { Link } from "react-router-dom";
@@ -26,7 +28,7 @@ import { Separator } from "../../components/ui/separator";
 import { useRecoverPassword } from "../../hooks/useRecoverPassword";
 
 export default function RecuperarContrasena() {
-  const { email, setEmail, loading, success, error, handleSubmit } = useRecoverPassword();
+  const { email, setEmail, loading, success, handleSubmit } = useRecoverPassword();
 
   return (
     <Layout>
@@ -74,23 +76,7 @@ export default function RecuperarContrasena() {
               </p>
             </div>
 
-            {/* Mensaje de éxito */}
-            {success && (
-              <div className="bg-[#90C090]/10 border-2 border-[#90C090] text-[#90C090] px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
-                <span className="text-xl">✅</span>
-                <span className="font-medium">
-                  Te hemos enviado un correo con instrucciones para restablecer tu contraseña.
-                </span>
-              </div>
-            )}
-
-            {/* Error general */}
-            {error && (
-              <div className="bg-[#FF6B81]/10 border-2 border-[#FF6B81] text-[#FF6B81] px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
-                <span className="text-xl">⚠️</span>
-                <span className="font-medium">{error}</span>
-              </div>
-            )}
+            {/* ✅ Mensajes de éxito/error SOLO con toasts (no en UI) */}
 
             {/* Formulario */}
             {!success && (
@@ -112,34 +98,55 @@ export default function RecuperarContrasena() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-[#7D5FFF] to-[#603060] hover:from-[#603060] hover:to-[#7D5FFF] text-white font-bold py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-gradient-to-r from-[#7D5FFF] to-[#603060] hover:from-[#603060] hover:to-[#7D5FFF] text-white font-bold py-5 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "Enviando..." : "📩 Enviar enlace de recuperación"}
                 </Button>
               </form>
             )}
 
-            <div className="flex items-center gap-4 my-6">
-              <Separator className="flex-1" />
-              <span className="text-sm text-gray-500">¿Ya recordaste?</span>
-              <Separator className="flex-1" />
-            </div>
+            {/* Mensaje de éxito en la UI (reemplaza el formulario) */}
+            {success && (
+              <div className="text-center py-6">
+                <div className="text-6xl mb-4">📧</div>
+                <h3 className="text-xl font-bold text-[#603060] mb-2">¡Correo enviado!</h3>
+                <p className="text-[#6A757C] text-sm">
+                  Revisa tu bandeja de entrada. Si no aparece, revisa tu carpeta de spam.
+                </p>
+                <Link
+                  to="/login"
+                  className="mt-6 inline-block text-[#7D5FFF] font-bold hover:text-[#603060] hover:underline transition-colors"
+                >
+                  Volver a Iniciar Sesión →
+                </Link>
+              </div>
+            )}
 
-            <div className="text-center">
-              <Link
-                to="/login"
-                className="text-[#7D5FFF] font-bold hover:text-[#603060] hover:underline transition-colors text-lg"
-              >
-                Volver a Iniciar Sesión →
-              </Link>
-              <p className="text-xs text-gray-400 mt-1">Ingresa con tu correo y contraseña</p>
-            </div>
+            {!success && (
+              <>
+                <div className="flex items-center gap-4 my-6">
+                  <Separator className="flex-1" />
+                  <span className="text-sm text-gray-500">¿Ya recordaste?</span>
+                  <Separator className="flex-1" />
+                </div>
 
-            <div className="text-center mt-6">
-              <Link to="/" className="text-sm text-gray-400 hover:text-[#7D5FFF] transition-colors">
-                ← Volver a la tienda
-              </Link>
-            </div>
+                <div className="text-center">
+                  <Link
+                    to="/login"
+                    className="text-[#7D5FFF] font-bold hover:text-[#603060] hover:underline transition-colors text-lg"
+                  >
+                    Volver a Iniciar Sesión →
+                  </Link>
+                  <p className="text-xs text-gray-400 mt-1">Ingresa con tu correo y contraseña</p>
+                </div>
+
+                <div className="text-center mt-6">
+                  <Link to="/" className="text-sm text-gray-400 hover:text-[#7D5FFF] transition-colors">
+                    ← Volver a la tienda
+                  </Link>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

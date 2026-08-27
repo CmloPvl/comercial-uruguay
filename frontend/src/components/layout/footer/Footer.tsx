@@ -9,8 +9,8 @@
 
 import { Link } from "react-router-dom";
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaWhatsapp, FaTruck, FaStore } from "react-icons/fa";
-import { empresaConfig } from "../../config/empresa";
-import Logo from "../common/Logo";
+import { empresaConfig } from "../../../config/empresa";
+import Logo from "../../common/Logo";
 import { FooterSocial } from "./FooterSocial";
 
 export default function Footer() {

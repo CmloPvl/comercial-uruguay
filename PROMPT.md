@@ -1,161 +1,120 @@
-📋 PROMPT COMPLETO — COMERCIAL URUGUAY
+📋 PROMPT MEJORADO — COMERCIAL URUGUAY (v2.0)
+markdown
 
-1. Contexto del Proyecto
-   text
+📋 PROMPT COMPLETO — COMERCIAL URUGUAY (v2.0)
 
-Proyecto: Comercial Uruguay
-Tipo: Web App (e-commerce)
-Estado: Producción (desplegado)
-Desarrollador: Camilo Riquelme
-Repositorio: github.com/CmloPvl/comercial-uruguay
-Web App: comercial-uruguay.vercel.app
-API: comercial-uruguay-backend.onrender.com
+---
 
-Descripción:
-Comercial Uruguay es la web app oficial de un comercio establecido con más de 10 años de trayectoria en Valparaíso. Especializado en productos para el hogar, cumpleaños, juguetes, cabello, melamina y temporada.
+## 1. CONTEXTO DEL PROYECTO
 
-Stack Tecnológico:
+**Proyecto:** Comercial Uruguay
+**Tipo:** Web App (e-commerce)
+**Estado:** Producción (desplegado)
+**Versión:** 1.2.0-beta.1
+**Desarrollador:** Camilo Riquelme
 
-- Frontend: React + TypeScript + Vite (React 19.x)
-- Backend: Node.js + Express + TypeScript (Node 22.x)
-- Base de Datos: PostgreSQL + Supabase
-- ORM: Prisma 7.9.0
-- Autenticación: JWT + bcryptjs
-- Estilos: Tailwind CSS + shadcn/ui
-- Validación: Zod
-- Notificaciones: react-hot-toast
-- Animaciones: framer-motion
-- Email: Resend
-- Despliegue: Vercel (frontend) + Render (backend)
+**Enlaces:**
 
-Paleta de Colores:
+- **Repositorio:** https://github.com/CmloPvl/comercial-uruguay
+- **Web App:** https://comercial-uruguay.vercel.app
+- **API:** https://comercial-uruguay-backend.onrender.com
 
-- Primary: #603060 (Morado oscuro)
-- Secondary: #7D5FFF (Morado eléctrico)
-- Accent: #00D2D3 (Cian), #FF6B81 (Rosa), #FFD93D (Amarillo), #FF9F43 (Naranja)
-- Text: #303030 (Charcoal), #6A757C (Slate Gray)
-- Background: #FAF9E2 (Cream)
+**Descripción:**
+Web app oficial de un comercio con más de 10 años en Valparaíso. Especializado en productos para el hogar, cumpleaños, juguetes, cabello, melamina y temporada.
 
-2. Modelo de Trabajo
-   text
+**Clientes pueden:**
 
-Principio fundamental: SEPARACIÓN DE LÓGICA Y DISEÑO (SoC)
+- Explorar productos por categorías
+- Consultar stock en tiempo real
+- Armar carrito de compras
+- Generar pedidos por WhatsApp
+- Reservar productos
 
-Cada página y componente grande se separa en dos partes:
+---
 
-- components/ → Diseño (UI) — Solo JSX, estilos, estructura visual
-- hooks/ → Lógica — Estados, API, validaciones, manejo de errores
-- pages/ → Conexión — Une diseño + lógica
-- context/ → Estado Global — Datos compartidos
-- services/ → API — Comunicación con el backend
+### Stack Tecnológico
 
-Metodología:
+| Capa               | Tecnología                           |
+| ------------------ | ------------------------------------ |
+| **Frontend**       | React 19 + TypeScript + Vite         |
+| **Backend**        | Node.js 22 + Express + TypeScript    |
+| **Base de Datos**  | PostgreSQL + Supabase                |
+| **ORM**            | Prisma 7.9.0                         |
+| **Estilos**        | Tailwind 3.4 + shadcn/ui             |
+| **Storage**        | Supabase Storage                     |
+| **Autenticación**  | JWT + bcryptjs                       |
+| **Validación**     | Zod                                  |
+| **Notificaciones** | react-hot-toast                      |
+| **Email**          | Resend                               |
+| **Despliegue**     | Vercel (frontend) + Render (backend) |
 
-1. Analizar el componente actual (identificar lógica y diseño)
-2. Crear hook personalizado (extraer toda la lógica)
-3. Simplificar el componente (dejar solo UI)
-4. Probar que todo funciona
-5. Documentar en el registro de mejoras
+---
 
-Estrategia de trabajo:
+### Paleta de Colores
 
-- Ir uno por uno (no adelantarse)
-- Micro-pasos (cambios pequeños y controlados)
-- Probar después de cada cambio
-- Mantener el código funcionando en todo momento
-- Comentarios explicativos en el código
+| Rol            | Color           | Hex       |
+| -------------- | --------------- | --------- |
+| **Primary**    | Deep Purple     | `#603060` |
+| **Secondary**  | Purple Electric | `#7D5FFF` |
+| **Accent**     | Cyan            | `#00D2D3` |
+| **Accent**     | Yellow Bright   | `#FFD93D` |
+| **Accent**     | Pink Vibrant    | `#FF6B81` |
+| **Accent**     | Orange Intense  | `#FF9F43` |
+| **Accent**     | Mint Green      | `#90C090` |
+| **Text**       | Charcoal        | `#303030` |
+| **Text**       | Slate Gray      | `#6A757C` |
+| **Background** | Cream           | `#FAF9E2` |
 
-3. Estado Actual del Proyecto
-   text
+---
 
-✅ COMPLETADO (Separación lógica/diseño):
+## 2. ARQUITECTURA DEL PROYECTO
 
-Navbar (100%):
+### Principio Fundamental: SEPARACIÓN DE LÓGICA Y DISEÑO (SoC)
 
-- useNavbar.ts (lógica)
-- NavbarAdminMenu.tsx (UI)
-- NavbarUserMenu.tsx (UI)
-- NavbarGuestMenu.tsx (UI)
-- NavbarMobile.tsx (UI)
-- Navbar.tsx (estructura principal)
+| Capa          | Responsabilidad                                        | Ejemplo           |
+| ------------- | ------------------------------------------------------ | ----------------- |
+| `components/` | Diseño (UI) — Solo JSX, estilos, estructura visual     | `Login.tsx`       |
+| `hooks/`      | Lógica — Estados, API, validaciones, manejo de errores | `useLogin.ts`     |
+| `pages/`      | Conexión — Une diseño + lógica                         | `LoginPage.tsx`   |
+| `context/`    | Estado Global — Datos compartidos                      | `AuthContext.tsx` |
+| `services/`   | API — Comunicación con el backend                      | `auth.service.ts` |
 
-Home (100%):
+---
 
-- useHome.ts (lógica)
-- Hero.tsx (UI)
-- CategoriesSection.tsx (UI)
-- FeaturedProductsSection.tsx (UI)
-- BenefitsSection.tsx (UI)
-- LocationSection.tsx (UI)
-- Home.tsx (conexión)
-
-Footer (100%):
-
-- Footer.tsx (estructura principal)
-- FooterColumn.tsx (UI)
-- FooterSocial.tsx (UI)
-- FooterServices.tsx (UI)
-
-Login (100%):
-
-- useLogin.ts (lógica)
-- Login.tsx (UI)
-
-Registro (100%):
-
-- useRegister.ts (lógica)
-- Registro.tsx (UI)
-
-Recuperar Contraseña (100%):
-
-- useRecoverPassword.ts (lógica)
-- RecuperarContrasena.tsx (UI)
-
-Página Envíos y Retiros (100%):
-
-- EnviosYRetiros.tsx (UI)
-
-🔄 EN PROGRESO:
-
-ResetPassword:
-
-- ResetPassword.tsx (tiene lógica interna)
-- Pendiente: crear useResetPassword.ts
-
-⏳ PENDIENTES (por orden de prioridad):
-
-1. Productos (página de tienda)
-2. Carrito
-3. Perfil
-4. Favoritos
-5. Mis Pedidos
-6. Admin Dashboard
-7. Admin Productos
-8. Admin Pedidos
-9. Admin Categorías
-10. Crear Publicación
-11. Editar Publicación
-
-12. Estructura de Carpetas
-    text
+### Estructura de Carpetas (REAL)
 
 frontend/src/
 ├── components/ # 🎨 Diseño (UI)
-│ ├── layout/ # Navbar, Footer, Layout
+│ ├── admin/ # DashboardStats, ImageUploader, ProductTable
+│ │ └── products/ # ProductForm y subcomponentes
+│ ├── auth/ # SocialLogin
+│ ├── cart/ # CartItem, CartSummary
+│ ├── common/ # AppBreadcrumb, ErrorMessage, LoadingSpinner, Logo, ProtectedRoute
 │ ├── home/ # Hero, Categories, Featured, Benefits, Location
-│ ├── auth/ # Login, Registro, Recuperar
-│ ├── products/ # ProductList, ProductCard, ProductFilters
-│ ├── common/ # Logo, LoadingSpinner, ProtectedRoute
-│ └── ui/ # shadcn/ui (Button, Card, Input...)
+│ ├── layout/ # Navbar, Footer, AdminLayout, AdminNavbar
+│ ├── products/ # ProductCard, ProductFilters, ProductGrid, ProductList, ProductsBanner
+│ └── ui/ # shadcn/ui (todos los componentes)
 │
 ├── hooks/ # 🧠 Lógica
-│ ├── useAuth.ts # Autenticación
-│ ├── useCart.ts # Carrito
+│ ├── useAuth.ts # Autenticación global
 │ ├── useLogin.ts # Login
 │ ├── useRegister.ts # Registro
-│ ├── useRecoverPassword.ts # Recuperación
+│ ├── useRecoverPassword.ts # Recuperar contraseña
 │ ├── useNavbar.ts # Navbar
-│ └── useHome.ts # Home
+│ ├── useHome.ts # Home
+│ ├── useProducts.ts # Productos (tienda)
+│ ├── useProductoDetalle.ts # Detalle de producto
+│ ├── useCarrito.ts # Carrito
+│ ├── useFavoritos.ts # Favoritos
+│ ├── usePerfil.ts # Perfil de usuario
+│ ├── useAdminDashboard.ts # Dashboard admin
+│ ├── useAdminProductos.ts # Admin productos
+│ ├── useAdminCategorias.ts # Admin categorías
+│ ├── useAdminPedidos.ts # Admin pedidos
+│ ├── useAdminUsuarios.ts # Admin usuarios
+│ ├── useCrearPublicacion.ts # Crear producto
+│ ├── useEditarPublicacion.ts # Editar producto
+│ └── use-supabase-upload.ts # Subida a Supabase
 │
 ├── context/ # 🌐 Estado global
 │ ├── AuthContext.tsx
@@ -164,127 +123,242 @@ frontend/src/
 ├── services/ # 📡 API
 │ ├── api.ts
 │ ├── auth.service.ts
-│ ├── product.service.ts
-│ ├── cart.service.ts
-│ ├── category.service.ts
-│ └── favorite.service.ts
+│ ├── productService.ts
+│ ├── cartService.ts
+│ ├── categoryService.ts
+│ ├── favoriteService.ts
+│ ├── orderService.ts
+│ ├── userService.ts
+│ └── adminService.ts
 │
 ├── pages/ # 📄 Páginas
-│ ├── Home.tsx ✅ Conecta lógica + UI
-│ ├── Productos.tsx 🔄 Pendiente
-│ ├── Carrito.tsx 🔄 Pendiente
-│ ├── Perfil.tsx 🔄 Pendiente
-│ ├── Favoritos.tsx 🔄 Pendiente
-│ ├── MisPedidos.tsx 🔄 Pendiente
-│ ├── EnviosYRetiros.tsx ✅ UI
+│ ├── Home.tsx ✅
+│ ├── Productos.tsx ✅
+│ ├── Carrito.tsx ✅
+│ ├── Perfil.tsx ✅
+│ ├── Favoritos.tsx ✅
+│ ├── MisPedidos.tsx ✅
+│ ├── DetallePedido.tsx ✅
+│ ├── ProductoDetalle.tsx ✅
+│ ├── EnviosYRetiros.tsx ✅
+│ ├── Envios.tsx ✅
+│ ├── RetiroTienda.tsx ✅
+│ ├── Contacto.tsx ✅
+│ ├── Nosotros.tsx ✅
+│ ├── Ofertas.tsx ✅
+│ ├── Terminos.tsx ✅
+│ ├── Privacidad.tsx ✅
+│ ├── NotFound.tsx ✅
 │ ├── auth/ # Login, Registro, Recuperar, ResetPassword
-│ └── admin/ # Dashboard, Productos, Pedidos, Categorías
+│ └── admin/ # Dashboard, Productos, Pedidos, Categorías, Usuarios
 │
 ├── schemas/ # 📌 Validaciones (Zod)
+│ └── auth.schema.ts
+│
 ├── types/ # 📌 Tipos TypeScript
-└── utils/ # 🛠️ Utilidades
+│ └── index.ts
+│
+├── utils/ # 🛠️ Utilidades
+│ ├── categoryUtils.ts
+│ ├── formatPrice.ts
+│ ├── perfilUtils.ts
+│ ├── validators.ts
+│ ├── errorMessages.ts # ✅ Helper de toasts centralizado
+│ └── index.ts
+│
+├── lib/ # 📦 Clientes externos
+│ ├── supabase.ts
+│ └── utils.ts
+│
+├── config/ # ⚙️ Configuraciones
+│ └── empresa.ts
+│
+├── App.tsx
+├── main.tsx
+└── index.css
+text
 
-5. Registro de Mejoras
-   text
+---
 
-📋 MEJORAS REALIZADAS:
+## 3. ESTADO ACTUAL DEL PROYECTO (REAL)
 
-Navbar:
+### ✅ COMPLETADO (100%)
 
-- useNavbar.ts: Lógica extraída del Navbar
-- NavbarAdminMenu.tsx: Menú de administración aislado
-- NavbarUserMenu.tsx: Menú de usuario aislado
-- NavbarGuestMenu.tsx: Menú de invitado aislado
-- NavbarMobile.tsx: Menú móvil aislado
-- Navbar.tsx: Solo diseño (UI)
+| Módulo                 | Componente                | Hook                      | Estado |
+| ---------------------- | ------------------------- | ------------------------- | ------ |
+| **Navbar**             | `Navbar.tsx`              | `useNavbar.ts`            | ✅     |
+| **AdminNavbar**        | `AdminNavbar.tsx`         | -                         | ✅     |
+| **Home**               | `Home.tsx`                | `useHome.ts`              | ✅     |
+| **Footer**             | `Footer.tsx`              | -                         | ✅     |
+| **Login**              | `Login.tsx`               | `useLogin.ts`             | ✅     |
+| **Registro**           | `Registro.tsx`            | `useRegister.ts`          | ✅     |
+| **Recuperar**          | `RecuperarContrasena.tsx` | `useRecoverPassword.ts`   | ✅     |
+| **Productos**          | `Productos.tsx`           | `useProducts.ts`          | ✅     |
+| **ProductoDetalle**    | `ProductoDetalle.tsx`     | `useProductoDetalle.ts`   | ✅     |
+| **Carrito**            | `Carrito.tsx`             | `useCarrito.ts`           | ✅     |
+| **Perfil**             | `Perfil.tsx`              | `usePerfil.ts`            | ✅     |
+| **Favoritos**          | `Favoritos.tsx`           | `useFavoritos.ts`         | ✅     |
+| **MisPedidos**         | `MisPedidos.tsx`          | -                         | ✅     |
+| **Admin Dashboard**    | `Dashboard.tsx`           | `useAdminDashboard.ts`    | ✅     |
+| **Admin Productos**    | `AdminProductos.tsx`      | `useAdminProductos.ts`    | ✅     |
+| **Admin Categorías**   | `AdminCategorias.tsx`     | `useAdminCategorias.ts`   | ✅     |
+| **Admin Pedidos**      | `Pedidos.tsx`             | `useAdminPedidos.ts`      | ✅     |
+| **Admin Usuarios**     | `Usuarios.tsx`            | `useAdminUsuarios.ts`     | ✅     |
+| **Crear Publicación**  | `CrearPublicacion.tsx`    | `useCrearPublicacion.ts`  | ✅     |
+| **Editar Publicación** | `EditarPublicacion.tsx`   | `useEditarPublicacion.ts` | ✅     |
+| **Envios y Retiros**   | `EnviosYRetiros.tsx`      | -                         | ✅     |
+| **Subida de Imágenes** | `ImageUploader.tsx`       | `use-supabase-upload.ts`  | ✅     |
 
-Home:
+### 🔄 EN PROGRESO
 
-- useHome.ts: Lógica extraída del Home
-- CategoriesSection.tsx: Sección de categorías aislada
-- FeaturedProductsSection.tsx: Sección de productos destacados aislada
-- BenefitsSection.tsx: Sección de beneficios aislada
-- LocationSection.tsx: Sección de ubicación aislada
-- Home.tsx: Solo conexión (lógica + UI)
+| Módulo            | Estado | Pendiente                                    |
+| ----------------- | ------ | -------------------------------------------- |
+| **ResetPassword** | 🔄     | Crear `useResetPassword.ts` y simplificar UI |
 
-Footer:
+### ⏳ PENDIENTES
 
-- Footer.tsx: Estructura rediseñada (inspirada en Falabella y Ripley)
-- FooterColumn.tsx: Columna reutilizable
-- FooterSocial.tsx: Redes sociales aisladas
-- FooterServices.tsx: Franja de servicios aislada
-- Eliminadas categorías del Footer (más limpio)
+| Tarea               | Prioridad | Descripción                                                |
+| ------------------- | --------- | ---------------------------------------------------------- |
+| 1. Helper Toasts    | 🔴 ALTA   | Integrar `errorMessages.ts` en todos los hooks y servicios |
+| 2. AdminNavbar      | 🔴 ALTA   | Agregar botones Favoritos y Carrito (accesos rápidos)      |
+| 3. ResetPassword    | 🟡 MEDIA  | Crear `useResetPassword.ts`                                |
+| 4. Mejoras visuales | 🟢 BAJA   | Revisar y pulir detalles de UI/UX                          |
 
-Página Envíos y Retiros:
+---
 
-- EnviosYRetiros.tsx: Página completa con envíos, retiro y FAQ
-- id="retiro" para ancla en la sección de retiro
-- FooterServices.tsx: Enlaces actualizados a /envios-y-retiros
+## 4. HELPER DE TOASTS
 
-6. Próximas Tareas (por orden de prioridad)
-   text
+### Archivo: `frontend/src/utils/errorMessages.ts`
 
-1. Productos (página de tienda)
-   - Crear useProductos.ts
-   - Simplificar Productos.tsx
-   - Mantener filtros y búsqueda
+**Funciones disponibles:**
 
-1. Carrito
-   - Crear useCarrito.ts
-   - Simplificar Carrito.tsx
+```typescript
+// 📌 Manejo de errores
+getErrorMessage(error): string       // Extrae mensaje de error
+showErrorToast(error)                // Muestra error con estilos consistentes
+showSuccessToast(message, icon?)     // Muestra éxito con estilos consistentes
 
-1. Perfil
-   - Crear usePerfil.ts
-   - Simplificar Perfil.tsx
+// 📌 Mensajes predefinidos
+successMessages: { ... }             // Éxito (productos, categorías, pedidos, etc.)
+infoMessages: { ... }               // Informativos (no products, empty cart, etc.)
 
-1. ResetPassword
-   - Crear useResetPassword.ts
-   - Simplificar ResetPassword.tsx
+Uso en hooks:
+typescript
 
-1. Admin
-   - Separar cada página de admin
-   - Crear hooks específicos
+import { showErrorToast, showSuccessToast } from "../../utils/errorMessages";
 
-1. Instrucciones para el Nuevo Chat
-   text
+// En try/catch
+try {
+  await productService.create(data);
+  showSuccessToast(successMessages.productCreated);
+} catch (error) {
+  showErrorToast(error);
+}
 
-INSTRUCCIONES PARA EL ASISTENTE:
+5. MODELO DE TRABAJO
+Metodología por Componente
 
-1. Mantén el principio de SEPARACIÓN DE LÓGICA Y DISEÑO (SoC).
-2. Trabaja UNO POR UNO (no adelantarse).
-3. Micro-pasos: cambios pequeños y controlados.
-4. Probar después de cada cambio.
-5. Comentarios explicativos en el código.
-6. Usa la paleta de colores definida.
-7. Usa shadcn/ui para los componentes.
-8. Usa react-hot-toast para notificaciones.
-9. Usa framer-motion para animaciones.
-10. Documenta cada mejora en el registro.
+    Analizar el componente actual (identificar lógica y diseño)
 
-Metodología para cada componente:
+    Crear hook personalizado (extraer toda la lógica)
 
-1. Analizar el componente actual (identificar lógica y diseño).
-2. Crear hook personalizado (extraer toda la lógica).
-3. Simplificar el componente (dejar solo UI).
-4. Probar que todo funciona.
-5. Documentar en el registro de mejoras.
+    Simplificar el componente (dejar solo UI)
 
-Archivos clave para referencia:
+    Probar que todo funciona
 
-- hooks/useNavbar.ts (ejemplo de lógica)
-- components/layout/Navbar.tsx (ejemplo de diseño)
-- pages/Home.tsx (ejemplo de conexión)
+    Documentar en el registro de mejoras
 
-8. Paleta de Colores (para diseño)
-   text
+Estrategia de Trabajo
 
-Deep Purple: #603060
-Purple Electric: #7D5FFF
-Cyan: #00D2D3
-Yellow Bright: #FFD93D
-Pink Vibrant: #FF6B81
-Orange Intense: #FF9F43
-Mint Green: #90C090
-Charcoal: #303030
-Slate Gray: #6A757C
-Cream: #FAF9E2
+    Ir uno por uno (no adelantarse)
+
+    Micro-pasos (cambios pequeños y controlados)
+
+    Probar después de cada cambio
+
+    Mantener el código funcionando en todo momento
+
+    Comentarios explicativos en el código
+
+6. INSTRUCCIONES PARA EL ASISTENTE
+
+    ✅ Mantén el principio de SEPARACIÓN DE LÓGICA Y DISEÑO (SoC)
+
+    ✅ Trabaja UNO POR UNO (no adelantarse)
+
+    ✅ Micro-pasos: cambios pequeños y controlados
+
+    ✅ Probar después de cada cambio
+
+    ✅ Comentarios explicativos en el código
+
+    ✅ Usa la paleta de colores definida
+
+    ✅ Usa shadcn/ui para los componentes
+
+    ✅ Usa react-hot-toast para notificaciones
+
+    ✅ Usa framer-motion para animaciones
+
+    ✅ Documenta cada mejora en el registro
+
+Directrices Adicionales
+
+    Sin generar código hasta que el usuario lo confirme
+
+    Analizar primero, proponer mejoras, luego implementar
+
+    No cambiar diseño ni lógica si no es requerido o pedido explícitamente
+
+    Prisma está instalado pero no hay migración - tenerlo en cuenta
+
+7. ARCHIVOS CLAVE PARA REFERENCIA
+Tipo	Archivo	Propósito
+Hook ejemplo	hooks/useNavbar.ts	Lógica de navbar
+Diseño ejemplo	components/layout/Navbar.tsx	UI de navbar
+Conexión ejemplo	pages/Home.tsx	Conexión lógica + UI
+Helper ejemplo	utils/errorMessages.ts	Toasts centralizados
+Contexto ejemplo	context/AuthContext.tsx	Estado global de autenticación
+8. REGISTRO DE MEJORAS
+📋 Mejoras Realizadas
+Componente	Mejora	Estado
+Navbar	Lógica extraída a useNavbar.ts	✅
+Navbar	Menús aislados (User, Guest, Mobile)	✅
+Home	Lógica extraída a useHome.ts	✅
+Footer	Rediseño inspirado en Falabella/Ripley	✅
+EnviosYRetiros	Página completa con anclas	✅
+ProductForm	Optimizado (900 → 250 líneas)	✅
+AppBreadcrumb	Universal (reduce ~200 líneas)	✅
+form-field	Reutilizable (reduce ~300 líneas)	✅
+categoryUtils	Colores e iconos centralizados	✅
+errorMessages	Helper de toasts centralizado	✅
+Supabase Storage	Subida de imágenes con Dropzone	✅
+9. PRÓXIMAS TAREAS (POR ORDEN DE PRIORIDAD)
+#	Tarea	Archivos Involucrados	Prioridad
+1	Integrar errorMessages.ts en todos los hooks y services	hooks/*.ts, services/*.ts	🔴 ALTA
+2	Agregar Favoritos y Carrito en AdminNavbar	AdminNavbar.tsx	🔴 ALTA
+3	Crear useResetPassword.ts	hooks/useResetPassword.ts	🟡 MEDIA
+4	Mejorar navegación admin (dropdown Productos)	AdminNavbar.tsx	🟡 MEDIA
+10. CONTACTO
+
+Dirección: Uruguay 660 esquina Colón, Valparaíso, Chile
+Horario: Lun-Vie 10:00-18:30, Sáb 10:00-15:00
+WhatsApp: +569 1234 5678
+Email: comercialuruguaychile@gmail.com
+Redes: Facebook, Instagram, TikTok
+text
+
+
+---
+
+## 📋 **RESUMEN DE MEJORAS AL PROMPT**
+
+| Mejora | Antes | Después |
+|--------|-------|---------|
+| **Estado del proyecto** | Desactualizado (decía que muchas cosas estaban pendientes) | ✅ Refleja la realidad: todo está completado |
+| **Estructura de hooks** | Incompleta (solo 7 hooks listados) | ✅ Completa (19 hooks listados) |
+| **Helper de toasts** | No existía | ✅ Sección completa con funciones y uso |
+| **Tareas pendientes** | Duplicadas y desactualizadas | ✅ Priorizadas y claras |
+| **Arquitectura** | Desactualizada | ✅ Real y verificada con el repositorio |
+| **Información del proyecto** | Básica | ✅ Más detallada (versión, enlaces, contacto) |
+```

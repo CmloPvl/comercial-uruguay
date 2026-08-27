@@ -5,20 +5,28 @@
  * 
  * Este componente SOLO se encarga de la interfaz de usuario (UI).
  * Toda la lógica (autenticación, carrito, menú, búsqueda) está en el hook useNavbar.
+ * 
+ * ✅ Mejoras aplicadas:
+ * - Buscador reutilizable (SearchBar)
+ * - Lupa en móvil que abre el menú
+ * - aria-label para accesibilidad
+ * - Condicional para NavbarAdminMenu (solo admin)
+ * - Estructura limpia y escalable
  */
 
 import { Link } from "react-router-dom";
 import Logo from "../common/Logo";
 import { Search, Heart, ShoppingCart } from "lucide-react";
+import { SearchBar } from "../common/SearchBar";
 
 // ✅ Importar el hook que contiene toda la lógica
 import { useNavbar } from "../../hooks/useNavbar";
 
 // ✅ Importar los subcomponentes
-import { NavbarAdminMenu } from "./NavbarAdminMenu";
-import { NavbarUserMenu } from "./NavbarUserMenu";
-import { NavbarGuestMenu } from "./NavbarGuestMenu";
-import { NavbarMobile } from "./NavbarMobile";
+import { NavbarAdminMenu } from "./drop-menu/NavbarAdminMenu";
+import { NavbarUserMenu } from "./drop-menu/NavbarUserMenu";
+import { NavbarGuestMenu } from "./drop-menu/NavbarGuestMenu";
+import { NavbarMenu } from "./NavbarMenu";
 
 export default function Navbar() {
   const {
@@ -34,6 +42,8 @@ export default function Navbar() {
     getInitials,
   } = useNavbar();
 
+  const isAdmin = user?.role === "ADMIN";
+
   return (
     <nav className="bg-gradient-to-r from-[#603060] via-[#7D5FFF] to-[#00D2D3] text-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
@@ -47,7 +57,7 @@ export default function Navbar() {
             </Link>
 
             {/* 📌 Menú Móvil (Sheet) */}
-            <NavbarMobile
+            <NavbarMenu
               isOpen={isMenuOpen}
               onOpenChange={setIsMenuOpen}
               searchQuery={searchQuery}
@@ -68,25 +78,30 @@ export default function Navbar() {
           </div>
 
           {/* ====== BUSCADOR (Desktop) ====== */}
-          <div className="hidden md:flex flex-1 max-w-md lg:max-w-2xl mx-4">
-            <form onSubmit={handleSearch} className="relative w-full group">
-              <input
-                type="text"
-                placeholder="Buscar productos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-5 py-2.5 rounded-full bg-white/15 text-white placeholder-white/70 border-2 border-white/20 focus:outline-none focus:ring-2 focus:ring-[#FFD93D] focus:border-[#FFD93D] transition-all backdrop-blur-sm text-sm"
-              />
-              <Search className="absolute right-4 top-2.5 text-white/50 group-hover:text-[#FFD93D] transition w-5 h-5" />
-            </form>
-          </div>
+          <SearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            onSubmit={handleSearch}
+            variant="navbar"
+            placeholder="Buscar productos..."
+          />
 
           {/* ====== ACCIONES ====== */}
           <div className="flex items-center gap-3 sm:gap-4 md:gap-6">
             
+            {/* 🔍 LUPA - Móvil (abre el menú) */}
+            <button
+              onClick={() => setIsMenuOpen(true)}
+              className="md:hidden text-white hover:text-[#FFD93D] transition hover:scale-105"
+              aria-label="Buscar productos"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+
             {/* ❤️ FAVORITOS - Visible en todos los tamaños */}
             <Link
               to="/favoritos"
+              aria-label="Favoritos"
               className="flex items-center gap-1 text-white/80 hover:text-[#FFD93D] transition text-sm font-medium hover:scale-105"
             >
               <Heart className="w-5 h-5" />
@@ -96,6 +111,7 @@ export default function Navbar() {
             {/* 🛒 CARRITO */}
             <Link
               to="/carrito"
+              aria-label="Carrito de compras"
               className="flex items-center gap-1 text-white/80 hover:text-[#FFD93D] transition text-sm font-medium hover:scale-105 relative"
             >
               <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -110,7 +126,7 @@ export default function Navbar() {
             {/* 👤 MENÚ DE USUARIO */}
             {user ? (
               <>
-                <NavbarAdminMenu userRole={user.role} />
+                {isAdmin && <NavbarAdminMenu userRole={user.role} />}
                 <NavbarUserMenu
                   user={user}
                   logout={logout}
