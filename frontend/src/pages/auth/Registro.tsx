@@ -1,3 +1,5 @@
+// 📁 frontend/src/pages/auth/Registro.tsx
+
 /**
  * 📌 PÁGINA DE REGISTRO
  * 
@@ -6,6 +8,7 @@
  * ✅ Animaciones sutiles y efectos modernos.
  * ✅ Feedback visual con toasts y estados.
  * ✅ Separación de lógica (useRegister) y diseño (Registro).
+ * ✅ Mensajes de éxito/error SOLO con toasts (no en la UI).
  */
 
 import { useState } from "react";
@@ -27,7 +30,6 @@ import { Badge } from "../../components/ui/badge";
 import { Checkbox } from "../../components/ui/checkbox";
 import { useRegister } from "../../hooks/useRegister";
 import { Eye, EyeOff, Sparkles, UserPlus, Gift, ArrowLeft, CheckCircle } from "lucide-react";
-import toast from "react-hot-toast";
 
 export default function Registro() {
   // =============================================
@@ -37,7 +39,6 @@ export default function Registro() {
     register,
     handleSubmit,
     errors,
-    error,
     isSubmitting,
     watch,
   } = useRegister();
@@ -53,38 +54,11 @@ export default function Registro() {
   const confirmPassword = watch("confirmPassword");
   const isPasswordMatch = password && confirmPassword && password === confirmPassword;
 
-  // ✅ Manejar términos (con toast)
+  // ✅ Manejar términos (sin toast en UI, solo actualiza el formulario)
   const handleTermsChange = (checked: boolean) => {
     register("termsAccepted").onChange({
       target: { name: "termsAccepted", value: checked }
     });
-    
-    if (checked) {
-      toast.success("📋 Términos aceptados", {
-        icon: "✅",
-        style: {
-          border: "2px solid #7D5FFF",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
-    }
-  };
-
-  // ✅ Toast de contraseñas coinciden
-  const showPasswordMatchToast = () => {
-    if (isPasswordMatch && confirmPassword) {
-      toast.success("🔒 Contraseñas coinciden", {
-        icon: "✅",
-        style: {
-          border: "2px solid #90C090",
-          padding: "12px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
-    }
   };
 
   return (
@@ -117,7 +91,7 @@ export default function Registro() {
       ============================================= */}
       <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 relative overflow-hidden bg-gradient-to-br from-[#FFD93D]/15 via-[#F0C0F0]/20 to-[#00D2D3]/10">
         
-        {/* 🎨 Formas decorativas flotantes (más colores) */}
+        {/* 🎨 Formas decorativas flotantes */}
         <div className="absolute top-20 left-10 w-64 h-64 bg-[#FF6B81]/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-80 h-80 bg-[#7D5FFF]/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#00D2D3]/10 rounded-full blur-2xl"></div>
@@ -125,10 +99,10 @@ export default function Registro() {
         <div className="absolute bottom-40 left-20 w-48 h-48 bg-[#90C090]/20 rounded-full blur-3xl animate-pulse delay-2000"></div>
         <div className="absolute top-10 right-10 w-32 h-32 bg-[#603060]/15 rounded-full blur-3xl"></div>
 
-        {/* 🃏 TARJETA DE REGISTRO con efecto glass */}
+        {/* 🃏 TARJETA DE REGISTRO */}
         <Card className="max-w-md w-full border-2 border-[#7D5FFF]/40 shadow-2xl hover:shadow-[#7D5FFF]/30 transition-all duration-500 backdrop-blur-sm bg-white/90 relative overflow-hidden">
           
-          {/* 🎨 Borde decorativo superior con gradiente de 3 colores contrastantes */}
+          {/* 🎨 Borde decorativo superior */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#FFD93D] via-[#7D5FFF] to-[#FF6B81]"></div>
           
           <CardContent className="p-8 relative z-10">
@@ -152,15 +126,7 @@ export default function Registro() {
               </p>
             </div>
 
-            {/* =============================================
-            ❌ ERROR GENERAL
-            ============================================= */}
-            {error && (
-              <div className="bg-[#FF6B81]/10 border-2 border-[#FF6B81] text-[#FF6B81] px-4 py-3 rounded-xl mb-6 flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
-                <span className="text-xl">⚠️</span>
-                <span className="font-medium">{error}</span>
-              </div>
-            )}
+            {/* ✅ Mensajes de éxito/error SOLO con toasts (no en UI) */}
 
             {/* =============================================
             📝 FORMULARIO
@@ -263,11 +229,6 @@ export default function Registro() {
                     placeholder="••••••••"
                     className={`mt-1 border-2 ${errors.confirmPassword ? 'border-[#FF6B81]' : 'border-[#90C090]/50'} focus:ring-4 focus:ring-[#FFD93D]/50 focus:border-[#FFD93D] transition-all rounded-xl hover:border-[#90C090]`}
                     {...register("confirmPassword")}
-                    onChange={() => {
-                      if (isPasswordMatch && confirmPassword) {
-                        showPasswordMatchToast();
-                      }
-                    }}
                   />
                   <button
                     type="button"

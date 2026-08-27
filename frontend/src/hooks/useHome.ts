@@ -13,11 +13,25 @@
  * - Separa la lógica del diseño
  * - Reutilizable en otros componentes
  * - Fácil de testear
- * - Manejo de errores con toasts
+ * - Manejo de errores con toasts centralizados
+ * - Mensajes consistentes y controlados (NO hardcodeados)
  */
 
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
+
+// ✅ Helper de toasts (centraliza TODOS los mensajes)
+import { 
+  showErrorToastWithFallback, 
+  showSuccessToast, 
+  successMessages,
+  productErrors,
+  cartErrors,
+  authErrors,
+} from "../utils/errorMessages";
+
+// =============================================
+// 📦 IMPORTACIONES LOCALES
+// =============================================
 import { productService, type Product } from "../services/productService";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -51,16 +65,9 @@ export function useHome() {
       const data = await productService.getProducts();
       setProducts(data || []);
     } catch (err: any) {
-      const errorMessage = err.message || "Error al cargar productos";
+      const errorMessage = err.message || productErrors.notFound;
       setError(errorMessage);
-      toast.error(`❌ ${errorMessage}`, {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      showErrorToastWithFallback(err, productErrors.notFound);
     } finally {
       setLoading(false);
     }
@@ -71,38 +78,15 @@ export function useHome() {
   // =============================================
   const handleAddToCart = async (productId: string, productName: string) => {
     if (!user) {
-      toast.error("🔒 Inicia sesión para agregar al carrito", {
-        icon: "🔐",
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      showErrorToastWithFallback(new Error(authErrors.loginRequired), authErrors.loginRequired);
       return;
     }
 
     try {
       await addItemById(productId, 1);
-      toast.success(`✅ ${productName} agregado al carrito`, {
-        icon: "🛒",
-        style: {
-          border: "2px solid #00D2D3",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      showSuccessToast(`${productName} ${successMessages.addedToCart}`);
     } catch (err: any) {
-      toast.error(`❌ ${err.message || "Error al agregar"}`, {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      showErrorToastWithFallback(err, cartErrors.empty);
     }
   };
 
