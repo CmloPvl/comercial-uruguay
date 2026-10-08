@@ -96,7 +96,7 @@ export function ImageCarousel({
             {isAdmin ? "Haz clic para subir una imagen" : "No hay imágenes disponibles"}
           </p>
           {isAdmin && (
-            <p className="text-xs text-[#6A757C]/40">PNG, JPG o WEBP (máx. 2MB)</p>
+            <p className="text-xs text-[#6A757C]/40">PNG, JPG o WEBP (máx. 10MB)</p>
           )}
           {isAdmin && (
             <input

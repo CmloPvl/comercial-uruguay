@@ -1,4 +1,3 @@
-
 // 📁 frontend/src/utils/categoryUtils.ts
 
 /**
@@ -7,11 +6,16 @@
  * Colores e iconos reutilizables para categorías en toda la app.
  * 
  * ✅ Buenas prácticas:
- * - Un solo lugar para mantener colores e iconos
+ * - Un solo lugar para mantener colores
+ * - Iconos vienen de la BD (admin los asigna)
+ * - Fallback genérico (📦) si no hay icono
  * - Reutilizable en toda la app
  * - Fácil de mantener y actualizar
  * 
  * 🎯 Uso:
+ * - useCategories.ts
+ * - CategoriesSection.tsx
+ * - HeroContent.tsx
  * - CrearPublicacion.tsx
  * - EditarPublicacion.tsx
  * - AdminCategorias.tsx
@@ -28,18 +32,9 @@ export const categoryColors = [
   { bg: "bg-[#603060]/10 border-[#603060]/30 hover:border-[#603060]" },
 ];
 
-// 🎨 Iconos por defecto para categorías
-export const defaultIcons: Record<string, string> = {
-  'Cabello': '💇',
-  'Juguetes y Cumpleaños': '🧸',
-  'Cumpleaños': '🎂',
-  'Hogar': '🏠',
-  'Melamina': '🍽️',
-  'Temporada': '🍂',
-  'Electrónica': '💻',
-  'Ropa': '👕',
-  'Deportes': '⚽',
-};
+// =============================================
+// 🎨 FUNCIONES
+// =============================================
 
 /**
  * Obtiene el color de una categoría según su índice
@@ -51,11 +46,14 @@ export const getCategoryColor = (index: number) => {
 };
 
 /**
- * Obtiene el icono de una categoría por su nombre
- * @param {string} name - Nombre de la categoría
- * @param {string} customIcon - Icono personalizado (opcional)
+ * Obtiene el icono de una categoría
+ * 
+ * ✅ El icono viene de la BD (admin lo asigna al crear la categoría)
+ * ✅ Si no hay icono, usa un fallback genérico (📦)
+ * 
+ * @param {string} customIcon - Icono personalizado (desde la BD)
  * @returns {string} - Icono de la categoría
  */
-export const getCategoryIcon = (name: string, customIcon?: string) => {
-  return customIcon || defaultIcons[name] || '📦';
+export const getCategoryIcon = (customIcon?: string) => {
+  return customIcon || '📦';
 };

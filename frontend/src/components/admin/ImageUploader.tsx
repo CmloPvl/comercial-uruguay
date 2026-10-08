@@ -34,7 +34,7 @@ export function ImageUploader({
   existingImages = [],
   onImagesChange,
   maxFiles = 5,
-  maxFileSize = 5,
+  maxFileSize = 10,
   label = '📸 Imágenes del Producto',
 }: ImageUploaderProps) {
   // =============================================
@@ -55,8 +55,6 @@ export function ImageUploader({
     ],
     upsert: true,
     onUploadComplete: (files: any) => {
-      console.log('📸 [ImageUploader] onUploadComplete - files:', files); // ✅ VER ESTO
-      
       // ✅ Verificar que files existe y es un array
       if (!files || !Array.isArray(files)) {
         console.error('❌ [ImageUploader] files no es un array válido:', files);
@@ -65,7 +63,6 @@ export function ImageUploader({
       
       // ✅ Verificar que files tiene elementos válidos
       const validFiles = files.filter((f: any) => f && f.publicUrl);
-      console.log('📸 [ImageUploader] validFiles:', validFiles); // ✅ VER ESTO
       
       if (validFiles.length === 0) {
         console.warn('⚠️ [ImageUploader] No hay archivos válidos para subir');
@@ -73,10 +70,7 @@ export function ImageUploader({
       }
       
       const urls = validFiles.map((f: any) => f.publicUrl);
-      console.log('📸 [ImageUploader] urls generadas:', urls); // ✅ VER ESTO
-      
       const allUrls = [...existingImages, ...urls];
-      console.log('📸 [ImageUploader] allUrls:', allUrls); // ✅ VER ESTO
       
       onImagesChange(allUrls);
     },

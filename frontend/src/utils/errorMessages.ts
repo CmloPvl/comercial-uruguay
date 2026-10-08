@@ -36,6 +36,8 @@ export const productErrors = {
   notFound: "Producto no encontrado.",
   outOfStock: "Producto sin stock.",
   invalidPrice: "Precio inválido.",
+  fileTooLarge: "La imagen excede el tamaño máximo permitido.",
+  invalidFileType: "El archivo no es una imagen válida.",
 };
 
 // =============================================

@@ -51,9 +51,9 @@ export function useHome() {
   const [error, setError] = useState<string | null>(null);
 
   // =============================================
-  // 📦 PRODUCTOS DESTACADOS (primeros 6)
+  // 📦 LOS MAS VENDIDOS (primeros 12)
   // =============================================
-  const featuredProducts = products.slice(0, 6);
+  const featuredProducts = products.slice(0, 12);
 
   // =============================================
   // 🔄 CARGAR PRODUCTOS

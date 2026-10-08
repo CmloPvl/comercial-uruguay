@@ -1,4 +1,4 @@
-// 📁 frontend/src/components/layout/FooterServices.tsx
+// 📁 frontend/src/components/layout/footer/FooterServices.tsx
 
 /**
  * 📌 FOOTER SERVICES
@@ -9,12 +9,14 @@
  * - WhatsApp para gestión de pedidos
  * - Envíos a todo Chile (enlace a página)
  * - Retiro en tienda (enlace a página con ancla)
+ * - Sello de compra segura
  * 
  * ✅ Buenas prácticas:
  * - Componente presentacional (solo UI)
  * - Recibe datos por props
  * - Enlaces a página completa de información
  * - Estilos consistentes con el Footer
+ * - Sello de seguridad
  * 
  * @param {Object} props
  * @param {string} props.whatsapp - Número de WhatsApp
@@ -22,7 +24,7 @@
  */
 
 import { Link } from "react-router-dom";
-import { FaWhatsapp, FaTruck, FaStore, FaInfoCircle } from "react-icons/fa";
+import { FaWhatsapp, FaTruck, FaStore, FaInfoCircle, FaLock } from "react-icons/fa";
 
 interface FooterServicesProps {
   whatsapp: string;
@@ -76,6 +78,17 @@ export function FooterServices({ whatsapp, nombre }: FooterServicesProps) {
           className="opacity-70 group-hover:opacity-100 transition-opacity" 
         />
       </Link>
+
+      <span className="text-white/30">|</span>
+
+      {/* Sello de compra segura */}
+      <span
+        className="inline-flex items-center gap-2 bg-[#7D5FFF]/20 border border-[#7D5FFF]/40 text-white font-bold px-5 py-2.5 rounded-full shadow-lg text-sm"
+        aria-label="Compra 100% segura"
+      >
+        <FaLock size={16} className="text-[#FFD93D]" />
+        Compra 100% segura
+      </span>
     </div>
   );
 }

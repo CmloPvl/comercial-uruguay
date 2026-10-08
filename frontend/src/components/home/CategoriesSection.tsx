@@ -5,12 +5,16 @@
  * 
  * COMPONENTE DE DISEÑO (UI)
  * 
- * Muestra las categorías disponibles en la tienda.
- * Los datos son estáticos (hardcodeados en el componente).
+ * Muestra las categorías dinámicas desde la API.
+ * Usa useCategories para obtener las categorías con iconos y colores.
  * 
  * ✅ Buenas prácticas:
  * - Componente presentacional (solo UI)
- * - Datos estáticos definidos dentro del componente
+ * - Datos dinámicos desde useCategories
+ * - Grid responsive según cantidad de categorías
+ * - Skeleton loading personalizado
+ * - Hover con animaciones
+ * - Botón "Ver todas" más visible
  * - Enlaces a la página de productos con filtro
  * - Responsive (mobile-first)
  * - Animaciones con framer-motion
@@ -18,23 +22,50 @@
 
 import { Link } from "react-router-dom";
 import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Skeleton } from "../ui/skeleton";
 import { motion } from "framer-motion";
+import { useCategories } from "../../hooks/useCategories";
 
-// 🎨 Categorías con colores variados
-const categories = [
-  { name: "Cabello", icon: "💇", color: "border-[#FF6B81] hover:bg-[#FF6B81]/10 hover:border-[#FF6B81]" },
-  { name: "Juguetes", icon: "🧸", color: "border-[#00D2D3] hover:bg-[#00D2D3]/10 hover:border-[#00D2D3]" },
-  { name: "Cumpleaños", icon: "🎂", color: "border-[#FFD93D] hover:bg-[#FFD93D]/20 hover:border-[#FFD93D]" },
-  { name: "Hogar", icon: "🏠", color: "border-[#7D5FFF] hover:bg-[#7D5FFF]/10 hover:border-[#7D5FFF]" },
-  { name: "Melamina", icon: "🍽️", color: "border-[#FF9F43] hover:bg-[#FF9F43]/10 hover:border-[#FF9F43]" },
-  { name: "Temporada", icon: "🍂", color: "border-[#603060] hover:bg-[#603060]/10 hover:border-[#603060]" },
-];
+// =============================================
+// 🎯 SKELETON DE CATEGORÍAS
+// =============================================
+const CategoriesSkeleton = () => (
+  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+    {[...Array(6)].map((_, i) => (
+      <div key={i} className="bg-white p-4 rounded-xl border-2 border-gray-200">
+        <Skeleton className="h-12 w-12 rounded-full mx-auto mb-2" />
+        <Skeleton className="h-4 w-3/4 mx-auto" />
+      </div>
+    ))}
+  </div>
+);
+
+// =============================================
+// 🎯 GRID RESPONSIVE SEGÚN CANTIDAD
+// =============================================
+const getGridCols = (count: number) => {
+  if (count <= 3) return "grid-cols-1 sm:grid-cols-3";
+  if (count <= 4) return "grid-cols-2 sm:grid-cols-4";
+  return "grid-cols-2 sm:grid-cols-3 md:grid-cols-6";
+};
+
+// =============================================
+// 🖥️ COMPONENTE PRINCIPAL
+// =============================================
 
 export function CategoriesSection() {
+  // =============================================
+  // 🧠 LÓGICA (categorías dinámicas)
+  // =============================================
+  const { categoriesWithIcons, loading } = useCategories();
+
   return (
     <section className="py-16 px-4 bg-gradient-to-br from-[#FFD93D]/20 via-[#F0C030]/10 to-[#FF9F43]/20">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
+        {/* =============================================
+        📌 HEADER
+        ============================================= */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -52,37 +83,66 @@ export function CategoriesSection() {
           </p>
         </motion.div>
 
-        {/* Grid de categorías */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-          {categories.map((cat, index) => (
-            <motion.div
-              key={cat.name}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Link
-                to={`/productos?categoria=${cat.name}`}
-                className={`bg-white p-4 rounded-xl border-2 ${cat.color} shadow-md hover:shadow-xl transition-all hover:-translate-y-2 cursor-pointer group block`}
+        {/* =============================================
+        📂 GRID DE CATEGORÍAS (dinámico)
+        ============================================= */}
+        {loading ? (
+          <CategoriesSkeleton />
+        ) : categoriesWithIcons.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-4xl mb-3">📂</p>
+            <p className="text-[#6A757C] font-medium">No hay categorías disponibles</p>
+          </div>
+        ) : (
+          <div className={`grid ${getGridCols(categoriesWithIcons.length)} gap-4`}>
+            {categoriesWithIcons.map((cat, index) => (
+              <motion.div
+                key={cat.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
               >
-                <div className="text-5xl mb-2 group-hover:scale-110 transition">
-                  {cat.icon}
-                </div>
-                <p className="font-bold text-[#303030] text-sm group-hover:text-[#7D5FFF] transition">
-                  {cat.name}
-                </p>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+                <Link
+                  to={`/productos?categoria=${cat.name}`}
+                  className={`
+                    bg-white 
+                    p-4 
+                    rounded-xl 
+                    border-2 
+                    ${cat.color.bg} 
+                    shadow-md 
+                    hover:shadow-xl 
+                    hover:shadow-[#7D5FFF]/30
+                    transition-all 
+                    hover:-translate-y-2 
+                    cursor-pointer 
+                    group 
+                    block
+                    text-center
+                  `}
+                >
+                  <div className="text-5xl mb-2 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                    {cat.icon}
+                  </div>
+                  <p className="font-bold text-[#303030] text-sm group-hover:text-[#7D5FFF] transition">
+                    {cat.name}
+                  </p>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
-        {/* Ver todas las categorías */}
+        {/* =============================================
+        🔗 VER TODAS LAS CATEGORÍAS
+        ============================================= */}
         <div className="text-center mt-8">
-          <Link
-            to="/productos"
-            className="text-[#7D5FFF] font-bold hover:underline hover:text-[#603060] transition text-lg"
-          >
-            Ver todas las categorías →
+          <Link to="/productos">
+            <Button
+              className="bg-gradient-to-r from-[#7D5FFF] to-[#603060] hover:from-[#603060] hover:to-[#7D5FFF] text-white font-bold px-7 py-5 text-base rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
+            >
+              Ver todos los productos →
+            </Button>
           </Link>
         </div>
       </div>

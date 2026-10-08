@@ -6,12 +6,14 @@
  * COMPONENTE DE DISEÑO (UI)
  * 
  * Muestra los productos destacados en la página principal.
- * Recibe los datos por props, no tiene lógica propia.
+ * Usa ProductCarousel con auto-scroll y lazy loading.
  * 
  * ✅ Buenas prácticas:
  * - Componente presentacional (solo UI)
- * - Recibe datos y funciones por props
+ * - Usa ProductCarousel (reutilizable)
+ * - Auto-scroll activado
  * - Maneja estados de carga y error visualmente
+ * - Botón "Ver tienda virtual" más visible
  * - Reutilizable en otras páginas
  * 
  * @param {Object} props
@@ -24,10 +26,10 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
-import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Skeleton } from "../ui/skeleton";
 import { motion } from "framer-motion";
+import { ProductCarousel } from "../common/ProductCarousel";
 import type { Product } from "../../services/productService";
 
 interface FeaturedProductsSectionProps {
@@ -38,9 +40,11 @@ interface FeaturedProductsSectionProps {
   onRetry: () => void;
 }
 
-// 🎨 Skeleton para productos destacados (componente interno)
+// =============================================
+// 🎯 SKELETON DE PRODUCTOS
+// =============================================
 const ProductSkeleton = () => (
-  <div className="border-2 border-[#00D2D3]/30 rounded-xl p-4 space-y-3">
+  <div className="flex-shrink-0 w-[280px] border-2 border-[#00D2D3]/30 rounded-xl p-4 space-y-3">
     <Skeleton className="w-full h-40 rounded-lg" />
     <Skeleton className="h-4 w-3/4" />
     <Skeleton className="h-4 w-1/2" />
@@ -48,6 +52,10 @@ const ProductSkeleton = () => (
     <Skeleton className="h-10 w-full rounded-xl" />
   </div>
 );
+
+// =============================================
+// 🖥️ COMPONENTE PRINCIPAL
+// =============================================
 
 export function FeaturedProductsSection({
   products,
@@ -59,7 +67,9 @@ export function FeaturedProductsSection({
   return (
     <section className="py-16 px-4 bg-white">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
+        {/* =============================================
+        📌 HEADER
+        ============================================= */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -67,19 +77,23 @@ export function FeaturedProductsSection({
           className="text-center mb-10"
         >
           <Badge className="bg-[#00D2D3] text-white mb-2 px-4 py-1 rounded-full">
-            ⭐ Destacados
+            ⭐ Los más vendidos
           </Badge>
           <h2 className="text-3xl md:text-4xl font-extrabold text-[#603060]">
-            ⭐ PRODUCTOS DESTACADOS
+            ⭐ LOS MÁS VENDIDOS
           </h2>
-          <p className="text-[#6A757C] mt-2">Los productos más populares del momento</p>
+          <p className="text-[#6A757C] mt-2">
+            Los productos favoritos de nuestros clientes
+          </p>
         </motion.div>
 
-        {/* Contenido */}
+        {/* =============================================
+        📦 CONTENIDO
+        ============================================= */}
         {loading ? (
           // 🔄 Estado de carga
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
+          <div className="flex gap-4 overflow-hidden">
+            {[...Array(5)].map((_, i) => (
               <ProductSkeleton key={i} />
             ))}
           </div>
@@ -94,96 +108,24 @@ export function FeaturedProductsSection({
               🔄 Reintentar
             </button>
           </div>
-        ) : products.length === 0 ? (
-          // 📭 Sin productos
-          <div className="text-center py-12">
-            <p className="text-[#6A757C]">No hay productos disponibles.</p>
-          </div>
         ) : (
-          // ✅ Grid de productos
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {products.map((product, index) => {
-              const finalPrice =
-                product.isOnSale && product.discount > 0
-                  ? product.price * (1 - product.discount / 100)
-                  : product.price;
-              const hasImage =
-                product.images && Array.isArray(product.images) && product.images.length > 0;
-
-              return (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="border-2 border-[#00D2D3] hover:border-[#7D5FFF] transition-all hover:shadow-xl hover:-translate-y-1 overflow-hidden group">
-                    <CardContent className="p-4">
-                      {/* Imagen */}
-                      <Link to={`/producto/${product.id}`}>
-                        <div className="relative bg-gradient-to-br from-[#FFD93D]/20 to-[#FF6B81]/20 h-40 rounded-lg flex items-center justify-center text-6xl group-hover:scale-105 transition">
-                          {hasImage ? (
-                            <img
-                              src={product.images[0]}
-                              alt={product.name}
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                          ) : (
-                            "📦"
-                          )}
-                          {product.isOnSale && product.discount > 0 && (
-                            <Badge className="absolute top-2 left-2 bg-[#FF6B81] text-white font-bold px-2 py-1 rounded-full animate-pulse">
-                              🔥 -{product.discount}%
-                            </Badge>
-                          )}
-                        </div>
-                      </Link>
-
-                      {/* Nombre */}
-                      <Link to={`/producto/${product.id}`}>
-                        <h3 className="font-bold text-lg mt-3 text-[#303030] group-hover:text-[#7D5FFF] transition line-clamp-1">
-                          {product.name}
-                        </h3>
-                      </Link>
-
-                      {/* Precio */}
-                      <div className="flex items-center gap-2">
-                        {product.isOnSale && product.discount > 0 && (
-                          <span className="text-sm text-[#6A757C] line-through">
-                            ${product.price.toLocaleString("es-CL")}
-                          </span>
-                        )}
-                        <p
-                          className={`font-bold text-xl ${
-                            product.isOnSale ? "text-[#FF6B81]" : "text-[#7D5FFF]"
-                          }`}
-                        >
-                          ${Math.round(finalPrice).toLocaleString("es-CL")}
-                        </p>
-                      </div>
-
-                      {/* Botón agregar */}
-                      <Button
-                        onClick={() => onAddToCart(product.id, product.name)}
-                        className="w-full mt-3 bg-gradient-to-r from-[#00D2D3] to-[#7D5FFF] hover:from-[#7D5FFF] hover:to-[#00D2D3] text-white font-bold transition-all shadow-md hover:shadow-lg rounded-xl"
-                      >
-                        🛒 Agregar
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
+          // ✅ Carrusel de productos con auto-scroll
+          <ProductCarousel
+            products={products}
+            onAddToCart={onAddToCart}
+            emptyMessage="No hay productos disponibles."
+            autoScroll={true}
+          />
         )}
 
-        {/* Ver todos los productos */}
+        {/* =============================================
+        🔗 VER TIENDA VIRTUAL
+        ============================================= */}
         <div className="text-center mt-8">
-          <Link
-            to="/productos"
-            className="text-[#FF6B81] font-bold hover:underline hover:text-[#7D5FFF] transition text-lg"
-          >
-            Ver todos los productos →
+          <Link to="/productos">
+            <Button className="bg-gradient-to-r from-[#FF6B81] to-[#FF9F43] hover:from-[#FF9F43] hover:to-[#FF6B81] text-white font-bold px-7 py-5 text-base rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105">
+              🛒 Ver tienda virtual →
+            </Button>
           </Link>
         </div>
       </div>

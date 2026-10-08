@@ -44,7 +44,7 @@ export function ProductFormRightColumn({
             existingImages={images}
             onImagesChange={setImages}
             maxFiles={5}
-            maxFileSize={5}
+            maxFileSize={10}
           />
         </CardContent>
       </Card>

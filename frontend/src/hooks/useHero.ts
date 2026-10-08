@@ -15,21 +15,26 @@
  * - Reutilizable en otros componentes
  * - Fácil de testear
  * - Manejo de errores con toasts centralizados
- * - Mensajes consistentes y controlados
+ * - Mensajes consistentes y controlados (NO hardcodeados)
  * - Conexión directa con Supabase Storage
  */
 
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
-import { showErrorToastWithFallback, showSuccessToast } from "../utils/errorMessages";
+import { 
+  showErrorToastWithFallback, 
+  showSuccessToast, 
+  successMessages,
+  productErrors,
+} from "../utils/errorMessages";
 
 // =============================================
 // 📦 CONSTANTES
 // =============================================
 
 const BUCKET_NAME = "hero";
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 // =============================================
 // 📦 TIPOS
@@ -93,11 +98,11 @@ export function useHero() {
   // 📤 SUBIR IMAGEN A SUPABASE
   // =============================================
   const uploadImage = async (file: File) => {
-    // ✅ Validar tamaño (2MB)
+    // ✅ Validar tamaño (10MB)
     if (file.size > MAX_FILE_SIZE) {
       showErrorToastWithFallback(
-        new Error("La imagen excede el tamaño máximo de 2MB"),
-        "La imagen excede el tamaño máximo de 2MB"
+        new Error(productErrors.fileTooLarge),
+        productErrors.fileTooLarge
       );
       return;
     }
@@ -105,8 +110,8 @@ export function useHero() {
     // ✅ Validar tipo
     if (!file.type.startsWith("image/")) {
       showErrorToastWithFallback(
-        new Error("El archivo no es una imagen válida"),
-        "El archivo no es una imagen válida"
+        new Error(productErrors.invalidFileType),
+        productErrors.invalidFileType
       );
       return;
     }
@@ -139,7 +144,7 @@ export function useHero() {
       };
       setImages((prev) => [...prev, newImage]);
 
-      showSuccessToast("Imagen del local agregada");
+      showSuccessToast(successMessages.imageUploaded);
     } catch (error) {
       showErrorToastWithFallback(error, "Error al subir la imagen");
     } finally {
@@ -159,7 +164,7 @@ export function useHero() {
       if (error) throw error;
 
       setImages((prev) => prev.filter((img) => img.id !== imageId));
-      showSuccessToast("🗑️ Imagen eliminada");
+      showSuccessToast(successMessages.imageDeleted);
     } catch (error) {
       showErrorToastWithFallback(error, "Error al eliminar la imagen");
     }
