@@ -1,27 +1,48 @@
-// 📁 frontend/src/components/home/FeaturedProductsSection.tsx
+// 📁 frontend/src/components/common/ProductsSection.tsx
 
 /**
- * 📌 FEATURED PRODUCTS SECTION
+ * 📌 PRODUCTS SECTION - COMPONENTE REUTILIZABLE
  * 
  * COMPONENTE DE DISEÑO (UI)
  * 
- * Muestra los productos destacados en la página principal.
- * Usa ProductCarousel con auto-scroll y lazy loading.
+ * Sección de productos con título, subtítulo y carrusel.
+ * 100% reutilizable: sirve para Destacados, Ofertas, Novedades, etc.
  * 
  * ✅ Buenas prácticas:
  * - Componente presentacional (solo UI)
- * - Usa ProductCarousel (reutilizable)
- * - Auto-scroll activado
+ * - 100% reutilizable (todas las props con defaults)
+ * - Usa ProductCarousel (también reutilizable)
  * - Maneja estados de carga y error visualmente
- * - Botón "Ver tienda virtual" más visible
- * - Reutilizable en otras páginas
+ * - Animaciones con framer-motion
+ * - Responsive (mobile-first)
  * 
- * @param {Object} props
- * @param {Product[]} props.products - Lista de productos a mostrar
- * @param {boolean} props.loading - Estado de carga
- * @param {string | null} props.error - Mensaje de error
- * @param {Function} props.onAddToCart - Función para agregar al carrito
- * @param {Function} props.onRetry - Función para reintentar carga
+ * 📌 Ejemplos de uso:
+ * 
+ * 1. Destacados (Home):
+ *    <ProductsSection
+ *      products={featured}
+ *      loading={loading}
+ *      error={error}
+ *      onAddToCart={handleAddToCart}
+ *      onRetry={load}
+ *      badge="⭐ Destacados"
+ *      title="⭐ Artículos Destacados"
+ *      subtitle="Los productos que elegimos para ti"
+ *    />
+ * 
+ * 2. Ofertas:
+ *    <ProductsSection
+ *      products={offers}
+ *      loading={loading}
+ *      error={error}
+ *      onAddToCart={handleAddToCart}
+ *      onRetry={load}
+ *      badge="🔥 Ofertas"
+ *      title="🔥 Ofertas del mes"
+ *      subtitle="Aprovecha estos precios"
+ *      ctaText="Ver todas las ofertas"
+ *      ctaLink="/ofertas"
+ *    />
  */
 
 import { Link } from "react-router-dom";
@@ -29,15 +50,34 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Skeleton } from "../ui/skeleton";
 import { motion } from "framer-motion";
-import { ProductCarousel } from "../common/ProductCarousel";
+import { ProductCarousel } from "./ProductCarousel";
 import type { Product } from "../../services/productService";
 
-interface FeaturedProductsSectionProps {
+// =============================================
+// 📋 INTERFAZ DE PROPS
+// =============================================
+
+interface ProductsSectionProps {
+  // =============================================
+  // 📦 DATOS (obligatorios)
+  // =============================================
   products: Product[];
   loading: boolean;
   error: string | null;
   onAddToCart: (productId: string, productName: string) => void;
   onRetry: () => void;
+
+  // =============================================
+  // 🎨 PERSONALIZACIÓN (opcionales con defaults)
+  // =============================================
+  badge?: string;
+  title?: string;
+  subtitle?: string;
+  showCTA?: boolean;
+  ctaText?: string;
+  ctaLink?: string;
+  backgroundColor?: string;
+  emptyMessage?: string;
 }
 
 // =============================================
@@ -57,15 +97,26 @@ const ProductSkeleton = () => (
 // 🖥️ COMPONENTE PRINCIPAL
 // =============================================
 
-export function FeaturedProductsSection({
+export function ProductsSection({
+  // Datos
   products,
   loading,
   error,
   onAddToCart,
   onRetry,
-}: FeaturedProductsSectionProps) {
+
+  // Personalización (con defaults)
+  badge = "⭐ Destacados",
+  title = "⭐ Artículos Destacados",
+  subtitle = "Los productos que elegimos para ti",
+  showCTA = true,
+  ctaText = "🛒 Ver tienda virtual →",
+  ctaLink = "/productos",
+  backgroundColor = "bg-white",
+  emptyMessage = "No hay productos disponibles.",
+}: ProductsSectionProps) {
   return (
-    <section className="py-16 px-4 bg-white">
+    <section className={`py-16 px-4 ${backgroundColor}`}>
       <div className="max-w-6xl mx-auto">
         {/* =============================================
         📌 HEADER
@@ -77,13 +128,13 @@ export function FeaturedProductsSection({
           className="text-center mb-10"
         >
           <Badge className="bg-[#00D2D3] text-white mb-2 px-4 py-1 rounded-full">
-            ⭐ Los más vendidos
+            {badge}
           </Badge>
           <h2 className="text-3xl md:text-4xl font-extrabold text-[#603060]">
-            ⭐ LOS MÁS VENDIDOS
+            {title}
           </h2>
           <p className="text-[#6A757C] mt-2">
-            Los productos favoritos de nuestros clientes
+            {subtitle}
           </p>
         </motion.div>
 
@@ -113,21 +164,23 @@ export function FeaturedProductsSection({
           <ProductCarousel
             products={products}
             onAddToCart={onAddToCart}
-            emptyMessage="No hay productos disponibles."
+            emptyMessage={emptyMessage}
             autoScroll={true}
           />
         )}
 
         {/* =============================================
-        🔗 VER TIENDA VIRTUAL
+        🔗 CTA (opcional)
         ============================================= */}
-        <div className="text-center mt-8">
-          <Link to="/productos">
-            <Button className="bg-gradient-to-r from-[#FF6B81] to-[#FF9F43] hover:from-[#FF9F43] hover:to-[#FF6B81] text-white font-bold px-7 py-5 text-base rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105">
-              🛒 Ver tienda virtual →
-            </Button>
-          </Link>
-        </div>
+        {showCTA && (
+          <div className="text-center mt-8">
+            <Link to={ctaLink}>
+              <Button className="bg-gradient-to-r from-[#FF6B81] to-[#FF9F43] hover:from-[#FF9F43] hover:to-[#FF6B81] text-white font-bold px-7 py-5 text-base rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                {ctaText}
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );

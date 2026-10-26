@@ -3,28 +3,41 @@
 /**
  * 📌 HOME — PÁGINA PRINCIPAL
  * 
- * Este componente SOLO conecta la lógica (useHome) con el diseño (secciones).
+ * Este componente SOLO conecta la lógica con el diseño (secciones).
  * 
  * ✅ Buenas prácticas:
  * - Separación de lógica y diseño
  * - Componente limpio y fácil de leer
  * - Solo renderiza secciones
+ * - Cada hook tiene responsabilidad única
+ * 
+ * 🆕 Usa useFeaturedProducts para los destacados
  */
 
 import Layout from "../components/layout/Layout";
 import Hero from "../components/home/Hero";
 import { CategoriesSection } from "../components/home/CategoriesSection";
-import { FeaturedProductsSection } from "../components/home/FeaturedProductsSection";
+import { ProductsSection } from "../components/common/ProductsSection";
 import { BenefitsSection } from "../components/home/BenefitsSection";
 import { LocationSection } from "../components/home/LocationSection";
 import { useHome } from "../hooks/useHome";
+import { useFeaturedProducts } from "../hooks/useFeaturedProducts";  // 🆕
 
 export default function Home() {
+  // =============================================
+  // 🆕 DESTACADOS (hook dedicado)
+  // =============================================
   const {
-    featuredProducts,
-    loading,
-    error,
-    loadProducts,
+    products: featuredProducts,
+    loading: featuredLoading,
+    error: featuredError,
+    loadFeatured,
+  } = useFeaturedProducts();
+
+  // =============================================
+  // 🧠 HOME BASE (carrito)
+  // =============================================
+  const {
     handleAddToCart,
   } = useHome();
 
@@ -36,13 +49,13 @@ export default function Home() {
       {/* Categorías */}
       <CategoriesSection />
 
-      {/* Productos Destacados */}
-      <FeaturedProductsSection
+      {/* Productos Destacados (usa useFeaturedProducts) */}
+      <ProductsSection
         products={featuredProducts}
-        loading={loading}
-        error={error}
+        loading={featuredLoading}
+        error={featuredError}
         onAddToCart={handleAddToCart}
-        onRetry={loadProducts}
+        onRetry={loadFeatured}
       />
 
       {/* Beneficios */}

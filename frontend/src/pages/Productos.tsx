@@ -4,15 +4,20 @@
  * 📌 PÁGINA: PRODUCTOS (TIENDA)
  * 
  * Página principal de la tienda.
- * Conecta la lógica (useProductos) con el diseño (componentes UI).
+ * Conecta la lógica (useProducts) con el diseño (componentes UI).
  * 
  * ✅ Buenas prácticas:
  * - Separación de lógica y diseño
  * - Componentes reutilizables
  * - Código limpio y fácil de leer
- * - Banner separado en componente propio
  * - Filtros desktop y móvil
  * - Estados de carga y error
+ * 
+ * 🆕 Mejoras:
+ * - Eliminado ProductsBanner (ocupaba espacio sin aportar)
+ * - Agregado ProductsSection (destacados, reutilizable)
+ * - Breadcrumb compacto (menos espacio, más foco en productos)
+ * - Layout mobile-first (más espacio para el grid)
  */
 
 import Layout from "../components/layout/Layout";
@@ -28,8 +33,9 @@ import LoadingSpinner from "../components/common/LoadingSpinner";
 import ErrorMessage from "../components/common/ErrorMessage";
 import ProductList from "../components/products/ProductList";
 import ProductFilters from "../components/products/ProductFilters";
-import { ProductsBanner } from "../components/products/ProductsBanner";
-import { useProductos } from "../hooks/useProducts";
+import { ProductsSection } from "../components/common/ProductsSection";  // 🆕
+import { useProducts } from "../hooks/useProducts";
+import { useFeaturedProducts } from "../hooks/useFeaturedProducts";    // 🆕
 
 // =============================================
 // 🎯 COMPONENTE PRINCIPAL
@@ -37,7 +43,7 @@ import { useProductos } from "../hooks/useProducts";
 
 export default function Productos() {
   // =============================================
-  // 🧠 LÓGICA (extraída a useProductos)
+  // 🧠 LÓGICA DEL CATÁLOGO (useProducts)
   // =============================================
   const {
     loading,
@@ -55,7 +61,17 @@ export default function Productos() {
     handleToggleFavorite,
     handleAddToCart,
     loadProducts,
-  } = useProductos();
+  } = useProducts();
+
+  // =============================================
+  // 🆕 LÓGICA DE DESTACADOS (useFeaturedProducts)
+  // =============================================
+  const {
+    products: featuredProducts,
+    loading: featuredLoading,
+    error: featuredError,
+    loadFeatured,
+  } = useFeaturedProducts();
 
   // =============================================
   // 🔄 ESTADO DE CARGA
@@ -74,7 +90,7 @@ export default function Productos() {
   if (error) {
     return (
       <Layout>
-        <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
+        <div className="min-h-[60vh] items-center justify-center py-12 px-4">
           <ErrorMessage message={error} onRetry={loadProducts} />
         </div>
       </Layout>
@@ -87,20 +103,20 @@ export default function Productos() {
   return (
     <Layout>
       {/* =============================================
-      🍞 BREADCRUMB
+      🍞 BREADCRUMB (compacto)
       ============================================= */}
-      <div className="bg-[#FF6B81]/10 py-3 px-4 border-b-2 border-[#FF6B81]">
+      <div className="bg-[#FAF9E2] py-2 px-4 border-b border-[#7D5FFF]/20">
         <div className="max-w-6xl mx-auto">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/" className="text-[#603060] hover:text-[#00D2D3]">
+                <BreadcrumbLink href="/" className="text-[#6A757C] hover:text-[#603060] text-sm">
                   Inicio
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="text-[#7D5FFF]" />
+              <BreadcrumbSeparator className="text-[#7D5FFF]/50" />
               <BreadcrumbItem>
-                <BreadcrumbPage className="text-[#00D2D3] font-bold">
+                <BreadcrumbPage className="text-[#603060] font-semibold text-sm">
                   Tienda
                 </BreadcrumbPage>
               </BreadcrumbItem>
@@ -110,27 +126,39 @@ export default function Productos() {
       </div>
 
       {/* =============================================
-      🎨 BANNER (componente separado)
+      ⭐ DESTACADOS (componente reutilizable)
       ============================================= */}
-      <ProductsBanner
-        categories={categoriesWithIcons}
-        selectedCategory={selectedCategory}
-        onCategorySelect={setSelectedCategory}
-        productCount={filteredProducts.length}
-      />
+      {featuredProducts.length > 0 && (
+        <ProductsSection
+          products={featuredProducts}
+          loading={featuredLoading}
+          error={featuredError}
+          onAddToCart={handleAddToCart}
+          onRetry={loadFeatured}
+          badge="⭐ Destacados"
+          title="⭐ Artículos Destacados"
+          subtitle="Los productos que elegimos para ti"
+          showCTA={false}  // ✅ Sin botón "Ver tienda" (ya estás en ella)
+        />
+      )}
 
       {/* =============================================
       📦 CONTENIDO PRINCIPAL
       ============================================= */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row gap-8">
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        <div className="flex flex-col md:flex-row gap-6">
           
           {/* =============================================
           📂 FILTROS (Desktop)
           ============================================= */}
           <div className="hidden md:block w-64 flex-shrink-0">
             <ProductFilters
-              categories={categoriesWithIcons}
+              categories={categoriesWithIcons.map(cat => ({
+                id: cat.id,
+                name: cat.name,
+                icon: cat.icon,
+                color: cat.color.bg,
+              }))}
               selectedCategory={selectedCategory}
               onCategoryChange={setSelectedCategory}
               priceRange={priceRange}
@@ -144,7 +172,7 @@ export default function Productos() {
           ============================================= */}
           <div className="flex-1">
             {/* Cabecera de productos */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
               <p className="text-[#303030] font-medium flex items-center gap-2">
                 <span className="text-[#FF6B81] font-bold">{filteredProducts.length}</span>
                 productos encontrados
@@ -152,6 +180,7 @@ export default function Productos() {
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className="md:hidden bg-[#FF6B81] hover:bg-[#C06060] text-white px-4 py-2 rounded-lg font-bold transition hover:scale-105"
+                aria-label="Abrir filtros"
               >
                 ⚙️ Filtrar
               </button>
@@ -173,7 +202,6 @@ export default function Productos() {
       ============================================= */}
       {showFilters && (
         <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
-          {/* Panel de filtros móvil */}
           <div className="bg-white w-80 h-full p-6 overflow-y-auto shadow-2xl animate-in slide-in-from-right">
             {/* Header del panel */}
             <div className="flex justify-between items-center mb-6">

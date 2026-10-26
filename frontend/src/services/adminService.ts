@@ -1,4 +1,26 @@
+// 📁 frontend/src/services/adminService.ts
+
+/**
+ * 📌 SERVICIO DE ADMIN
+ * 
+ * Maneja todas las operaciones del panel admin:
+ * - Dashboard (stats, pedidos recientes)
+ * - Productos (listar, actualizar, eliminar)
+ * - Pedidos (listar, cambiar estado)
+ * 
+ * ✅ Buenas prácticas:
+ * - Tipado fuerte con TypeScript
+ * - Separación de responsabilidades
+ * - Reutilizable
+ * 
+ * 🆕 Soporte para packs promocionales (packPrice, packQuantity)
+ */
+
 import api from './api';
+
+// =============================================
+// 📋 INTERFACES
+// =============================================
 
 export interface DashboardStats {
   totalProducts: number;
@@ -31,6 +53,9 @@ export interface Product {
   isOnSale: boolean;
   discount: number;
   images: string[];
+  destacado?: boolean;            // 🆕 Campo destacado
+  packPrice?: number | null;      // 🆕 Precio del pack (null si no hay)
+  packQuantity?: number | null;   // 🆕 Cantidad del pack (null si no hay)
   createdAt: string;
 }
 
@@ -44,22 +69,20 @@ export interface PaginatedResponse<T> {
   };
 }
 
+// =============================================
+// 📦 SERVICIO
+// =============================================
+
 export const adminService = {
   // =============================================
   // DASHBOARD
   // =============================================
   
-  /**
-   * Obtener estadísticas del dashboard
-   */
   async getStats(): Promise<DashboardStats> {
     const response = await api.get('/admin/stats');
     return response.data.data;
   },
 
-  /**
-   * Obtener pedidos recientes
-   */
   async getRecentOrders(limit: number = 5): Promise<Order[]> {
     const response = await api.get(`/admin/orders/recent?limit=${limit}`);
     return response.data.data;
@@ -69,9 +92,6 @@ export const adminService = {
   // PRODUCTOS (Admin)
   // =============================================
   
-  /**
-   * Obtener todos los productos (con paginación)
-   */
   async getProducts(page: number = 1, limit: number = 10, search?: string): Promise<PaginatedResponse<Product>> {
     const params = new URLSearchParams();
     params.append('page', page.toString());
@@ -88,20 +108,10 @@ export const adminService = {
     };
   },
 
-  // =============================================
-  // ✅ NUEVOS MÉTODOS PARA PRODUCTOS
-  // =============================================
-
-  /**
-   * ✅ ELIMINAR PRODUCTO
-   */
   async deleteProduct(id: string): Promise<void> {
     await api.delete(`/admin/products/${id}`);
   },
 
-  /**
-   * ✅ ACTUALIZAR PRODUCTO
-   */
   async updateProduct(id: string, data: Partial<Product>): Promise<Product> {
     const response = await api.put(`/admin/products/${id}`, data);
     return response.data.data;
@@ -111,9 +121,6 @@ export const adminService = {
   // PEDIDOS (Admin)
   // =============================================
   
-  /**
-   * Obtener todos los pedidos (con paginación y filtro)
-   */
   async getOrders(page: number = 1, limit: number = 10, status?: string): Promise<PaginatedResponse<Order>> {
     const params = new URLSearchParams();
     params.append('page', page.toString());
@@ -128,9 +135,6 @@ export const adminService = {
     };
   },
 
-  /**
-   * Actualizar estado de un pedido
-   */
   async updateOrderStatus(orderId: string, status: string): Promise<Order> {
     const response = await api.put(`/admin/orders/${orderId}/status`, { status });
     return response.data.data;

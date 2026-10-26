@@ -13,15 +13,16 @@
  * ✅ Responsabilidades:
  * - Mostrar lista de categorías con checkbox
  * - Mostrar inputs para rango de precios
- * - Comunicar cambios al componente padre (onCategoryChange, onPriceChange)
- * - Limpiar todos los filtros (onClearFilters)
+ * - Comunicar cambios al componente padre
+ * - Limpiar todos los filtros
  * 
  * ✅ Buenas prácticas:
  * - Componente presentacional (solo UI)
  * - Recibe datos y funciones por props
  * - No tiene lógica de negocio
  * - Accesible (labels, inputs con aria-label)
- * - Sticky en desktop (se queda fijo al hacer scroll)
+ * - Sticky en desktop
+ * - Opción "Todas las categorías"
  * 
  * @param {Object} props
  * @param {Category[]} props.categories - Lista de categorías con iconos y colores
@@ -75,10 +76,22 @@ export default function ProductFilters({
   onPriceChange,
   onClearFilters,
 }: ProductFiltersProps) {
+  // =============================================
+  // 💰 FORMATEAR RANGO DE PRECIO
+  // =============================================
+  const formatPrice = (value: string) => {
+    if (!value) return "";
+    return Number(value).toLocaleString("es-CL");
+  };
+
+  const hasPriceRange = priceRange.min !== "" || priceRange.max !== "";
+
   return (
-    // 📦 Panel de filtros (sticky en desktop)
-    <div className="bg-white p-6 rounded-xl border-2 border-[#FF6B81] shadow-lg sticky top-4">
-      
+    <div 
+      className="bg-white p-6 rounded-xl border-2 border-[#FF6B81] shadow-lg sticky top-4"
+      role="region"
+      aria-label="Panel de filtros de productos"
+    >
       {/* =============================================
       📌 TÍTULO
       ============================================= */}
@@ -92,27 +105,45 @@ export default function ProductFilters({
       <div className="space-y-4">
         <div>
           <h4 className="font-semibold text-[#303030] mb-2">Categorías</h4>
-          
+
+          {/* ✅ Opción "Todas las categorías" */}
+          <label
+            className="flex items-center gap-2 py-1 cursor-pointer hover:text-[#FF6B81] transition-colors"
+          >
+            <input
+              type="checkbox"
+              checked={selectedCategory === ""}
+              onChange={() => onCategoryChange("")}
+              className="accent-[#FF6B81] w-4 h-4 cursor-pointer"
+              aria-label="Mostrar todas las categorías"
+            />
+            <span className="text-sm font-medium">
+              🏷️ Todas las categorías
+            </span>
+          </label>
+
           {/* 📋 Lista de categorías con checkbox */}
-          {categories.map((cat) => (
-            <label
-              key={cat.id}
-              className="flex items-center gap-2 py-1 cursor-pointer hover:text-[#FF6B81] transition-colors"
-            >
-              <input
-                type="checkbox"
-                checked={selectedCategory === cat.name}
-                onChange={() =>
-                  onCategoryChange(selectedCategory === cat.name ? "" : cat.name)
-                }
-                className="accent-[#FF6B81] w-4 h-4 cursor-pointer"
-                aria-label={`Filtrar por ${cat.name}`}
-              />
-              <span className="text-sm">
-                {cat.icon} {cat.name}
-              </span>
-            </label>
-          ))}
+          <div className="mt-2 ml-2 border-l-2 border-[#FF6B81]/20 pl-2">
+            {categories.map((cat) => (
+              <label
+                key={cat.id}
+                className="flex items-center gap-2 py-1 cursor-pointer hover:text-[#FF6B81] transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedCategory === cat.name}
+                  onChange={() =>
+                    onCategoryChange(selectedCategory === cat.name ? "" : cat.name)
+                  }
+                  className="accent-[#FF6B81] w-4 h-4 cursor-pointer"
+                  aria-label={`Filtrar por ${cat.name}`}
+                />
+                <span className="text-sm">
+                  {cat.icon} {cat.name}
+                </span>
+              </label>
+            ))}
+          </div>
         </div>
 
         {/* =============================================
@@ -144,8 +175,14 @@ export default function ProductFilters({
               min="0"
             />
           </div>
-          {/* 💡 Sugerencia: si ambos inputs están vacíos, mostrar texto */}
-          {!priceRange.min && !priceRange.max && (
+
+          {/* ✅ Rango de precio visible */}
+          {hasPriceRange ? (
+            <p className="text-xs text-[#303030] mt-1 font-medium">
+              Mostrando: {priceRange.min ? `$${formatPrice(priceRange.min)}` : "$0"} -{" "}
+              {priceRange.max ? `$${formatPrice(priceRange.max)}` : "∞"}
+            </p>
+          ) : (
             <p className="text-xs text-[#6A757C] mt-1">
               💡 Vacío muestra todos los precios
             </p>

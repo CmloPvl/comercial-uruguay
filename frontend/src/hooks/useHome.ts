@@ -3,18 +3,19 @@
 /**
  * 📌 HOOK PERSONALIZADO: useHome
  * 
- * Encapsula toda la lógica de la página Home:
+ * Encapsula la lógica base de la página Home:
  * - Carga de productos desde la API
  * - Estado de carga y error
  * - Agregar productos al carrito
- * - Productos destacados
  * 
  * ✅ Buenas prácticas:
  * - Separa la lógica del diseño
+ * - Responsabilidad única
  * - Reutilizable en otros componentes
  * - Fácil de testear
  * - Manejo de errores con toasts centralizados
- * - Mensajes consistentes y controlados (NO hardcodeados)
+ * 
+ * 🆕 Los productos destacados ahora viven en useFeaturedProducts
  */
 
 import { useState, useEffect } from "react";
@@ -50,10 +51,8 @@ export function useHome() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // =============================================
-  // 📦 LOS MAS VENDIDOS (primeros 12)
-  // =============================================
-  const featuredProducts = products.slice(0, 12);
+  // 🆕 Ya NO se calcula featuredProducts acá
+  // (ahora vive en useFeaturedProducts)
 
   // =============================================
   // 🔄 CARGAR PRODUCTOS
@@ -104,8 +103,8 @@ export function useHome() {
     products,
     loading,
     error,
-    featuredProducts,
     loadProducts,
     handleAddToCart,
+    // 🆕 featuredProducts eliminado del return
   };
 }

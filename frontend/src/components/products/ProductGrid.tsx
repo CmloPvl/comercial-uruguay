@@ -9,7 +9,6 @@
  * 
  * ✅ Responsabilidades:
  * - Mostrar un grid responsive de productos
- * - Manejar el estado "sin productos" (mensaje vacío)
  * - Pasar props a cada ProductCard
  * 
  * ✅ Buenas prácticas:
@@ -17,13 +16,14 @@
  * - Recibe datos y funciones por props
  * - No tiene lógica de negocio
  * - Responsive (mobile-first)
+ * - Accesible con aria-label
  * 
  * @param {Object} props
  * @param {Product[]} props.products - Lista de productos a mostrar
  * @param {Set<string>} [props.favorites] - Set con IDs de productos favoritos
  * @param {Function} [props.onToggleFavorite] - Función para agregar/eliminar favoritos
  * @param {Function} [props.onAddToCart] - Función para agregar al carrito
- * @returns {JSX.Element} - Grid de productos o mensaje de "sin productos"
+ * @returns {JSX.Element} - Grid de productos
  */
 
 import ProductCard from "./ProductCard";
@@ -50,33 +50,19 @@ interface ProductGridProps {
 
 export default function ProductGrid({
   products,
-  favorites = new Set(), // ✅ Valor por defecto: Set vacío
+  favorites = new Set(),
   onToggleFavorite,
   onAddToCart,
 }: ProductGridProps) {
-  // =============================================
-  // 📭 ESTADO: SIN PRODUCTOS
-  // =============================================
-
-  // ✅ Si no hay productos, mostrar mensaje amigable
-  if (products.length === 0) {
-    return (
-      <div className="text-center py-12">
-        {/* Icono decorativo */}
-        <div className="text-6xl mb-4">🔍</div>
-        <h3 className="text-xl font-bold text-[#303030]">No hay productos</h3>
-        <p className="text-[#6A757C] mt-2">Prueba con otros filtros.</p>
-      </div>
-    );
-  }
-
   // =============================================
   // 📦 RENDERIZADO DEL GRID
   // =============================================
 
   return (
-    /* ✅ Grid responsive: 1 columna en móvil, 2 en tablet, 3 en desktop */
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div 
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+      aria-label={`Grid de ${products.length} productos`}
+    >
       {products.map((product) => (
         <ProductCard
           key={product.id}

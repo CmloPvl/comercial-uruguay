@@ -1,10 +1,10 @@
-// 📁 frontend/src/hooks/useProductos.ts
+// 📁 frontend/src/hooks/useProducts.ts
 
 /**
- * 📌 HOOK PERSONALIZADO: useProductos
+ * 📌 HOOK PERSONALIZADO: useProducts
  * 
  * Encapsula toda la lógica de la página de productos (tienda):
- * - Carga de productos y categorías
+ * - Carga de productos
  * - Filtros (categoría, precio)
  * - Favoritos
  * - Carrito
@@ -12,41 +12,30 @@
  * 
  * ✅ Buenas prácticas:
  * - Separa la lógica del diseño
+ * - Usa useCategories (evita duplicación)
+ * - Usa helper de toasts (consistencia)
  * - Reutilizable en otros componentes
  * - Fácil de testear
- * - Manejo de errores con toasts
+ * - Manejo de errores con toasts centralizados
  */
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import toast from "react-hot-toast";
 import { productService, type Product } from "../services/productService";
-import { categoryService, type Category } from "../services/categoryService";
 import { favoriteService } from "../services/favoriteService";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { useCategories } from "./useCategories";
+import { 
+  showErrorToastWithFallback, 
+  showSuccessToast, 
+  successMessages,
+  productErrors,
+  cartErrors,
+  authErrors,
+} from "../utils/errorMessages";
 
-// 🎨 Iconos por defecto para categorías
-const defaultCategoryIcons: Record<string, string> = {
-  'Cabello': '💇',
-  'Juguetes': '🧸',
-  'Cumpleaños': '🎂',
-  'Hogar': '🏠',
-  'Melamina': '🍽️',
-  'Temporada': '🍂',
-};
-
-// 🎨 Colores para categorías
-const categoryColors = [
-  { color: "hover:bg-[#FF6B81]/20 hover:border-[#FF6B81]" },
-  { color: "hover:bg-[#C06060]/20 hover:border-[#C06060]" },
-  { color: "hover:bg-[#FFD93D]/20 hover:border-[#FFD93D]" },
-  { color: "hover:bg-[#7D5FFF]/20 hover:border-[#7D5FFF]" },
-  { color: "hover:bg-[#FF9F43]/20 hover:border-[#FF9F43]" },
-  { color: "hover:bg-[#603060]/20 hover:border-[#603060]" },
-];
-
-export function useProductos() {
+export function useProducts() {
   // =============================================
   // 🔍 PARÁMETROS DE URL
   // =============================================
@@ -60,10 +49,14 @@ export function useProductos() {
   const { addItemById } = useCart();
 
   // =============================================
+  // 📂 CATEGORÍAS (hook genérico)
+  // =============================================
+  const { categoriesWithIcons } = useCategories();
+
+  // =============================================
   // 🎯 ESTADOS
   // =============================================
-  const [productos, setProductos] = useState<Product[]>([]);
-  const [categorias, setCategorias] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -72,77 +65,41 @@ export function useProductos() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   // =============================================
-  // 📦 CATEGORÍAS CON ICONOS Y COLORES
-  // =============================================
-  const categoriesWithIcons = categorias.map((cat, index) => ({
-    ...cat,
-    icon: cat.icon || defaultCategoryIcons[cat.name] || '📦',
-    color: categoryColors[index % categoryColors.length].color,
-  }));
-
-  // =============================================
-  // 🔄 CARGAR DATOS
+  // 🔄 CARGAR PRODUCTOS
   // =============================================
   const loadProducts = async () => {
     try {
       setLoading(true);
       setError(null);
       const data = await productService.getProducts({ search: searchQuery });
-      setProductos(data || []);
-    } catch (err: any) {
-      setError(err.message || "Error al cargar productos");
-      toast.error("❌ Error al cargar productos", {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      setProducts(data || []);
+    } catch (err) {
+      const errorMessage = productErrors.notFound;
+      setError(errorMessage);
+      showErrorToastWithFallback(err, errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const loadCategories = async () => {
-    try {
-      const data = await categoryService.getCategories();
-      setCategorias(data);
-    } catch (error) {
-      console.error("Error al cargar categorías:", error);
-      toast.error("❌ Error al cargar categorías", {
-        style: {
-          border: "2px solid #FF9F43",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
-    }
-  };
-
+  // =============================================
+  // ❤️ CARGAR FAVORITOS
+  // =============================================
   const loadFavorites = async () => {
     try {
       const favs = await favoriteService.getFavorites();
       setFavorites(new Set(favs.map((f) => f.product.id)));
-    } catch (error) {
-      console.error("Error al cargar favoritos:", error);
+    } catch (err) {
+      // Silencioso (no es crítico)
     }
   };
 
   // =============================================
-  // ❤️ FAVORITOS
+  // ❤️ TOGGLE FAVORITO
   // =============================================
   const handleToggleFavorite = async (productId: string) => {
     if (!user) {
-      toast.error("🔒 Inicia sesión para guardar favoritos", {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      showErrorToastWithFallback(new Error(authErrors.loginRequired), authErrors.loginRequired);
       return;
     }
 
@@ -154,73 +111,31 @@ export function useProductos() {
           newSet.delete(productId);
           return newSet;
         });
-        toast.success("🗑️ Producto eliminado de favoritos", {
-          style: {
-            border: "2px solid #FF9F43",
-            padding: "16px",
-            backgroundColor: "#FAF9E2",
-            color: "#303030",
-          },
-        });
+        showSuccessToast("Producto eliminado de favoritos");
       } else {
         await favoriteService.addFavorite(productId);
         setFavorites((prev) => new Set([...prev, productId]));
-        toast.success("❤️ Producto agregado a favoritos", {
-          style: {
-            border: "2px solid #7D5FFF",
-            padding: "16px",
-            backgroundColor: "#FAF9E2",
-            color: "#303030",
-          },
-        });
+        showSuccessToast("Producto agregado a favoritos");
       }
-    } catch (err: any) {
-      toast.error(err.message || "Error al guardar favoritos", {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+    } catch (err) {
+      showErrorToastWithFallback(err, "Error al guardar favoritos");
     }
   };
 
   // =============================================
-  // 🛒 CARRITO
+  // 🛒 AGREGAR AL CARRITO
   // =============================================
   const handleAddToCart = async (productId: string) => {
     if (!user) {
-      toast.error("🔒 Inicia sesión para agregar al carrito", {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      showErrorToastWithFallback(new Error(authErrors.loginRequired), authErrors.loginRequired);
       return;
     }
 
     try {
       await addItemById(productId, 1);
-      toast.success("✅ Producto agregado al carrito", {
-        style: {
-          border: "2px solid #00D2D3",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
-    } catch (err: any) {
-      toast.error(err.message || "Error al agregar al carrito", {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      showSuccessToast(successMessages.addedToCart);
+    } catch (err) {
+      showErrorToastWithFallback(err, cartErrors.empty);
     }
   };
 
@@ -234,20 +149,13 @@ export function useProductos() {
   const handleClearFilters = () => {
     setSelectedCategory("");
     setPriceRange({ min: "", max: "" });
-    toast.success("🧹 Filtros limpiados", {
-      style: {
-        border: "2px solid #00D2D3",
-        padding: "16px",
-        backgroundColor: "#FAF9E2",
-        color: "#303030",
-      },
-    });
+    showSuccessToast("Filtros limpiados");
   };
 
   // =============================================
   // 📊 FILTRAR PRODUCTOS
   // =============================================
-  const filteredProducts = productos.filter((p) => {
+  const filteredProducts = products.filter((p) => {
     const matchesCategory = !selectedCategory || p.category_name === selectedCategory;
     const minPrice = priceRange.min !== "" ? Number(priceRange.min) : 0;
     const maxPrice = priceRange.max !== "" ? Number(priceRange.max) : Infinity;
@@ -260,7 +168,6 @@ export function useProductos() {
   // =============================================
   useEffect(() => {
     loadProducts();
-    loadCategories();
     if (user) {
       loadFavorites();
     }
@@ -271,8 +178,7 @@ export function useProductos() {
   // =============================================
   return {
     // Estados
-    productos,
-    categorias,
+    products,
     loading,
     error,
     selectedCategory,
@@ -291,7 +197,6 @@ export function useProductos() {
     handleToggleFavorite,
     handleAddToCart,
     loadProducts,
-    loadCategories,
     loadFavorites,
   };
 }

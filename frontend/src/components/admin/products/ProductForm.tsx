@@ -9,17 +9,17 @@
  * - Columnas extraídas a componentes separados
  * - Opciones avanzadas extraídas a componente separado
  * - Código más limpio y mantenible
- * 
- * 📊 Resultado: ~900 líneas → ~180 líneas (80% de reducción)
+ * - Campo "destacado" conectado al backend
+ * - 🆕 Soporte para packs promocionales (packPrice, packQuantity)
  */
 
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { Card, CardContent } from "../../ui/card";
 import { ProductFormSkeleton } from "./ProductFormSkeleton";
-import { ProductFormHeader } from "../products/ProductFormHeader";
-import { ProductFormActions } from "../products/ProductFormActions";
-import { ProductFormLeftColumn } from "../products/ProductFormLeftColumn";
+import { ProductFormHeader } from "./ProductFormHeader";
+import { ProductFormActions } from "./ProductFormActions";
+import { ProductFormLeftColumn } from "./ProductFormLeftColumn";
 import { ProductFormRightColumn } from "./ProductFormRightColumn";
 import type { Product } from "../../../services/adminService";
 import type { Category } from "../../../services/categoryService";
@@ -57,9 +57,11 @@ export default function ProductForm({
     stock: product?.stock?.toString() || "",
     variantes: "",
     etiquetas: "",
-    destacar: false,
+    destacar: product?.destacado || false,
     enOferta: product?.isOnSale || false,
     descuento: product?.discount?.toString() || "",
+    packQuantity: product?.packQuantity?.toString() || "",  // 🆕
+    packPrice: product?.packPrice?.toString() || "",        // 🆕
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [images, setImages] = useState<string[]>(product?.images || []);
@@ -78,9 +80,11 @@ export default function ProductForm({
         stock: product.stock?.toString() || "",
         variantes: "",
         etiquetas: "",
-        destacar: false,
+        destacar: product.destacado || false,
         enOferta: product.isOnSale || false,
         descuento: product.discount?.toString() || "",
+        packQuantity: product.packQuantity?.toString() || "",  // 🆕
+        packPrice: product.packPrice?.toString() || "",        // 🆕
       });
       setImages(product.images || []);
     }
@@ -135,6 +139,15 @@ export default function ProductForm({
     if (formData.enOferta && (!formData.descuento || Number(formData.descuento) <= 0 || Number(formData.descuento) > 100)) {
       newErrors.descuento = "Debes indicar un descuento válido (1-100)";
     }
+    // 🆕 Validación de pack: ambos o ninguno
+    if (formData.packQuantity || formData.packPrice) {
+      if (!formData.packQuantity || Number(formData.packQuantity) <= 0) {
+        newErrors.packQuantity = "La cantidad del pack debe ser mayor a 0";
+      }
+      if (!formData.packPrice || Number(formData.packPrice) <= 0) {
+        newErrors.packPrice = "El precio del pack debe ser mayor a 0";
+      }
+    }
     
     return newErrors;
   };
@@ -161,8 +174,6 @@ export default function ProductForm({
     const tags = formData.etiquetas ? formData.etiquetas.split(",").map(tag => tag.trim()).filter(Boolean) : [];
     const variants = formData.variantes ? formData.variantes.split(",").map(v => v.trim()).filter(Boolean) : [];
 
-console.log('📸 [ProductForm] images ANTES de enviar:', images);
-
     try {
       await onSubmit({
         name: formData.nombre,
@@ -177,6 +188,10 @@ console.log('📸 [ProductForm] images ANTES de enviar:', images);
         isActive: true,
         tags,
         variants,
+        destacado: formData.destacar,
+        // 🆕 Pack: enviar null si no se llenó
+        packQuantity: formData.packQuantity ? Number(formData.packQuantity) : null,
+        packPrice: formData.packPrice ? Number(formData.packPrice) : null,
       });
     } catch (error: any) {
       toast.error(error.message || "Error al guardar el producto", {

@@ -12,8 +12,7 @@
  * - Reemplazado breadcrumb manual por AppBreadcrumb
  * - Reemplazado spinner manual por Skeleton de shadcn/ui
  * - Código más limpio y mantenible
- * 
- * 📊 Resultado: ~350 líneas → ~180 líneas (48% de reducción)
+ * - 🆕 Soporte para packs promocionales
  */
 
 import { Link, useParams } from "react-router-dom";
@@ -50,12 +49,9 @@ export default function ProductoDetalle() {
       <Layout>
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Imagen skeleton */}
             <div className="lg:w-1/2">
               <Skeleton className="h-96 w-full rounded-2xl" />
             </div>
-
-            {/* Información skeleton */}
             <div className="lg:w-1/2 space-y-4">
               <Skeleton className="h-6 w-32 rounded-full" />
               <Skeleton className="h-10 w-3/4" />
@@ -88,6 +84,18 @@ export default function ProductoDetalle() {
       </Layout>
     );
   }
+
+  // 🆕 ¿Tiene pack promocional?
+  const hasPack =
+    product.packPrice != null &&
+    product.packQuantity != null &&
+    product.packQuantity > 0 &&
+    product.packPrice > 0;
+
+  // 🆕 ¿Cuánto se ahorra con el pack? (solo si tiene pack)
+  const packSavings = hasPack
+    ? product.price * product.packQuantity! - product.packPrice!
+    : 0;
 
   // =============================================
   // 🖥️ RENDER PRINCIPAL
@@ -162,6 +170,23 @@ export default function ProductoDetalle() {
                 <Badge className="bg-[#FF6B81] text-white ml-2">-{product.discount}%</Badge>
               )}
             </div>
+
+            {/* 🆕 PACK PROMOCIONAL */}
+            {hasPack && (
+              <div className="bg-gradient-to-r from-[#FFD93D]/30 to-[#FF9F43]/30 border-2 border-[#FFD93D] rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-2xl">🎁</span>
+                  <p className="font-bold text-[#603060] text-lg">
+                    Lleva {product.packQuantity} por ${product.packPrice!.toLocaleString("es-CL")}
+                  </p>
+                </div>
+                {packSavings > 0 && (
+                  <p className="text-sm text-[#6A757C] ml-8">
+                    Ahorras ${packSavings.toLocaleString("es-CL")}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Stock */}
             <div

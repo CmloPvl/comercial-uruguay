@@ -12,11 +12,13 @@
  * - Protección de rutas con middleware
  * - Uso de controllers
  * - Comentarios explicativos
+ * - ⚠️ Rutas específicas ANTES de las dinámicas (/:id)
  */
 
 import { Router } from 'express';
 import { 
   getProducts, 
+  getFeaturedProducts,      // 🆕 Importar controlador
   getProductById, 
   createProduct, 
   updateProduct, 
@@ -39,6 +41,17 @@ const router = Router();
 router.get('/', getProducts);
 
 /**
+ * ⭐ GET /api/products/destacados
+ * 
+ * Obtener solo los productos marcados como destacados
+ * Público - usado por el Home para "Artículos destacados"
+ * 
+ * ⚠️ IMPORTANTE: Debe ir ANTES de /:id
+ * (si va después, Express interpreta "destacados" como un ID)
+ */
+router.get('/destacados', getFeaturedProducts);   // 🆕
+
+/**
  * GET /api/products/:id
  * 
  * Obtener un producto específico por ID
@@ -55,7 +68,6 @@ router.get('/:id', getProductById);
  * 
  * Crear un nuevo producto
  * 🔒 Requiere autenticación (verifyToken)
- * 🔒 Requiere rol ADMIN (opcional - por implementar)
  */
 router.post('/', verifyToken, createProduct);
 
@@ -64,7 +76,6 @@ router.post('/', verifyToken, createProduct);
  * 
  * Actualizar un producto existente
  * 🔒 Requiere autenticación (verifyToken)
- * 🔒 Requiere rol ADMIN (opcional - por implementar)
  */
 router.put('/:id', verifyToken, updateProduct);
 
@@ -73,7 +84,6 @@ router.put('/:id', verifyToken, updateProduct);
  * 
  * Eliminar (soft delete) un producto
  * 🔒 Requiere autenticación (verifyToken)
- * 🔒 Requiere rol ADMIN (opcional - por implementar)
  */
 router.delete('/:id', verifyToken, deleteProduct);
 

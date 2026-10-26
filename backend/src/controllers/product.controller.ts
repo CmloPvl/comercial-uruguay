@@ -5,6 +5,7 @@
  * 
  * Maneja todas las operaciones relacionadas con productos:
  * - Obtener todos los productos
+ * - Obtener productos destacados
  * - Obtener producto por ID
  * - Crear producto
  * - Actualizar producto
@@ -15,6 +16,8 @@
  * - Manejo de errores con try/catch
  * - Logs para depuración
  * - Respuestas consistentes
+ * 
+ * 🆕 Soporte para packs promocionales (packPrice, packQuantity)
  */
 
 import { Response } from 'express';
@@ -36,6 +39,25 @@ export const getProducts = async (_req: AuthRequest, res: Response) => {
     return res.status(500).json({
       success: false,
       message: error.message || 'Error al obtener productos'
+    });
+  }
+};
+
+// =============================================
+// ⭐ OBTENER PRODUCTOS DESTACADOS
+// =============================================
+export const getFeaturedProducts = async (_req: AuthRequest, res: Response) => {
+  try {
+    const products = await ProductModel.findFeatured();
+    return res.json({
+      success: true,
+      data: products
+    });
+  } catch (error: any) {
+    console.error('❌ Error en getFeaturedProducts:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Error al obtener productos destacados'
     });
   }
 };
@@ -73,29 +95,26 @@ export const getProductById = async (req: AuthRequest, res: Response) => {
 // =============================================
 export const createProduct = async (req: AuthRequest, res: Response) => {
   try {
-    // 🎯 1. LOG: Inicio del proceso
     console.log('📦 ===== INICIO DE CREACIÓN DE PRODUCTO =====');
-    
-    // 🎯 2. LOG: Mostrar todo el body recibido (para depuración)
     console.log('📦 Body recibido completo:', JSON.stringify(req.body, null, 2));
     
-    // 🎯 3. Extraer los campos del body
-    // IMPORTANTE: 'images' viene del frontend como un array de URLs
     const { 
       name, 
       description, 
       price, 
       sku, 
       stock, 
-      images,        // ← Aquí llega el array de URLs de Supabase
+      images, 
       categoryId, 
       isOnSale, 
       discount, 
       tags, 
-      variants 
+      variants,
+      destacado,              // 🆕 Extraer destacado
+      packPrice,              // 🆕 Extraer packPrice
+      packQuantity,           // 🆕 Extraer packQuantity
     } = req.body;
 
-    // 🎯 4. LOG: Verificar cada campo extraído (para depuración)
     console.log('📦 Campos extraídos:');
     console.log('  - name:', name);
     console.log('  - description:', description);
@@ -107,15 +126,15 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
     console.log('  - discount:', discount);
     console.log('  - tags:', tags);
     console.log('  - variants:', variants);
-    
-    // ✅ 5. LOG ESPECÍFICO DE IMÁGENES (NUEVO)
-    // Esto nos dice si 'images' llega correctamente desde el frontend
-    console.log('  - images:', images);                              // ✅ Muestra el array completo
-    console.log('  - type of images:', typeof images);               // ✅ Debería ser "object"
-    console.log('  - images es array:', Array.isArray(images));      // ✅ Debería ser "true"
-    console.log('  - cantidad de imágenes:', images?.length || 0);   // ✅ Cuántas imágenes llegaron
+    console.log('  - destacado:', destacado);
+    console.log('  - packPrice:', packPrice);           // 🆕 Log
+    console.log('  - packQuantity:', packQuantity);   // 🆕 Log
+    console.log('  - images:', images);
+    console.log('  - type of images:', typeof images);
+    console.log('  - images es array:', Array.isArray(images));
+    console.log('  - cantidad de imágenes:', images?.length || 0);
 
-    // 🛡️ 6. Validación de campos obligatorios
+    // 🛡️ Validación de campos obligatorios
     if (!name || !description || !price || !sku) {
       console.log('❌ Faltan campos obligatorios');
       return res.status(400).json({
@@ -126,34 +145,30 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
 
     console.log('✅ Validación pasada, creando producto...');
 
-    // 🎯 7. Preparar los datos para el modelo
-    // IMPORTANTE: 'images' se pasa como array, el modelo lo convertirá a JSON string
     const productData = {
       name,
       description,
       price: Number(price),
       sku,
       stock: stock ? Number(stock) : 0,
-      images: images || [],  // ← Si no hay imágenes, usar array vacío
+      images: images || [],
       categoryId: categoryId ? Number(categoryId) : undefined,
       isOnSale: isOnSale || false,
       discount: discount ? Number(discount) : 0,
       tags: tags || [],
-      variants: variants || []
+      variants: variants || [],
+      destacado: destacado || false,
+      packPrice: packPrice ? Number(packPrice) : null,        // 🆕 Pasar al modelo
+      packQuantity: packQuantity ? Number(packQuantity) : null, // 🆕 Pasar al modelo
     };
 
-    // 🎯 8. LOG: Ver qué se está enviando al modelo
     console.log('📦 Datos a enviar al modelo:', JSON.stringify(productData, null, 2));
-    console.log('📦 images antes de enviar al modelo:', JSON.stringify(images)); // ✅ NUEVO
 
-    // 💾 9. Guardar en la base de datos
     const product = await ProductModel.create(productData);
 
-    // 🎯 10. LOG: Éxito
     console.log('✅ Producto creado exitosamente:', JSON.stringify(product, null, 2));
     console.log('📦 ===== FIN DE CREACIÓN DE PRODUCTO =====');
 
-    // 📤 11. Respuesta exitosa
     return res.status(201).json({
       success: true,
       message: 'Producto creado exitosamente',
@@ -161,7 +176,6 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
     });
     
   } catch (error: any) {
-    // 🐛 12. Manejo de errores
     console.error('❌ ===== ERROR EN createProduct =====');
     console.error('❌ Mensaje de error:', error.message);
     console.error('❌ Código de error:', error.code);
@@ -169,16 +183,13 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
     console.error('❌ Stack:', error.stack);
     console.error('❌ ===== FIN DEL ERROR =====');
     
-    // 🔍 13. Errores específicos
     if (error.code === '23505') {
-      // Código 23505 = violación de unicidad (SKU duplicado)
       return res.status(400).json({
         success: false,
         message: 'El SKU ya está registrado'
       });
     }
     
-    // 📤 14. Error genérico
     return res.status(500).json({
       success: false,
       message: error.message || 'Error al crear producto'
@@ -198,15 +209,17 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
       price, 
       sku, 
       stock, 
-      images,      // ← Array de URLs de Supabase
+      images, 
       categoryId, 
       isOnSale, 
-      discount 
+      discount,
+      destacado,              // 🆕 Extraer destacado
+      packPrice,              // 🆕 Extraer packPrice
+      packQuantity,           // 🆕 Extraer packQuantity
     } = req.body;
 
     console.log('📦 Actualizando producto ID:', id);
-    console.log('📦 Datos de actualización:', { name, description, price, sku, stock, categoryId });
-    console.log('📦 images en actualización:', images); // ✅ NUEVO
+    console.log('📦 Datos de actualización:', { name, description, price, sku, stock, categoryId, destacado, packPrice, packQuantity });
 
     const updatedProduct = await ProductModel.update(id, {
       name,
@@ -217,7 +230,10 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
       images,
       categoryId,
       isOnSale,
-      discount
+      discount,
+      destacado,
+      packPrice: packPrice ? Number(packPrice) : null,          // 🆕 Pasar al modelo
+      packQuantity: packQuantity ? Number(packQuantity) : null, // 🆕 Pasar al modelo
     });
 
     if (!updatedProduct) {
