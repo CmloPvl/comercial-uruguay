@@ -10,7 +10,11 @@
  * - Opciones avanzadas extraídas a componente separado
  * - Código más limpio y mantenible
  * - Campo "destacado" conectado al backend
- * - 🆕 Soporte para packs promocionales (packPrice, packQuantity)
+ * - Soporte para packs promocionales (packPrice, packQuantity)
+ * - Prop description opcional (el header la muestra)
+ * - ProductForm autocontenido (sin header duplicado en páginas)
+ * 
+ * 🆕 Stock opcional (si vacío → 0, frontend muestra "Consultar disponibilidad")
  */
 
 import { useState, useEffect } from "react";
@@ -29,6 +33,7 @@ interface ProductFormProps {
   onSubmit: (data: any) => Promise<void>;
   loading: boolean;
   title: string;
+  description?: string;
   submitText: string;
   categories: Category[];
   categoriesLoading?: boolean;
@@ -40,6 +45,7 @@ export default function ProductForm({
   onSubmit,
   loading,
   title,
+  description,
   submitText,
   categories,
   categoriesLoading = false,
@@ -60,8 +66,8 @@ export default function ProductForm({
     destacar: product?.destacado || false,
     enOferta: product?.isOnSale || false,
     descuento: product?.discount?.toString() || "",
-    packQuantity: product?.packQuantity?.toString() || "",  // 🆕
-    packPrice: product?.packPrice?.toString() || "",        // 🆕
+    packQuantity: product?.packQuantity?.toString() || "",
+    packPrice: product?.packPrice?.toString() || "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [images, setImages] = useState<string[]>(product?.images || []);
@@ -83,8 +89,8 @@ export default function ProductForm({
         destacar: product.destacado || false,
         enOferta: product.isOnSale || false,
         descuento: product.discount?.toString() || "",
-        packQuantity: product.packQuantity?.toString() || "",  // 🆕
-        packPrice: product.packPrice?.toString() || "",        // 🆕
+        packQuantity: product.packQuantity?.toString() || "",
+        packPrice: product.packPrice?.toString() || "",
       });
       setImages(product.images || []);
     }
@@ -133,13 +139,10 @@ export default function ProductForm({
     if (!formData.precio || Number(formData.precio) <= 0) {
       newErrors.precio = "El precio debe ser mayor a 0";
     }
-    if (!formData.stock || Number(formData.stock) < 0) {
-      newErrors.stock = "El stock debe ser un número mayor o igual a 0";
-    }
+    // 🆕 Stock ya NO es obligatorio (se permite vacío)
     if (formData.enOferta && (!formData.descuento || Number(formData.descuento) <= 0 || Number(formData.descuento) > 100)) {
       newErrors.descuento = "Debes indicar un descuento válido (1-100)";
     }
-    // 🆕 Validación de pack: ambos o ninguno
     if (formData.packQuantity || formData.packPrice) {
       if (!formData.packQuantity || Number(formData.packQuantity) <= 0) {
         newErrors.packQuantity = "La cantidad del pack debe ser mayor a 0";
@@ -181,7 +184,8 @@ export default function ProductForm({
         sku: formData.sku,
         categoryId: Number(formData.categoriaId),
         price: Number(formData.precio),
-        stock: Number(formData.stock),
+        // 🆕 Stock opcional: si vacío → 0
+        stock: formData.stock ? Number(formData.stock) : 0,
         images: images.length > 0 ? images : ["https://via.placeholder.com/300x300?text=Sin+Imagen"],
         isOnSale: formData.enOferta,
         discount: formData.enOferta ? Number(formData.descuento) : 0,
@@ -189,7 +193,6 @@ export default function ProductForm({
         tags,
         variants,
         destacado: formData.destacar,
-        // 🆕 Pack: enviar null si no se llenó
         packQuantity: formData.packQuantity ? Number(formData.packQuantity) : null,
         packPrice: formData.packPrice ? Number(formData.packPrice) : null,
       });
@@ -217,9 +220,10 @@ export default function ProductForm({
   // =============================================
   return (
     <form onSubmit={handleSubmit} className="space-y-6" aria-label={`Formulario de ${title}`}>
-      {/* Header */}
+      {/* Header (título, descripción, badges) */}
       <ProductFormHeader
         title={title}
+        description={description}
         categoriesCount={categories.length}
         badge={badge}
       />

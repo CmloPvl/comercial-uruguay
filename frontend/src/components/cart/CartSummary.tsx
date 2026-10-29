@@ -17,14 +17,8 @@
  * - Sticky en desktop (se queda fijo al hacer scroll)
  * - Accesible (labels en inputs)
  * 
- * @param {Object} props
- * @param {number} props.totalItems - Cantidad total de productos en el carrito
- * @param {number} props.totalPrice - Precio total del carrito
- * @param {'retiro' | 'envio'} props.deliveryOption - Opción de entrega seleccionada
- * @param {Function} props.onDeliveryChange - Función para cambiar la opción de entrega
- * @param {Function} props.onWhatsApp - Función para enviar pedido por WhatsApp
- * @param {boolean} [props.loading] - Estado de carga (por defecto: false)
- * @returns {JSX.Element} - Resumen del carrito
+ * 🆕 "unidades" en vez de "productos" (más honesto con packs)
+ * 🆕 "Enviar por WhatsApp" (mejor redacción)
  */
 
 import { Card, CardContent } from "../ui/card";
@@ -36,7 +30,7 @@ import { FaWhatsapp } from "react-icons/fa";
 // =============================================
 
 interface CartSummaryProps {
-  /** Cantidad total de productos en el carrito */
+  /** Cantidad total de unidades en el carrito */
   totalItems: number;
   /** Precio total del carrito */
   totalPrice: number;
@@ -81,7 +75,8 @@ export default function CartSummary({
           {/* Subtotal */}
           <div className="flex justify-between">
             <span className="text-[#303030]">
-              Subtotal ({totalItems} productos)
+              {/* 🆕 "unidades" en vez de "productos" */}
+              Subtotal ({totalItems} {totalItems === 1 ? "unidad" : "unidades"})
             </span>
             <span className="font-bold text-[#7D5FFF]">
               ${totalPrice.toLocaleString()}
@@ -135,49 +130,50 @@ export default function CartSummary({
         {/* =============================================
         📤 BOTÓN WHATSAPP
         ============================================= */}
-       <Button
-  onClick={onWhatsApp}
-  disabled={loading || totalItems === 0}
-  className="
-    w-full 
-    mt-6 
-    bg-gradient-to-r from-[#25D366] to-[#128C7E] 
-    hover:from-[#128C7E] hover:to-[#075E54] 
-    text-white 
-    font-bold 
-    py-4 px-8 
-    text-lg 
-    rounded-2xl 
-    shadow-lg hover:shadow-2xl 
-    transition-all duration-300 
-    hover:scale-[1.03] 
-    active:scale-[0.97]
-    disabled:opacity-50 
-    disabled:cursor-not-allowed 
-    disabled:hover:scale-100
-    flex items-center justify-center gap-3
-    relative
-    overflow-hidden
-    group
-  "
->
-  {/* ✅ Efecto de brillo al hacer hover */}
-  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
-  
-  {/* ✅ Icono con animación */}
-  <FaWhatsapp 
-    size={22} 
-    className="group-hover:scale-110 group-hover:rotate-[-5deg] transition-transform duration-300" 
-  />
-  
-  {loading ? (
-    <span className="flex items-center gap-2">
-      <span className="animate-spin">⏳</span> Enviando...
-    </span>
-  ) : (
-    "Envía al Whatsapp"
-  )}
-</Button>
+        <Button
+          onClick={onWhatsApp}
+          disabled={loading || totalItems === 0}
+          className="
+            w-full 
+            mt-6 
+            bg-gradient-to-r from-[#25D366] to-[#128C7E] 
+            hover:from-[#128C7E] hover:to-[#075E54] 
+            text-white 
+            font-bold 
+            py-4 px-8 
+            text-lg 
+            rounded-2xl 
+            shadow-lg hover:shadow-2xl 
+            transition-all duration-300 
+            hover:scale-[1.03] 
+            active:scale-[0.97]
+            disabled:opacity-50 
+            disabled:cursor-not-allowed 
+            disabled:hover:scale-100
+            flex items-center justify-center gap-3
+            relative
+            overflow-hidden
+            group
+          "
+        >
+          {/* ✅ Efecto de brillo al hacer hover */}
+          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+          
+          {/* ✅ Icono con animación */}
+          <FaWhatsapp 
+            size={22} 
+            className="group-hover:scale-110 group-hover:rotate-[-5deg] transition-transform duration-300" 
+          />
+          
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <span className="animate-spin">⏳</span> Enviando...
+            </span>
+          ) : (
+            // 🆕 Mejor redacción
+            "Enviar por WhatsApp"
+          )}
+        </Button>
 
         {/* Nota informativa */}
         <p className="text-xs text-[#6A757C] text-center mt-2">

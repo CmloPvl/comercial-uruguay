@@ -1,8 +1,36 @@
+// 📁 backend/src/controllers/cart.controller.ts
+
+/**
+ * 📌 CONTROLADOR DE CARRITO
+ * 
+ * Maneja todas las operaciones del carrito:
+ * - Obtener carrito del usuario
+ * - Agregar producto
+ * - Actualizar cantidad
+ * - Eliminar producto
+ * - Vaciar carrito
+ * 
+ * ✅ Buenas prácticas:
+ * - Separación de responsabilidades
+ * - Manejo de errores con try/catch
+ * - Validaciones de stock y autenticación
+ * - Respuestas consistentes
+ * - Cálculo de subtotales delegado a utils/calculateSubtotal
+ * - Comentarios explicativos
+ * 
+ * 🆕 Soporte para packs promocionales
+ * 🆕 Stock 0 = "consultar" (no bloquea agregar)
+ */
+
 import { Response } from 'express';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { CartModel } from '../models/Cart';
 import { ProductModel } from '../models/Product';
+import { calculateSubtotal } from '../utils/calculateSubtotal';
 
+// =============================================
+// 📦 OBTENER CARRITO
+// =============================================
 export const getCart = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -19,6 +47,7 @@ export const getCart = async (req: AuthRequest, res: Response) => {
       data: cart
     });
   } catch (error: any) {
+    console.error('❌ Error en getCart:', error);
     return res.status(500).json({
       success: false,
       message: error.message || 'Error al obtener carrito'
@@ -26,6 +55,9 @@ export const getCart = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// =============================================
+// ➕ AGREGAR AL CARRITO
+// =============================================
 export const addToCart = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -53,7 +85,9 @@ export const addToCart = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    if (product.stock < quantity) {
+    // 🆕 Validar stock SOLO si hay stock real definido > 0
+    // (stock = 0 significa "consultar disponibilidad" → se permite agregar)
+    if (product.stock > 0 && product.stock < quantity) {
       return res.status(400).json({
         success: false,
         message: `Stock insuficiente. Disponible: ${product.stock}`
@@ -63,16 +97,25 @@ export const addToCart = async (req: AuthRequest, res: Response) => {
     const cartId = await CartModel.getOrCreateCart(userId);
     await CartModel.addItem(cartId, parseInt(productId as string), quantity);
 
+    const packPrice = product.packPrice ? parseFloat(product.packPrice.toString()) : null;
+    const packQuantity = product.packQuantity || null;
+    const subtotal = calculateSubtotal(product.price, quantity, packPrice, packQuantity);
+    const packApplied = !!(packPrice && packQuantity && quantity >= packQuantity);
+
     return res.json({
       success: true,
       message: 'Producto agregado al carrito',
       data: {
         productId: parseInt(productId as string),
         quantity,
-        subtotal: product.price * quantity
+        subtotal,
+        packPrice,
+        packQuantity,
+        packApplied,
       }
     });
   } catch (error: any) {
+    console.error('❌ Error en addToCart:', error);
     return res.status(500).json({
       success: false,
       message: error.message || 'Error al agregar al carrito'
@@ -80,6 +123,9 @@ export const addToCart = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// =============================================
+// ✏️ ACTUALIZAR CANTIDAD
+// =============================================
 export const updateCartItem = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -108,7 +154,8 @@ export const updateCartItem = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    if (product.stock < quantity) {
+    // 🆕 Validar stock SOLO si hay stock real definido > 0
+    if (product.stock > 0 && product.stock < quantity) {
       return res.status(400).json({
         success: false,
         message: `Stock insuficiente. Disponible: ${product.stock}`
@@ -125,16 +172,25 @@ export const updateCartItem = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    const packPrice = product.packPrice ? parseFloat(product.packPrice.toString()) : null;
+    const packQuantity = product.packQuantity || null;
+    const subtotal = calculateSubtotal(product.price, quantity, packPrice, packQuantity);
+    const packApplied = !!(packPrice && packQuantity && quantity >= packQuantity);
+
     return res.json({
       success: true,
       message: 'Cantidad actualizada',
       data: {
         productId,
         quantity,
-        subtotal: product.price * quantity
+        subtotal,
+        packPrice,
+        packQuantity,
+        packApplied,
       }
     });
   } catch (error: any) {
+    console.error('❌ Error en updateCartItem:', error);
     return res.status(500).json({
       success: false,
       message: error.message || 'Error al actualizar carrito'
@@ -142,6 +198,9 @@ export const updateCartItem = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// =============================================
+// 🗑️ ELIMINAR PRODUCTO DEL CARRITO
+// =============================================
 export const removeFromCart = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -168,6 +227,7 @@ export const removeFromCart = async (req: AuthRequest, res: Response) => {
       message: 'Producto eliminado del carrito'
     });
   } catch (error: any) {
+    console.error('❌ Error en removeFromCart:', error);
     return res.status(500).json({
       success: false,
       message: error.message || 'Error al eliminar del carrito'
@@ -175,6 +235,9 @@ export const removeFromCart = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// =============================================
+// 🗑️ VACIAR CARRITO
+// =============================================
 export const clearCart = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -193,6 +256,7 @@ export const clearCart = async (req: AuthRequest, res: Response) => {
       message: 'Carrito vaciado exitosamente'
     });
   } catch (error: any) {
+    console.error('❌ Error en clearCart:', error);
     return res.status(500).json({
       success: false,
       message: error.message || 'Error al vaciar carrito'

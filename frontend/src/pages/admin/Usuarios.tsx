@@ -4,7 +4,6 @@
  * 📌 PÁGINA: ADMIN USUARIOS
  * 
  * Panel de administración de usuarios.
- * Conecta la lógica (useAdminUsuarios) con el diseño (componentes UI).
  * 
  * ✅ Buenas prácticas:
  * - Separación de lógica y diseño
@@ -19,10 +18,12 @@
  * - Modales de confirmación (AlertDialog)
  * - Contadores de usuarios
  * - Botón para volver al Dashboard
+ * 
+ * 🆕 Sin <Layout>: App.tsx ya envuelve con <AdminLayout>
+ *    (evita doble layout)
  */
 
 import { Link } from 'react-router-dom';
-import Layout from '../../components/layout/Layout';
 import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -137,28 +138,26 @@ export default function AdminUsuarios() {
   // =============================================
   if (user?.role !== 'ADMIN') {
     return (
-      <Layout title="Acceso Denegado">
-        <div className="min-h-[70vh] flex items-center justify-center py-12 px-4">
-          <Card className="max-w-md w-full border-2 border-[#FF6B81] shadow-2xl">
-            <CardContent className="p-8 text-center">
-              <div className="text-6xl mb-4">🚫</div>
-              <h2 className="text-2xl font-bold text-[#603060] mb-2">
-                Acceso Denegado
-              </h2>
-              <p className="text-[#6A757C] mb-6">
-                No tienes permisos para gestionar usuarios.
-                <br />
-                Esta sección es solo para administradores.
-              </p>
-              <Link to="/">
-                <Button className="w-full bg-gradient-to-r from-[#7D5FFF] to-[#603060] hover:from-[#603060] hover:to-[#7D5FFF] text-white font-bold py-3 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]">
-                  🏠 Volver al Inicio
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-      </Layout>
+      <div className="min-h-[70vh] flex items-center justify-center py-12 px-4">
+        <Card className="max-w-md w-full border-2 border-[#FF6B81] shadow-2xl">
+          <CardContent className="p-8 text-center">
+            <div className="text-6xl mb-4">🚫</div>
+            <h2 className="text-2xl font-bold text-[#603060] mb-2">
+              Acceso Denegado
+            </h2>
+            <p className="text-[#6A757C] mb-6">
+              No tienes permisos para gestionar usuarios.
+              <br />
+              Esta sección es solo para administradores.
+            </p>
+            <Link to="/">
+              <Button className="w-full bg-gradient-to-r from-[#7D5FFF] to-[#603060] hover:from-[#603060] hover:to-[#7D5FFF] text-white font-bold py-3 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]">
+                🏠 Volver al Inicio
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -167,7 +166,7 @@ export default function AdminUsuarios() {
   // =============================================
   if (loading) {
     return (
-      <Layout title="Gestionar Usuarios">
+      <>
         {/* Breadcrumb skeleton */}
         <div className="bg-[#FF6B81]/10 py-3 px-4 border-b-2 border-[#FF6B81]">
           <div className="max-w-7xl mx-auto">
@@ -195,7 +194,7 @@ export default function AdminUsuarios() {
             </CardContent>
           </Card>
         </div>
-      </Layout>
+      </>
     );
   }
 
@@ -203,7 +202,7 @@ export default function AdminUsuarios() {
   // 🖥️ RENDER PRINCIPAL
   // =============================================
   return (
-    <Layout title="Gestionar Usuarios">
+    <>
       {/* =============================================
       📍 BREADCRUMB
       ============================================= */}
@@ -601,6 +600,6 @@ export default function AdminUsuarios() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Layout>
+    </>
   );
 }

@@ -1,0 +1,200 @@
+═══════════════════════════════════════════════════════════════
+📋 PROPUESTAS DE MEJORA — COMERCIAL URUGUAY
+Fecha: 28/10/2026
+Áreas: Programación · Marketing · Manejo de la web
+═══════════════════════════════════════════════════════════════
+
+DIAGNÓSTICO GENERAL
+─────────────────────────────────────────────────────────────
+El admin está bien construido (SoC, componentes reutilizables,
+toasts, skeletons, modales). Hay oportunidades de mejora en
+3 áreas: técnica, marketing y operativa.
+
+
+═══════════════════════════════════════════════════════════════
+🔧 PROGRAMACIÓN (TÉCNICO)
+═══════════════════════════════════════════════════════════════
+
+1. Dashboard.tsx — revisar
+   No lo hemos visto. ¿Tiene stats? ¿Acciones rápidas?
+   Propuesta: revisarlo y asegurar que sea el hub central.
+
+2. Botón "Crear producto" en el Dashboard
+   Hoy hay que ir a /admin/productos → botón.
+   Propuesta: acceso directo desde el Dashboard (card).
+   ✅ Reduce clics, mejora UX.
+
+3. ProductForm — dividir en pasos (wizard)
+   Hoy es un formulario largo de 1 página.
+   Propuesta: 2-3 pasos:
+     1. Info básica (nombre, descripción, SKU, categoría)
+     2. Precio y stock (precio, stock, variantes)
+     3. Imágenes y opciones (imágenes, destacado, oferta, pack)
+   ✅ Menos abrumador, más rápido.
+
+4. Validación en tiempo real en el form
+   Hoy valida al enviar.
+   Propuesta: validar mientras escribe.
+   ✅ Feedback inmediato.
+
+5. Manejo de errores global en el admin
+   Cada página maneja su error.
+   Propuesta: ErrorBoundary o contexto global.
+   ✅ Un solo lugar para errores críticos.
+
+6. Debounce en búsquedas
+   Hoy busca en cada tecla.
+   Propuesta: debounce 300ms.
+   ✅ Mejor performance en listas grandes.
+
+7. Paginación en AdminProductos
+   Ya tiene paginación ✅.
+   Propuesta: agregar "ir a página X" o "mostrar N".
+   ✅ Más control.
+
+8. Auditar hooks del admin
+   No hemos visto todos.
+   Propuesta: asegurar que usen errorMessages.ts.
+   ✅ Consistencia en toasts.
+
+9. Eliminar imagen en ProductForm
+   ImageUploader sube pero ¿permite eliminar?
+   Propuesta: asegurar que se puedan borrar imágenes.
+   ✅ Control total del catálogo.
+
+10. Vista previa del producto antes de guardar
+    Propuesta: botón "Vista previa" con modal.
+    ✅ Menos errores, más confianza.
+
+
+═══════════════════════════════════════════════════════════════
+📈 MARKETING (VENTAS Y CONVERSIÓN)
+═══════════════════════════════════════════════════════════════
+
+11. Banner editable desde el admin
+    Hoy ProductsBanner es hardcodeado.
+    Propuesta: CRUD de banners (título, subtítulo, imagen,
+    productos, fechas).
+    ✅ Controlas qué promocionar sin tocar código.
+    🎯 CLAVE PARA NAVIDAD.
+
+12. Sección "Novedades" o "Recién llegados"
+    Hoy solo hay "Destacados".
+    Propuesta: carrusel de productos creados últimos 30 días.
+    ✅ Los clientes ven lo nuevo sin marcarlo manualmente.
+
+13. Página "Ofertas" funcional
+    Existe Ofertas.tsx pero no lo hemos revisado.
+    Propuesta: asegurar que muestre solo isOnSale = true.
+    ✅ Página dedicada = conversión.
+
+14. Productos relacionados en ProductoDetalle
+    Propuesta: mostrar 4 productos de la misma categoría.
+    ✅ Aumenta ticket promedio.
+
+15. SEO básico
+    Título, descripción, Open Graph.
+    Propuesta: meta tags dinámicos por producto.
+    ✅ Mejor posicionamiento y compartir en redes.
+
+16. Compartir producto por WhatsApp
+    Hoy solo desde el carrito.
+    Propuesta: botón "Compartir por WhatsApp" en detalle.
+    ✅ Marketing gratis (boca a boca digital).
+
+17. Warning "Stock bajo" en admin
+    Propuesta: badge "⚠️ Stock bajo" cuando stock < 5.
+    ✅ Te avisa qué reponer.
+
+18. Tracking de productos vistos
+    Propuesta: guardar en localStorage → "Vistos recientemente".
+    ✅ Retención de clientes.
+
+19. Generar link de pedido por WhatsApp desde admin
+    Propuesta: en DetallePedido, botón "Reenviar por WhatsApp".
+    ✅ Ahorra tiempo al coordinar.
+
+20. Página de Preguntas Frecuentes
+    Ya estaba en el PROMPT como pendiente.
+    Propuesta: crearla con contenido editable.
+    ✅ Reduce consultas repetitivas.
+
+
+═══════════════════════════════════════════════════════════════
+🧑‍💼 MANEJO DE LA WEB (OPERATIVO)
+═══════════════════════════════════════════════════════════════
+
+21. Historial de cambios por producto
+    Propuesta: guardar quién editó qué y cuándo.
+    ✅ Sabes qué pasó si algo cambia.
+
+22. Duplicar producto
+    Propuesta: botón "Duplicar" (crea copia con SKU nuevo).
+    ✅ Útil para productos similares.
+
+23. Importar productos desde CSV
+    Propuesta: subir CSV con productos masivos.
+    ✅ Si tienes 100+ productos, no cargas uno por uno.
+
+24. Exportar productos a CSV
+    Propuesta: descargar catálogo actual.
+    ✅ Backup y análisis en Excel.
+
+25. Modo mantenimiento
+    Propuesta: activar/desactivar la tienda desde admin.
+    ✅ Control total (ej. vacaciones).
+
+26. Notificaciones al admin
+    Propuesta: avisar cuando entra un pedido nuevo.
+    ✅ No te pierdes pedidos.
+
+27. Dashboard con métricas avanzadas
+    Hoy tiene stats básicos.
+    Propuesta agregar:
+      - Productos más vistos
+      - Categorías más vendidas
+      - Ticket promedio
+      - Pedidos por estado
+    ✅ Tomas decisiones con datos.
+
+
+═══════════════════════════════════════════════════════════════
+🎯 PRIORIDADES RECOMENDADAS
+═══════════════════════════════════════════════════════════════
+
+🔴 ALTA (hacer ya para Navidad)
+─────────────────────────────────────────────────────────────
+  #11  Banner editable                      → Navidad
+  #12  Novedades                            → Ventas
+  #17  Stock bajo warning                   → Reposición
+  #2   Crear producto desde Dashboard       → UX
+
+🟡 MEDIA (próximas 2 semanas)
+─────────────────────────────────────────────────────────────
+  #3   Form wizard (3 pasos)
+  #6   Debounce búsquedas
+  #14  Productos relacionados
+  #15  SEO básico
+  #16  Compartir por WhatsApp
+  #22  Duplicar producto
+
+🟢 BAJA (backlog)
+─────────────────────────────────────────────────────────────
+  #4   Validación tiempo real
+  #5   ErrorBoundary
+  #9   Eliminar imágenes
+  #10  Vista previa
+  #13  Ofertas funcional
+  #18  Vistos recientemente
+  #20  FAQ
+  #21  Historial cambios
+  #23  Importar CSV
+  #24  Exportar CSV
+  #25  Modo mantenimiento
+  #26  Notificaciones admin
+  #27  Dashboard avanzado
+
+
+═══════════════════════════════════════════════════════════════
+FIN DEL DOCUMENTO
+═══════════════════════════════════════════════════════════════

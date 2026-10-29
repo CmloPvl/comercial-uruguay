@@ -6,7 +6,8 @@
  * Columna derecha del formulario de productos.
  * Contiene: Imagen, Precio, Stock, Variantes, Pack, Opciones Avanzadas.
  * 
- * 🆕 Agregado bloque de pack promocional
+ * 🆕 Stock opcional (si vacío → "Consultar disponibilidad" en tienda)
+ * 🆕 Pack promocional
  */
 
 import { Input } from "../../ui/input";
@@ -25,8 +26,8 @@ interface ProductFormRightColumnProps {
     destacar: boolean;
     enOferta: boolean;
     descuento: string;
-    packQuantity: string;  // 🆕
-    packPrice: string;     // 🆕
+    packQuantity: string;
+    packPrice: string;
   };
   errors: Record<string, string>;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
@@ -79,11 +80,11 @@ export function ProductFormRightColumn({
               />
             </FormField>
 
+            {/* 🆕 Stock opcional */}
             <FormField
-              label="Stock disponible"
-              required
+              label="Stock disponible (opcional)"
               error={errors.stock}
-              helpText="💡 Número de unidades disponibles"
+              helpText="💡 Dejar vacio por el momento"
             >
               <Input
                 type="number"
@@ -112,7 +113,7 @@ export function ProductFormRightColumn({
         </CardContent>
       </Card>
 
-      {/* 🆕 Pack Promocional */}
+      {/* Pack Promocional */}
       <Card className="border-2 border-[#FFD93D] shadow-lg hover:shadow-xl transition-shadow bg-[#FFD93D]/5">
         <CardContent className="p-6">
           <h2 className="text-xl font-bold text-[#603060] mb-2 flex items-center gap-2">
@@ -155,7 +156,6 @@ export function ProductFormRightColumn({
               />
             </FormField>
 
-            {/* Preview del pack */}
             {formData.packQuantity && formData.packPrice && (
               <div className="bg-[#FFD93D]/20 border border-[#FFD93D] rounded-lg p-3 text-center">
                 <p className="text-sm font-bold text-[#603060]">

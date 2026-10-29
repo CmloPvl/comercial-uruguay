@@ -1,3 +1,5 @@
+markdown
+
 # 🏪 Comercial Uruguay — Catálogo Virtual
 
 **Estado:** En desarrollo activo
@@ -44,6 +46,35 @@ Mejorar la experiencia de venta del local mediante una vitrina digital que:
 
 ---
 
+## ✨ Funcionalidades
+
+### Catálogo
+
+- Explorar productos por categoría
+- Búsqueda por nombre
+- Filtros por categoría y precio
+- Destacados (elegidos manualmente por el admin)
+- Packs promocionales (ej: "3 por $1000")
+- Stock por WhatsApp (si no hay stock real)
+
+### Pedidos
+
+- Carrito de compras
+- Generación de pedido por WhatsApp
+- Confirmación de stock en el local
+
+### Admin
+
+- CRUD de productos
+- CRUD de categorías
+- Gestión de pedidos
+- Gestión de usuarios
+- Marcar productos como destacados
+- Configurar packs promocionales
+- Subir múltiples imágenes (Supabase Storage)
+
+---
+
 ## 🛠️ Stack Tecnológico
 
 | Capa               | Tecnología                           |
@@ -80,7 +111,7 @@ Mejorar la experiencia de venta del local mediante una vitrina digital que:
 
 ## 🚀 Instalación Rápida
 
-```bash
+````bash
 # Clonar repositorio
 git clone https://github.com/CmloPvl/comercial-uruguay.git
 cd comercial-uruguay
@@ -133,7 +164,7 @@ Estrategia:
 
     Probar después de cada cambio
 
-    Comentarios explicativos en el código (para aprender y entender)
+    Comentarios explicativos en el código
 
     Documentar cada mejora
 
@@ -167,29 +198,43 @@ text
 
 ---
 
-## ✅ Qué mejoré respecto a tu versión actual
+## ✅ Verificación
 
-| # | Cambio | Por qué |
-|---|--------|---------|
-| 1 | Título: "Web App" → **"Catálogo Virtual"** | Refleja la realidad actual del proyecto |
-| 2 | Estado: "Producción (desplegado)" → **"En desarrollo activo"** | Es más honesto; sigues iterando |
-| 3 | Agregué **enlaces** al inicio | Visibilidad rápida |
-| 4 | Reescribí **Descripción** con el flujo real (catálogo + WhatsApp) | Tu versión decía "consultar stock en tiempo real", que **no es cierto** |
-| 5 | Agregué **Nota** sobre la caja registradora | Explica por qué no hay e-commerce en vivo |
-| 6 | Agregué **Flujo del cliente** (7 pasos) | Claridad para cualquiera que lea el repo |
-| 7 | Agregué **Paleta de colores** | Consistencia visual |
-| 8 | Agregué **Metodología SoC** | Refleja cómo trabajas |
-| 9 | Agregué **Sobre el Desarrollador** | Contexto del bootcamp y el negocio familiar |
-| 10 | Arreglé el **encoding** (acentos, tildes) | Se ve bien en GitHub |
+Después de aplicar el `README.md`:
 
----
+```bash
+git status
 
-## 🗑️ Qué hacer con el `README.md` actual
+Debería mostrar los 3 archivos modificados:
 
-Reemplázalo completo por el de arriba. No hay nada que conservar del viejo, porque:
-- Decía "stock en tiempo real" (no es cierto)
-- No mencionaba el flujo de WhatsApp
-- No tenía contexto del negocio
+    CHANGELOG.md ✅
 
----
-```
+    PROMPT.md ✅
+
+    README.md ✅
+
+🚀 Commit + Push
+bash
+
+git add -A
+git commit -m "docs: actualizar CHANGELOG, PROMPT y README (v1.2.0-beta.5)
+
+- CHANGELOG: agregar v1.2.0-beta.5 con todo lo de hoy
+- PROMPT: actualizar estructura, hooks y componentes clave
+- README: agregar sección de funcionalidades
+
+Cambios funcionales incluidos:
+- Fix doble layout en admin
+- Fix doble header en crear/editar
+- Stock opcional + 'Stock por WhatsApp'
+- Loader en ProductCard
+- Unificación ProductCard (variant)
+- Fix category_name (categoría visible)
+- calculateSubtotal en utils (backend)
+- Toasts del helper en carrito
+
+Versión: v1.2.0-beta.5
+Fecha: 29/10/2026"
+git push origin master
+
+````

@@ -10,12 +10,23 @@
  * - Reutilizable en Crear/Editar Publicación
  * - Props para configurar desde fuera
  * - Manejo de estados de carga
+ * - Toasts de éxito/error (helper centralizado)
  * - Paleta de colores consistente
+ * 
+ * 🆕 Toasts de éxito/error
+ * 🆕 Limpiar dropzone después de subir
+ * 🆕 Contador incluye pendientes
+ * 🆕 Fix: emoji duplicado en el label
  */
 
+import { useEffect } from 'react'
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/ui/dropzone'
 import { useSupabaseUpload } from '@/hooks/use-supabase-upload'
 import { supabase, PRODUCTS_BUCKET } from '@/lib/supabase'
+import {
+  showSuccessToast,
+  showErrorToastWithFallback,
+} from '@/utils/errorMessages'
 
 interface ImageUploaderProps {
   /** URLs de imágenes existentes (para editar) */
@@ -55,13 +66,11 @@ export function ImageUploader({
     ],
     upsert: true,
     onUploadComplete: (files: any) => {
-      // ✅ Verificar que files existe y es un array
       if (!files || !Array.isArray(files)) {
         console.error('❌ [ImageUploader] files no es un array válido:', files);
         return;
       }
       
-      // ✅ Verificar que files tiene elementos válidos
       const validFiles = files.filter((f: any) => f && f.publicUrl);
       
       if (validFiles.length === 0) {
@@ -73,19 +82,48 @@ export function ImageUploader({
       const allUrls = [...existingImages, ...urls];
       
       onImagesChange(allUrls);
+      
+      showSuccessToast(
+        `${validFiles.length} ${validFiles.length === 1 ? 'imagen subida' : 'imágenes subidas'} correctamente`
+      );
     },
     onUploadError: (file: any, error: any) => {
       console.error('❌ Error al subir imagen:', file?.name, error);
+      
+      showErrorToastWithFallback(
+        error,
+        `Error al subir ${file?.name || 'la imagen'}`
+      );
     },
   })
 
   // =============================================
-  // 🗑️ ELIMINAR IMAGEN
+  // 🔄 LIMPIAR DROPZONE DESPUÉS DE SUBIR
+  // =============================================
+  useEffect(() => {
+    if (uploadProps.isSuccess && uploadProps.files.length > 0) {
+      const timer = setTimeout(() => {
+        uploadProps.setFiles([]);
+      }, 1500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [uploadProps.isSuccess]);
+
+  // =============================================
+  // 🗑️ ELIMINAR IMAGEN EXISTENTE
   // =============================================
   const removeImage = (index: number) => {
     const newImages = existingImages.filter((_, i) => i !== index)
     onImagesChange(newImages)
+    showSuccessToast('Imagen eliminada')
   }
+
+  // =============================================
+  // 📊 CONTADOR (incluye pendientes)
+  // =============================================
+  const totalImages = existingImages.length + uploadProps.files.length;
+  const isAtMax = totalImages >= maxFiles;
 
   // =============================================
   // 🖥️ RENDER
@@ -93,25 +131,37 @@ export function ImageUploader({
   return (
     <div className="space-y-4">
       {/* =============================================
-      📌 LABEL
+      📌 LABEL CON CONTADOR (sin emoji duplicado)
       ============================================= */}
       <h2 className="text-xl font-bold text-[#603060] mb-4 flex items-center gap-2">
-        <span className="text-[#FFD93D]">{label.split(' ')[0]}</span>
         {label}
-        <span className="text-sm font-normal text-[#6A757C] ml-2">
-          ({existingImages.length}/{maxFiles})
+        <span className={`text-sm font-normal ml-2 ${
+          isAtMax ? 'text-[#FF6B81] font-bold' : 'text-[#6A757C]'
+        }`}>
+          ({totalImages}/{maxFiles})
         </span>
       </h2>
 
       {/* =============================================
-      📤 DROPZONE DE SUPABASE
+      ⚠️ AVISO SI ESTÁ AL MÁXIMO
       ============================================= */}
-      <div className="border-2 border-dashed border-[#7D5FFF] rounded-xl p-6 text-center hover:border-[#FFD93D] transition-all bg-[#F0F0C0]/10">
-        <Dropzone {...uploadProps}>
-          <DropzoneEmptyState className="text-[#6A757C]" />
-          <DropzoneContent />
-        </Dropzone>
-      </div>
+      {isAtMax && (
+        <div className="bg-[#FFD93D]/20 border-2 border-[#FFD93D] rounded-lg p-3 text-sm text-[#603060]">
+          ⚠️ Has alcanzado el máximo de {maxFiles} imágenes. Elimina alguna para subir más.
+        </div>
+      )}
+
+      {/* =============================================
+      📤 DROPZONE (solo si no está al máximo)
+      ============================================= */}
+      {!isAtMax && (
+        <div className="border-2 border-dashed border-[#7D5FFF] rounded-xl p-6 text-center hover:border-[#FFD93D] transition-all bg-[#F0F0C0]/10">
+          <Dropzone {...uploadProps}>
+            <DropzoneEmptyState className="text-[#6A757C]" />
+            <DropzoneContent />
+          </Dropzone>
+        </div>
+      )}
 
       {/* =============================================
       📸 IMÁGENES EXISTENTES

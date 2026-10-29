@@ -12,7 +12,10 @@
  * - Reemplazado breadcrumb manual por AppBreadcrumb
  * - Reemplazado spinner manual por Skeleton de shadcn/ui
  * - Código más limpio y mantenible
- * - 🆕 Soporte para packs promocionales
+ * - Soporte para packs promocionales
+ * - Stock 0 → "Consultar disponibilidad" (no bloquea agregar)
+ * 
+ * 🆕 Fix: usa category_name (no category)
  */
 
 import { Link, useParams } from "react-router-dom";
@@ -34,7 +37,6 @@ export default function ProductoDetalle() {
     isFavorite,
     addingToCart,
     finalPrice,
-    isOutOfStock,
     handleAddToCart,
     handleToggleFavorite,
     increaseQuantity,
@@ -85,17 +87,20 @@ export default function ProductoDetalle() {
     );
   }
 
-  // 🆕 ¿Tiene pack promocional?
+  // ¿Tiene pack promocional?
   const hasPack =
     product.packPrice != null &&
     product.packQuantity != null &&
     product.packQuantity > 0 &&
     product.packPrice > 0;
 
-  // 🆕 ¿Cuánto se ahorra con el pack? (solo si tiene pack)
+  // ¿Cuánto se ahorra con el pack?
   const packSavings = hasPack
     ? product.price * product.packQuantity! - product.packPrice!
     : 0;
+
+  // stock = 0 → "Consultar" (no bloquea)
+  const needsStockCheck = product.stock === 0;
 
   // =============================================
   // 🖥️ RENDER PRINCIPAL
@@ -143,9 +148,9 @@ export default function ProductoDetalle() {
 
           {/* ====== COLUMNA DERECHA: INFORMACIÓN ====== */}
           <div className="lg:w-1/2 space-y-6">
-            {/* Categoría */}
+            {/* 🆕 Categoría (fix: category_name) */}
             <Badge className="bg-[#00D2D3] text-white">
-              {product.category?.name || "Sin categoría"}
+              {product.category_name || "Sin categoría"}
             </Badge>
 
             {/* Nombre */}
@@ -171,7 +176,7 @@ export default function ProductoDetalle() {
               )}
             </div>
 
-            {/* 🆕 PACK PROMOCIONAL */}
+            {/* PACK PROMOCIONAL */}
             {hasPack && (
               <div className="bg-gradient-to-r from-[#FFD93D]/30 to-[#FF9F43]/30 border-2 border-[#FFD93D] rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-1">
@@ -188,21 +193,21 @@ export default function ProductoDetalle() {
               </div>
             )}
 
-            {/* Stock */}
+            {/* STOCK (consultar si = 0) */}
             <div
               className={`p-3 rounded-xl ${
-                isOutOfStock
-                  ? "bg-[#FF6B81]/10 border-[#FF6B81]"
+                needsStockCheck
+                  ? "bg-[#FFD93D]/10 border-[#FFD93D]"
                   : "bg-[#00D2D3]/10 border-[#00D2D3]"
               } border-2`}
             >
               <p
                 className={`font-bold ${
-                  isOutOfStock ? "text-[#FF6B81]" : "text-[#00D2D3]"
+                  needsStockCheck ? "text-[#603060]" : "text-[#00D2D3]"
                 }`}
               >
-                {isOutOfStock
-                  ? "❌ Sin Stock"
+                {needsStockCheck
+                  ? "📞 Consultar disponibilidad en tienda"
                   : `✅ ${product.stock} unidades disponibles`}
               </p>
             </div>
@@ -221,12 +226,11 @@ export default function ProductoDetalle() {
                 <button
                   onClick={increaseQuantity}
                   className="w-10 h-10 rounded-full border-2 border-[#00D2D3] hover:bg-[#00D2D3] hover:text-white transition flex items-center justify-center text-xl font-bold"
-                  disabled={isOutOfStock}
                 >
                   +
                 </button>
                 <span className="text-sm text-[#6A757C]">
-                  ({product.stock} disponibles)
+                  {needsStockCheck ? "Consultar stock" : `(${product.stock} disponibles)`}
                 </span>
               </div>
             </div>
@@ -235,14 +239,10 @@ export default function ProductoDetalle() {
             <div className="space-y-3 pt-4 border-t border-gray-200">
               <Button
                 onClick={handleAddToCart}
-                disabled={isOutOfStock || addingToCart}
+                disabled={addingToCart}
                 className="w-full bg-gradient-to-r from-[#00D2D3] to-[#7D5FFF] hover:from-[#7D5FFF] hover:to-[#00D2D3] text-white font-bold py-3 text-lg rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {addingToCart
-                  ? "Agregando..."
-                  : isOutOfStock
-                  ? "Sin Stock"
-                  : "🛒 Agregar al Carrito"}
+                {addingToCart ? "Agregando..." : "🛒 Agregar al Carrito"}
               </Button>
 
               <Button

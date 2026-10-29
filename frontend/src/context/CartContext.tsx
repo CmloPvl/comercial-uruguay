@@ -1,7 +1,40 @@
+// 📁 frontend/src/context/CartContext.tsx
+
+/**
+ * 📌 CONTEXTO DEL CARRITO
+ * 
+ * Estado global del carrito de compras.
+ * 
+ * ✅ Responsabilidades:
+ * - Mantener los items del carrito en memoria
+ * - Sincronizar con el backend (CRUD)
+ * - Calcular totales (items y precio)
+ * - Proveer funciones a toda la app
+ * 
+ * ✅ Buenas prácticas:
+ * - Separación de lógica y diseño
+ * - Sincronización con backend
+ * - Fallback local (sin autenticación)
+ * - Comentarios explicativos
+ * 
+ * 🆕 Soporte para packs promocionales:
+ *   - Cada item incluye packPrice, packQuantity, packApplied, subtotal
+ *   - El subtotal viene calculado del backend (con packs aplicados)
+ *   - totalPrice suma los subtotales (no recalcula)
+ */
+
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { cartService, type CartItem as ApiCartItem } from "../services/cartService"
 import { useAuth } from "./AuthContext"
 
+// =============================================
+// 📋 INTERFACES
+// =============================================
+
+/**
+ * Item del carrito en el frontend (formato local)
+ * Es una versión "aplanada" del CartItem de la API
+ */
 export interface CartItem {
   id: number | string
   name: string
@@ -12,6 +45,10 @@ export interface CartItem {
   isOnSale?: boolean
   discount?: number
   productId?: string
+  packPrice?: number | null          // 🆕 Precio del pack
+  packQuantity?: number | null       // 🆕 Cantidad del pack
+  packApplied?: boolean              // 🆕 ¿Se aplicó el pack?
+  subtotal?: number                  // 🆕 Subtotal calculado (con packs)
 }
 
 interface CartContextType {
@@ -29,13 +66,17 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
+// =============================================
+// 🎯 PROVIDER
+// =============================================
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuth()  // ✅ user eliminado
+  const { isAuthenticated } = useAuth()
   const [items, setItems] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(false)
 
   // =============================================
-  // CARGAR CARRITO DESDE EL BACKEND AL INICIAR
+  // 🔄 CARGAR CARRITO AL INICIAR
   // =============================================
   useEffect(() => {
     if (isAuthenticated) {
@@ -45,6 +86,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [isAuthenticated])
 
+  /**
+   * 🔄 REFRESCAR CARRITO
+   * 
+   * Trae el carrito del backend y lo convierte al formato local.
+   * 🆕 Incluye packPrice, packQuantity, packApplied, subtotal.
+   */
   const refreshCart = async () => {
     if (!isAuthenticated) return
 
@@ -62,6 +109,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
         stock: item.stock || 999,
         isOnSale: item.isOnSale || false,
         discount: item.discount || 0,
+        // 🆕 Campos de pack
+        packPrice: item.packPrice ?? null,
+        packQuantity: item.packQuantity ?? null,
+        packApplied: item.packApplied ?? false,
+        subtotal: item.subtotal,
       }))
       setItems(cartItems)
     } catch (error) {
@@ -72,10 +124,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   // =============================================
-  // AGREGAR PRODUCTO (local + API)
+  // ➕ AGREGAR PRODUCTO
   // =============================================
+  /**
+   * Agrega un producto al carrito.
+   * - Si está autenticado: guarda en el backend y refresca
+   * - Si no: guarda en memoria (fallback)
+   */
   const addItem = async (product: Omit<CartItem, "quantity">, quantity: number = 1) => {
-    // Si está autenticado, guardar en el backend
     if (isAuthenticated && product.productId) {
       try {
         setLoading(true)
@@ -90,7 +146,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Fallback: modo local (sin conexión o sin autenticación)
+    // Fallback: modo local
     setItems(prev => {
       const existing = prev.find(item => item.id === product.id)
       if (existing) {
@@ -105,8 +161,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   // =============================================
-  // AGREGAR PRODUCTO POR ID (para ProductoDetalle)
+  // ➕ AGREGAR PRODUCTO POR ID
   // =============================================
+  /**
+   * Agrega un producto por su ID (usado en ProductoDetalle).
+   * Requiere autenticación.
+   */
   const addItemById = async (productId: string, quantity: number) => {
     if (!isAuthenticated) {
       throw new Error("Debes iniciar sesión para agregar productos al carrito")
@@ -125,8 +185,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   // =============================================
-  // ELIMINAR PRODUCTO
+  // 🗑️ ELIMINAR PRODUCTO
   // =============================================
+  /**
+   * Elimina un producto del carrito.
+   * - Si está autenticado: elimina en backend y refresca
+   * - Si no: elimina en memoria
+   */
   const removeItem = async (id: number | string) => {
     const productId = typeof id === 'string' ? id : id.toString()
 
@@ -149,8 +214,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   // =============================================
-  // ACTUALIZAR CANTIDAD
+  // ✏️ ACTUALIZAR CANTIDAD
   // =============================================
+  /**
+   * Actualiza la cantidad de un producto.
+   * - Si quantity <= 0: elimina el producto
+   * - Si está autenticado: actualiza en backend y refresca
+   * - Si no: actualiza en memoria
+   */
   const updateQuantity = async (id: number | string, quantity: number) => {
     if (quantity <= 0) {
       await removeItem(id)
@@ -182,8 +253,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   // =============================================
-  // VACIAR CARRITO
+  // 🗑️ VACIAR CARRITO
   // =============================================
+  /**
+   * Elimina todos los items del carrito.
+   * - Si está autenticado: vacía en backend y refresca
+   * - Si no: vacía en memoria
+   */
   const clearCart = async () => {
     if (isAuthenticated) {
       try {
@@ -203,10 +279,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   // =============================================
-  // CALCULAR TOTALES
+  // 🧮 CALCULAR TOTALES
   // =============================================
+  // Total de items (suma de cantidades)
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
-  const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  
+  // 🆕 Total de precio: usa subtotal (calculado con packs en backend)
+  // Si no hay subtotal (fallback local), calcula price × quantity
+  const totalPrice = items.reduce((sum, item) => {
+    const itemSubtotal = item.subtotal ?? (item.price * item.quantity)
+    return sum + itemSubtotal
+  }, 0)
 
   return (
     <CartContext.Provider
@@ -228,6 +311,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   )
 }
 
+// =============================================
+// 🎣 HOOK: useCart
+// =============================================
+
+/**
+ * Hook para acceder al contexto del carrito.
+ * Lanza error si se usa fuera del CartProvider.
+ */
 export function useCart() {
   const context = useContext(CartContext)
   if (!context) {

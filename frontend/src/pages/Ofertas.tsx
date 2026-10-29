@@ -1,52 +1,77 @@
-import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
-import Layout from "../components/layout/Layout"
-import { Card, CardContent } from "../components/ui/card"
-import { Badge } from "../components/ui/badge"
-import { Button } from "../components/ui/button"
-import { productService, type Product } from "../services/productService"
-import { useAuth } from "../context/AuthContext"
-import { useCart } from "../context/CartContext"
+// 📁 frontend/src/pages/Ofertas.tsx
+
+/**
+ * 📌 PÁGINA: OFERTAS
+ * 
+ * Muestra solo los productos que tienen isOnSale = true.
+ * 
+ * ✅ Mejoras aplicadas:
+ * - Usa ProductCard reutilizable (sin duplicar card)
+ * - Toasts del helper (no más alert())
+ * - Stock 0 → "Stock por WhatsApp" (no bloquea agregar)
+ * - Muestra pack promocional
+ * - Fix de categoría (category_name)
+ * 
+ * 🆕 Usa useOfertas (lógica extraída)
+ */
+
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import Layout from "../components/layout/Layout";
+import { Badge } from "../components/ui/badge";
+import ProductCard from "../components/products/ProductCard";
+import { productService, type Product } from "../services/productService";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
+import {
+  showErrorToastWithFallback,
+  showSuccessToast,
+  successMessages,
+  cartErrors,
+  authErrors,
+  productErrors,
+} from "../utils/errorMessages";
 
 export default function Ofertas() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const { user } = useAuth()
-  const { addItemById } = useCart()
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { addItemById } = useCart();
 
   useEffect(() => {
-    loadProducts()
-  }, [])
+    loadProducts();
+  }, []);
 
   const loadProducts = async () => {
     try {
-      setLoading(true)
-      setError(null)
-      const data = await productService.getProducts()
-      // Filtrar solo productos en oferta
-      const saleProducts = data?.products?.filter((p: Product) => p.isOnSale === true) || []
-      setProducts(saleProducts)
+      setLoading(true);
+      setError(null);
+      const data = await productService.getProducts();
+      const saleProducts = data?.filter((p: Product) => p.isOnSale === true) || [];
+      setProducts(saleProducts);
     } catch (err: any) {
-      setError(err.message || "Error al cargar ofertas")
+      const errorMessage = err.message || productErrors.notFound;
+      setError(errorMessage);
+      showErrorToastWithFallback(err, productErrors.notFound);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const handleAddToCart = async (productId: string) => {
+  const handleAddToCart = async (productId: string, productName: string) => {
     if (!user) {
-      alert("Inicia sesión para agregar al carrito")
-      return
+      showErrorToastWithFallback(new Error(authErrors.loginRequired), authErrors.loginRequired);
+      return;
     }
 
     try {
-      await addItemById(productId, 1)
-      alert("✅ Producto agregado al carrito")
+      await addItemById(productId, 1);
+      showSuccessToast(`${productName} ${successMessages.addedToCart}`);
     } catch (err: any) {
-      alert("❌ " + err.message)
+      showErrorToastWithFallback(err, cartErrors.addFailed);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -58,12 +83,12 @@ export default function Ofertas() {
           </div>
         </div>
       </Layout>
-    )
+    );
   }
 
   return (
     <Layout>
-      {/* ====== BANNER ====== */}
+      {/* BANNER */}
       <div className="bg-gradient-to-r from-[#FF6B81] via-[#FFD93D] to-[#FF6B81] py-12 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <Badge className="bg-[#603060] text-white mb-3 px-4 py-1 rounded-full">
@@ -78,7 +103,7 @@ export default function Ofertas() {
         </div>
       </div>
 
-      {/* ====== PRODUCTOS EN OFERTA ====== */}
+      {/* PRODUCTOS EN OFERTA */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         {error && (
           <div className="bg-[#FF6B81]/10 border-2 border-[#FF6B81] text-[#FF6B81] px-4 py-3 rounded-xl mb-6">
@@ -97,93 +122,16 @@ export default function Ofertas() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => {
-              const finalPrice = product.isOnSale && product.discount > 0
-                ? product.price * (1 - product.discount / 100)
-                : product.price
-              const hasImage = product.images && Array.isArray(product.images) && product.images.length > 0
-              const isOutOfStock = product.stock === 0
-
-              return (
-                <Card key={product.id} className="border-2 border-[#FF6B81] hover:border-[#FFD93D] transition-all hover:shadow-xl group">
-                  <CardContent className="p-4">
-                    {/* Badge de oferta */}
-                    <div className="relative">
-                      {product.isOnSale && product.discount > 0 && (
-                        <Badge className="absolute top-2 left-2 bg-[#FF6B81] text-white font-bold px-3 py-1.5 rounded-full animate-pulse z-10">
-                          🔥 -{product.discount}%
-                        </Badge>
-                      )}
-                    </div>
-
-                    {/* Imagen */}
-                    <Link to={`/producto/${product.id}`}>
-                      <div className="aspect-square bg-gradient-to-br from-[#F0F0C0]/30 to-[#F0C0F0]/30 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
-                        {hasImage ? (
-                          <img
-                            src={product.images[0]}
-                            alt={product.name}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <span className="text-6xl">📦</span>
-                        )}
-                      </div>
-                    </Link>
-
-                    {/* Categoría */}
-                    {product.category && (
-                      <Badge className="bg-[#00D2D3]/10 text-[#00D2D3] hover:bg-[#00D2D3]/20 mb-2">
-                        {product.category.name}
-                      </Badge>
-                    )}
-
-                    {/* Nombre */}
-                    <Link to={`/producto/${product.id}`}>
-                      <h3 className="font-bold text-[#303030] hover:text-[#7D5FFF] transition-colors line-clamp-2 min-h-[48px]">
-                        {product.name}
-                      </h3>
-                    </Link>
-
-                    {/* Precio */}
-                    <div className="flex items-center justify-between mt-2">
-                      <div>
-                        {product.isOnSale && product.discount > 0 && (
-                          <span className="text-sm text-gray-400 line-through mr-2">
-                            ${product.price.toLocaleString('es-CL')}
-                          </span>
-                        )}
-                        <span className="text-xl font-extrabold text-[#FF6B81]">
-                          ${Math.round(finalPrice).toLocaleString('es-CL')}
-                        </span>
-                      </div>
-                      <Badge className="bg-[#FFD93D] text-[#303030]">
-                        🔥 Oferta
-                      </Badge>
-                    </div>
-
-                    {/* Botones */}
-                    <div className="flex gap-2 mt-3">
-                      <Button
-                        onClick={() => handleAddToCart(product.id)}
-                        disabled={isOutOfStock}
-                        className="flex-1 bg-gradient-to-r from-[#FF6B81] to-[#FFD93D] hover:from-[#FFD93D] hover:to-[#FF6B81] text-[#303030] font-bold text-sm py-2 rounded-lg shadow-md hover:shadow-lg transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isOutOfStock ? "Sin Stock" : "🛒 Agregar"}
-                      </Button>
-                      <Link to={`/producto/${product.id}`}>
-                        <Button variant="outline" className="border-[#7D5FFF] text-[#7D5FFF] hover:bg-[#7D5FFF] hover:text-white font-bold text-sm py-2 px-4 rounded-lg transition-all hover:scale-[1.02]">
-                          👁️
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onAddToCart={() => handleAddToCart(product.id, product.name)}
+              />
+            ))}
           </div>
         )}
       </div>
     </Layout>
-  )
+  );
 }

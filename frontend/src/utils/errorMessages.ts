@@ -11,6 +11,8 @@
  * - Fácil de mantener y escalar
  * - Los mensajes de error son controlados por el helper (no por el backend)
  * - Usa iconTheme en lugar de icon para evitar el icono de "visto" adicional
+ * 
+ * 🆕 Mensajes agregados para el carrito (éxito al actualizar/eliminar/vaciar)
  */
 
 import toast from 'react-hot-toast';
@@ -48,6 +50,10 @@ export const cartErrors = {
   empty: "El carrito está vacío.",
   itemNotFound: "El producto no está en el carrito.",
   quantityExceeded: "No hay suficiente stock.",
+  updateFailed: "Error al actualizar la cantidad.",
+  removeFailed: "Error al eliminar el producto.",
+  clearFailed: "Error al vaciar el carrito.",
+  addFailed: "Error al agregar al carrito.",  // ← ¿está?
 };
 
 // =============================================
@@ -170,6 +176,10 @@ export const successMessages = {
   imageDeleted: "Imagen eliminada exitosamente",
 
   addedToCart: "Producto agregado al carrito",
+  // 🆕 Mensajes nuevos para el carrito
+  quantityUpdated: "Cantidad actualizada",
+  itemRemoved: "Producto eliminado del carrito",
+  cartCleared: "Carrito vaciado",
 
   changesSaved: "Cambios guardados exitosamente",
   changesCancelled: "Cambios cancelados",

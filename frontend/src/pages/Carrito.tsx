@@ -10,6 +10,8 @@
  * - Separación de lógica y diseño
  * - Componentes reutilizables
  * - Código limpio y fácil de leer
+ * 
+ * 🆕 Pasa loading a CartSummary (deshabilita WhatsApp mientras carga)
  */
 
 import { Link } from "react-router-dom";
@@ -42,8 +44,8 @@ export default function Carrito() {
     deliveryOption,
     setDeliveryOption,
     clearCart,
-    updateQuantity, // ✅ EXTRAER
-    removeItem,     // ✅ EXTRAER
+    updateQuantity,
+    removeItem,
     handleWhatsApp,
   } = useCarrito();
 
@@ -179,8 +181,8 @@ export default function Carrito() {
                 <CartItem
                   key={item.id}
                   item={item}
-                  onUpdateQuantity={updateQuantity} // ✅ PASAR
-                  onRemoveItem={removeItem}         // ✅ PASAR
+                  onUpdateQuantity={updateQuantity}
+                  onRemoveItem={removeItem}
                 />
               ))}
             </div>
@@ -212,6 +214,7 @@ export default function Carrito() {
               deliveryOption={deliveryOption}
               onDeliveryChange={setDeliveryOption}
               onWhatsApp={handleWhatsApp}
+              loading={loading}  // 🆕 Pasar loading
             />
           </div>
         </div>

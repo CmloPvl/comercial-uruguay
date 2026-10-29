@@ -4,7 +4,6 @@
  * 📌 PÁGINA: ADMIN PRODUCTOS
  * 
  * Panel de administración de productos.
- * Conecta la lógica (useAdminProductos) con el diseño (componentes UI).
  * 
  * ✅ Buenas prácticas:
  * - Separación de lógica y diseño
@@ -20,10 +19,12 @@
  * - Buscador de productos
  * - Paginación
  * - Botón para volver al Dashboard
+ * 
+ * 🆕 Sin <Layout>: App.tsx ya envuelve con <AdminLayout>
+ *    (evita doble layout)
  */
 
 import { Link } from "react-router-dom";
-import Layout from "../../components/layout/Layout";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -91,7 +92,6 @@ const TableSkeleton = () => (
 export default function AdminProductos() {
   // =============================================
   // 🧠 LÓGICA (extraída a useAdminProductos)
-  // ✅ PRIMERO: llamar al hook SIEMPRE antes de cualquier condicional
   // =============================================
   const {
     products,
@@ -119,11 +119,10 @@ export default function AdminProductos() {
 
   // =============================================
   // 🔄 ESTADO DE CARGA (con Skeleton)
-  // ✅ DESPUÉS: condicionales y renders
   // =============================================
   if (loading) {
     return (
-      <Layout title="Gestionar Productos">
+      <>
         {/* Breadcrumb skeleton */}
         <div className="bg-[#FF6B81]/10 py-3 px-4 border-b-2 border-[#FF6B81]">
           <div className="max-w-7xl mx-auto">
@@ -148,7 +147,7 @@ export default function AdminProductos() {
             </CardContent>
           </Card>
         </div>
-      </Layout>
+      </>
     );
   }
 
@@ -156,7 +155,7 @@ export default function AdminProductos() {
   // 🖥️ RENDER PRINCIPAL
   // =============================================
   return (
-    <Layout title="Gestionar Productos">
+    <>
       {/* =============================================
       📍 BREADCRUMB (con estilo consistente)
       ============================================= */}
@@ -521,6 +520,6 @@ export default function AdminProductos() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Layout>
+    </>
   );
 }

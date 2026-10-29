@@ -13,16 +13,20 @@
  * - Reutilizable en otras partes de la app
  * - Fácil de testear (no depende de contexto)
  * - Accesible (aria-labels en botones)
+ * - Comentarios explicativos
  * 
- * @param {Object} props
- * @param {CartItemType} props.item - Datos del producto en el carrito
- * @param {Function} props.onUpdateQuantity - Función para actualizar cantidad
- * @param {Function} props.onRemoveItem - Función para eliminar producto
- * @returns {JSX.Element} - Tarjeta del producto en el carrito
+ * 🆕 Soporte para packs promocionales:
+ *   - Si el pack está aplicado, muestra "🎁 1 pack de 3"
+ *   - El subtotal usa el valor calculado por el backend (con packs)
+ * 
+ * 🆕 Imagen real con fallback:
+ *   - Si item.image es URL (http/https) → muestra <img> real
+ *   - Si no → muestra 📦 (placeholder)
  */
 
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
+import { Badge } from "../ui/badge";
 import type { CartItem as CartItemType } from "../../context/CartContext";
 
 // =============================================
@@ -61,6 +65,37 @@ export default function CartItem({
   };
 
   // =============================================
+  // 🆕 CÁLCULOS DE PACK
+  // =============================================
+
+  // ¿Tiene pack aplicado?
+  const hasPack = item.packApplied && item.packQuantity && item.packPrice;
+
+  // Cantidad de packs completos y sobrantes
+  const packs = hasPack ? Math.floor(item.quantity / item.packQuantity!) : 0;
+  const remainder = hasPack ? item.quantity % item.packQuantity! : item.quantity;
+
+  // Subtotal: usar el calculado por el backend (con packs) o calcular normal
+  const subtotal = item.subtotal ?? (item.price * item.quantity);
+
+  // =============================================
+  // 🆕 VALIDACIÓN DE IMAGEN
+  // =============================================
+
+  /**
+   * Solo mostramos <img> si:
+   * - item.image existe
+   * - Es un string
+   * - Empieza con http:// o https:// (URL válida de Supabase)
+   * 
+   * Si no, mostramos el placeholder 📦
+   */
+  const hasValidImage = 
+    item.image && 
+    typeof item.image === "string" && 
+    (item.image.startsWith("http://") || item.image.startsWith("https://"));
+
+  // =============================================
   // 🖥️ RENDERIZADO
   // =============================================
 
@@ -69,10 +104,19 @@ export default function CartItem({
       <CardContent className="p-4 flex flex-col sm:flex-row items-center gap-4">
         
         {/* =============================================
-        🖼️ IMAGEN
+        🖼️ IMAGEN (con fallback a placeholder)
         ============================================= */}
-        <div className="w-20 h-20 bg-gradient-to-br from-[#FFD93D]/20 to-[#FF6B81]/20 rounded-lg flex items-center justify-center text-3xl flex-shrink-0">
-          {item.image || "📦"}
+        <div className="w-20 h-20 bg-gradient-to-br from-[#FFD93D]/20 to-[#FF6B81]/20 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+          {hasValidImage ? (
+            <img
+              src={item.image}
+              alt={item.name}
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span className="text-3xl">📦</span>
+          )}
         </div>
 
         {/* =============================================
@@ -81,6 +125,14 @@ export default function CartItem({
         <div className="flex-1 text-center sm:text-left">
           <h3 className="font-bold text-[#303030]">{item.name}</h3>
           <p className="text-[#7D5FFF] font-bold">${formatPrice(item.price)} c/u</p>
+          
+          {/* Badge de pack aplicado */}
+          {hasPack && (
+            <Badge className="bg-[#FFD93D] text-[#303030] mt-1 text-xs font-bold">
+              🎁 {packs} pack{packs > 1 ? 's' : ''} de {item.packQuantity}
+              {remainder > 0 && ` + ${remainder} suelto${remainder > 1 ? 's' : ''}`}
+            </Badge>
+          )}
         </div>
 
         {/* =============================================
@@ -117,8 +169,9 @@ export default function CartItem({
         💰 SUBTOTAL Y ELIMINAR
         ============================================= */}
         <div className="flex items-center gap-4">
+          {/* Subtotal: usar el calculado por backend (con packs) */}
           <p className="font-bold text-[#603060] min-w-[80px] text-right">
-            ${formatPrice(item.price * item.quantity)}
+            ${formatPrice(subtotal)}
           </p>
           <Button
             variant="ghost"

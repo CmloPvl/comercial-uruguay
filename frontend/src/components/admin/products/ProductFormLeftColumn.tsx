@@ -111,7 +111,7 @@ export function ProductFormLeftColumn({
                 </SelectTrigger>
                 <SelectContent className="bg-white border-2 border-[#7D5FFF] shadow-lg rounded-xl">
                   {categories.map((category) => {
-                    const icon = getCategoryIcon(category.name, category.icon);
+                    const icon = getCategoryIcon(category.icon);
                     return (
                       <SelectItem
                         key={category.id}

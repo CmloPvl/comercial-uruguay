@@ -16,6 +16,7 @@
  * - Manejo de errores con toasts centralizados
  * 
  * 🆕 Los productos destacados ahora viven en useFeaturedProducts
+ * 🆕 Toast de error correcto (cartErrors.addFailed)
  */
 
 import { useState, useEffect } from "react";
@@ -51,9 +52,6 @@ export function useHome() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 🆕 Ya NO se calcula featuredProducts acá
-  // (ahora vive en useFeaturedProducts)
-
   // =============================================
   // 🔄 CARGAR PRODUCTOS
   // =============================================
@@ -85,7 +83,8 @@ export function useHome() {
       await addItemById(productId, 1);
       showSuccessToast(`${productName} ${successMessages.addedToCart}`);
     } catch (err: any) {
-      showErrorToastWithFallback(err, cartErrors.empty);
+      // 🆕 Mensaje correcto (no "carrito vacío")
+      showErrorToastWithFallback(err, cartErrors.addFailed);
     }
   };
 
@@ -105,6 +104,5 @@ export function useHome() {
     error,
     loadProducts,
     handleAddToCart,
-    // 🆕 featuredProducts eliminado del return
   };
 }

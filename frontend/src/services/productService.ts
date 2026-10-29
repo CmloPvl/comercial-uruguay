@@ -18,6 +18,7 @@
  * - Sin logs innecesarios (solo en desarrollo)
  * 
  * 🆕 Soporte para packs promocionales (packPrice, packQuantity)
+ * 🆕 Eliminado `category` del tipo (el backend devuelve `category_name`)
  */
 
 import api from './api';
@@ -36,15 +37,14 @@ export interface Product {
   images: string[];
   categoryId: string;
   category_name?: string;
-  category?: { id: string; name: string };
   isActive: boolean;
   isOnSale: boolean;
   discount: number;
   tags?: string[];
   variants?: string[];
-  destacado?: boolean;            // 🆕 Campo destacado (opcional)
-  packPrice?: number | null;      // 🆕 Precio del pack (null si no hay)
-  packQuantity?: number | null;   // 🆕 Cantidad del pack (null si no hay)
+  destacado?: boolean;
+  packPrice?: number | null;
+  packQuantity?: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -72,9 +72,9 @@ export interface CreateProductData {
   tags?: string[];
   variants?: string[];
   isActive?: boolean;
-  destacado?: boolean;            // 🆕 Campo destacado (opcional)
-  packPrice?: number | null;      // 🆕 Precio del pack (opcional)
-  packQuantity?: number | null;   // 🆕 Cantidad del pack (opcional)
+  destacado?: boolean;
+  packPrice?: number | null;
+  packQuantity?: number | null;
 }
 
 export interface GetProductsParams {
