@@ -13,6 +13,8 @@
  * - Sin enlaces duplicados
  * - Accesible con aria-label
  * - Responsive (mobile-first)
+ * 
+ * 🆕 Link a /retiro (Retiro en tienda)
  */
 
 import { Link } from "react-router-dom";
@@ -35,9 +37,7 @@ export default function Footer() {
         ============================================= */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-white/20">
           
-          {/* =============================================
-          COLUMNA 1: Logo + descripción + redes sociales
-          ============================================= */}
+          {/* COLUMNA 1: Logo + descripción + redes sociales */}
           <div className="col-span-1 md:col-span-1">
             <Logo className="h-12 w-auto mb-3" />
             <p className="text-white/80 text-sm leading-relaxed">
@@ -49,9 +49,7 @@ export default function Footer() {
             <FooterSocial social={empresaConfig.social} />
           </div>
 
-          {/* =============================================
-          COLUMNA 2: Te ayudamos
-          ============================================= */}
+          {/* COLUMNA 2: Te ayudamos */}
           <FooterColumn title="Te ayudamos" icon="💡">
             <ul className="space-y-2 text-sm">
               <li>
@@ -70,6 +68,15 @@ export default function Footer() {
                   🚚 Envíos y retiros
                 </Link>
               </li>
+              {/* 🆕 Retiro en tienda */}
+              <li>
+                <Link 
+                  to="/retiro" 
+                  className="text-white/80 hover:text-[#FFD93D] transition-colors hover:translate-x-1 inline-block"
+                >
+                  🏪 Retiro en tienda
+                </Link>
+              </li>
               <li>
                 <Link 
                   to="/preguntas-frecuentes" 
@@ -81,9 +88,7 @@ export default function Footer() {
             </ul>
           </FooterColumn>
 
-          {/* =============================================
-          COLUMNA 3: Comercial Uruguay (SIN WhatsApp)
-          ============================================= */}
+          {/* COLUMNA 3: Comercial Uruguay */}
           <FooterColumn title="Comercial Uruguay" icon="🏪">
             <ul className="space-y-2 text-sm">
               <li>
@@ -113,9 +118,7 @@ export default function Footer() {
             </ul>
           </FooterColumn>
 
-          {/* =============================================
-          COLUMNA 4: Contacto (iconos reales)
-          ============================================= */}
+          {/* COLUMNA 4: Contacto (iconos reales) */}
           <FooterColumn title="Contacto" icon="📍">
             <ul className="space-y-3 text-white/80 text-sm">
               {/* Dirección */}

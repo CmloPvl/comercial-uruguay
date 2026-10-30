@@ -14,8 +14,11 @@
  * - Código más limpio y mantenible
  * - Soporte para packs promocionales
  * - Stock 0 → "Consultar disponibilidad" (no bloquea agregar)
+ * - Fix: usa category_name (no category)
+ * - Botones admin (editar + desactivar)
  * 
- * 🆕 Fix: usa category_name (no category)
+ * 🆕 Galería de imágenes con ImageCarousel (flechas + auto-scroll)
+ * 🆕 Mensaje de stock más explicativo
  */
 
 import { Link, useParams } from "react-router-dom";
@@ -25,6 +28,7 @@ import { Badge } from "../components/ui/badge";
 import { Card, CardContent } from "../components/ui/card";
 import { Skeleton } from "../components/ui/skeleton";
 import { AppBreadcrumb } from "@/components/common/AppBreadcrumb";
+import { ImageCarousel } from "@/components/common/ImageCarousel";  // 🆕
 import { useProductoDetalle } from "../hooks/useProductoDetalle";
 
 export default function ProductoDetalle() {
@@ -41,6 +45,9 @@ export default function ProductoDetalle() {
     handleToggleFavorite,
     increaseQuantity,
     decreaseQuantity,
+    user,
+    deactivating,
+    handleDesactivar,
   } = useProductoDetalle(id);
 
   // =============================================
@@ -102,6 +109,9 @@ export default function ProductoDetalle() {
   // stock = 0 → "Consultar" (no bloquea)
   const needsStockCheck = product.stock === 0;
 
+  // ¿Es admin?
+  const isAdmin = user?.role === "ADMIN";
+
   // =============================================
   // 🖥️ RENDER PRINCIPAL
   // =============================================
@@ -124,7 +134,7 @@ export default function ProductoDetalle() {
       ============================================= */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* ====== COLUMNA IZQUIERDA: IMAGEN ====== */}
+          {/* ====== COLUMNA IZQUIERDA: IMAGEN (🆕 ImageCarousel) ====== */}
           <div className="lg:w-1/2">
             <Link
               to="/productos"
@@ -133,22 +143,44 @@ export default function ProductoDetalle() {
               ← Volver a la Tienda
             </Link>
 
-            <div className="bg-gradient-to-br from-[#FFD93D]/20 to-[#00D2D3]/20 rounded-2xl p-8 flex items-center justify-center text-8xl h-96 border-2 border-[#00D2D3]">
-              {product.images?.[0] ? (
-                <img
-                  src={product.images[0]}
-                  alt={product.name}
-                  className="w-full h-full object-contain"
-                />
-              ) : (
-                "📦"
-              )}
-            </div>
+            <ImageCarousel
+              images={product.images || []}
+              alt={product.name}
+              interval={4000}
+              autoplay={true}
+            />
           </div>
 
           {/* ====== COLUMNA DERECHA: INFORMACIÓN ====== */}
           <div className="lg:w-1/2 space-y-6">
-            {/* 🆕 Categoría (fix: category_name) */}
+            {/* BOTONES ADMIN (solo si es ADMIN) */}
+            {isAdmin && (
+              <div className="flex flex-wrap gap-2 bg-[#FFD93D]/10 border-2 border-[#FFD93D] rounded-xl p-3">
+                <Badge className="bg-[#FFD93D] text-[#303030] text-xs">
+                  👑 Modo admin
+                </Badge>
+                <Link to={`/admin/productos/${product.id}/editar`} className="ml-auto">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-[#7D5FFF] text-[#7D5FFF] hover:bg-[#7D5FFF] hover:text-white"
+                  >
+                    ✏️ Editar
+                  </Button>
+                </Link>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleDesactivar}
+                  disabled={deactivating}
+                  className="border-[#FF9F43] text-[#FF9F43] hover:bg-[#FF9F43] hover:text-white disabled:opacity-50"
+                >
+                  {deactivating ? "Desactivando..." : "⏸️ Desactivar"}
+                </Button>
+              </div>
+            )}
+
+            {/* Categoría */}
             <Badge className="bg-[#00D2D3] text-white">
               {product.category_name || "Sin categoría"}
             </Badge>
@@ -193,23 +225,29 @@ export default function ProductoDetalle() {
               </div>
             )}
 
-            {/* STOCK (consultar si = 0) */}
+            {/* 🆕 STOCK (mensaje explicativo) */}
             <div
-              className={`p-3 rounded-xl ${
+              className={`p-4 rounded-xl ${
                 needsStockCheck
                   ? "bg-[#FFD93D]/10 border-[#FFD93D]"
                   : "bg-[#00D2D3]/10 border-[#00D2D3]"
               } border-2`}
             >
-              <p
-                className={`font-bold ${
-                  needsStockCheck ? "text-[#603060]" : "text-[#00D2D3]"
-                }`}
-              >
-                {needsStockCheck
-                  ? "📞 Consultar disponibilidad en tienda"
-                  : `✅ ${product.stock} unidades disponibles`}
-              </p>
+              {needsStockCheck ? (
+                <div>
+                  <p className="font-bold text-[#603060] mb-1">
+                    📲 Stock a confirmar
+                  </p>
+                  <p className="text-sm text-[#6A757C] leading-relaxed">
+  Por el momento no contamos con stock en línea.
+  El stock se confirmará al finalizar la compra y ser enviada por WhatsApp por el personal de Comercial Uruguay.
+</p>
+                </div>
+              ) : (
+                <p className="font-bold text-[#00D2D3]">
+                  ✅ {product.stock} unidades disponibles
+                </p>
+              )}
             </div>
 
             {/* Cantidad */}
@@ -230,7 +268,7 @@ export default function ProductoDetalle() {
                   +
                 </button>
                 <span className="text-sm text-[#6A757C]">
-                  {needsStockCheck ? "Consultar stock" : `(${product.stock} disponibles)`}
+                  {needsStockCheck ? "(Stock a confirmar)" : `(${product.stock} disponibles)`}
                 </span>
               </div>
             </div>

@@ -13,6 +13,8 @@
  * - Buscador reutilizable (SearchBar)
  * - Accesible con aria-label
  * 
+ * 🆕 Links a Envíos y Retiros + Retiro en Tienda
+ * 
  * @param {Object} props
  * @param {boolean} props.isOpen - Estado del menú
  * @param {Function} props.onOpenChange - Función para abrir/cerrar
@@ -45,6 +47,8 @@ import {
   Phone,
   Star,
   Menu,
+  Truck,   // 🆕
+  Store,   // 🆕
 } from "lucide-react";
 
 interface NavbarMenuProps {
@@ -128,6 +132,9 @@ export function NavbarMenu({
             <NavItemMobile to="/ofertas" icon={<Tag className="w-5 h-5" />} label="Ofertas" onClick={onClose} />
             <NavItemMobile to="/nosotros" icon={<Users className="w-5 h-5" />} label="Nosotros" onClick={onClose} />
             <NavItemMobile to="/contacto" icon={<Phone className="w-5 h-5" />} label="Contacto" onClick={onClose} />
+            {/* 🆕 Links nuevos */}
+            <NavItemMobile to="/envios-y-retiros" icon={<Truck className="w-5 h-5" />} label="Envíos y Retiros" onClick={onClose} />
+            <NavItemMobile to="/retiro" icon={<Store className="w-5 h-5" />} label="Retiro en Tienda" onClick={onClose} />
 
             <div className="pt-2 border-t border-gray-100 mt-2 space-y-0.5">
               <NavItemMobile to="/favoritos" icon={<Heart className="w-5 h-5" />} label="Favoritos" onClick={onClose} />

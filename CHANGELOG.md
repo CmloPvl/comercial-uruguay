@@ -1,4 +1,69 @@
-markdown
+## [v1.2.0-beta.6] — 30/10/2026
+
+### Agregado ✨
+
+- **Páginas de Envíos y Retiros** (reutilizables)
+  - `components/info/EnviosSection.tsx` (envíos a todo Chile)
+  - `components/info/RetiroSection.tsx` (retiro en tienda)
+  - `/envios-y-retiros` con tabs (Envios | Retiro) + URL directa (`?tab=retiro`)
+  - `/envios` y `/retiro` usan las secciones (sin duplicar contenido)
+
+- **Links de Envíos/Retiro en menús**
+  - `Footer.tsx` → "Retiro en tienda" en columna "Te ayudamos"
+  - `NavbarMenu.tsx` (sidebar móvil) → "Envíos y Retiros" + "Retiro en Tienda"
+  - `NavbarGuestMenu.tsx` (desktop invitado) → 2 links
+  - `NavbarUserMenu.tsx` (desktop logueado) → 2 links
+
+- **Botones admin en `ProductoDetalle`**
+  - "✏️ Editar" → `/admin/productos/:id/editar`
+  - "⏸️ Desactivar" → soft delete (desaparece del catálogo, recuperable)
+  - Badge "👑 Modo admin" (para saber que estás en modo admin)
+
+- **Galería de imágenes en `ProductoDetalle`**
+  - Reutiliza `ImageCarousel` (flechas, auto-scroll, indicadores, contador)
+  - Mismo tamaño que el carrusel del Hero
+
+- **Cantidad con stock 0**
+  - Permite subir cantidad hasta 99 (antes solo 1)
+  - Mensaje explicativo de stock
+
+### Cambiado 🔄
+
+- **Banner de `/retiro`** rediseñado
+  - Antes: gradiente rosa/amarillo/naranja (muy fuerte)
+  - Ahora: gradiente purple/cyan (paleta oficial) + blobs decorativos + texto blanco
+
+- **Mensaje de stock en `ProductoDetalle`** más explicativo
+  - Antes: "📞 Consultar disponibilidad en tienda"
+  - Ahora: "📲 Stock a confirmar" + explicación del flujo WhatsApp
+
+- **Tabs de `/envios-y-retiros`** rediseñados
+  - Textos cortos ("Envíos" / "Retiro")
+  - Iconos grandes (mobile: arriba, desktop: al lado)
+  - `whitespace-nowrap` (evita cortes)
+
+- **`Footer.tsx`** → link a `/retiro` agregado
+
+### Corregido 🐛
+
+- **Imports sin usar** en `EnviosSection.tsx` y `RetiroSection.tsx`
+- **`ProductFormAdvancedOptions.tsx`** → `getCategoryIcon` con 1 argumento (fix de tipos)
+- **`ProductoDetalle.tsx`** → `product.category_name` (antes `product.category`)
+- **`ProductCard.tsx`** → `product.category_name` (antes `product.category`)
+- **`Ofertas.tsx`** → `product.category_name` (antes `product.category`)
+- **`productService.ts`** → eliminado `category` del tipo `Product` (nunca existió)
+
+### Pendiente ⚠️
+
+- **Scroll horizontal en mobile** (parcialmente fixeado, revisar después)
+- `Ofertas.tsx` → usar `ProductCard` (sigue con card hardcodeado)
+- SKU opcional (backend autogenera)
+- Descripción sin mínimo de 20 caracteres
+- Etiquetas/tags sin uso
+- Productos relacionados en detalle
+- Compartir por WhatsApp desde el producto
+
+---
 
 # 📋 CHANGELOG — Comercial Uruguay
 

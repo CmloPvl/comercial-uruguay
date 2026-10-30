@@ -8,6 +8,7 @@
  * - Verificación de favoritos
  * - Agregar al carrito
  * - Agregar/eliminar favoritos
+ * - Desactivar producto (solo admin)
  * - Estados de carga, error y datos
  * 
  * ✅ Buenas prácticas:
@@ -16,20 +17,32 @@
  * - Fácil de testear
  * - Manejo de errores con toasts
  * 
+ * 🆕 handleDesactivar (soft delete, solo admin)
+ * 🆕 user expuesto (para condicionales admin)
+ * 
  * @param {string} id - ID del producto
  * @returns {Object} - Estados y funciones del detalle de producto
  */
 
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { productService } from "../services/productService";
 import { favoriteService } from "../services/favoriteService";
+import {
+  showErrorToastWithFallback,
+  showSuccessToast,
+  successMessages,
+  productErrors,
+  cartErrors,
+  authErrors,
+} from "../utils/errorMessages";
 
 export function useProductoDetalle(id: string | undefined) {
   const { user } = useAuth();
   const { addItem } = useCart();
+  const navigate = useNavigate();
 
   // =============================================
   // 🎯 ESTADOS
@@ -40,6 +53,7 @@ export function useProductoDetalle(id: string | undefined) {
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [deactivating, setDeactivating] = useState(false);  // 🆕
 
   // =============================================
   // 📊 DATOS DERIVADOS
@@ -66,21 +80,14 @@ export function useProductoDetalle(id: string | undefined) {
       const data = await productService.getProductById(id);
       setProduct(data);
 
-      // Verificar si está en favoritos
       if (user) {
         const fav = await favoriteService.isFavorite(id);
         setIsFavorite(fav);
       }
     } catch (err: any) {
-      setError(err.message || "Error al cargar el producto");
-      toast.error(`❌ ${err.message || "Error al cargar el producto"}`, {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      const errorMessage = err.message || productErrors.notFound;
+      setError(errorMessage);
+      showErrorToastWithFallback(err, productErrors.notFound);
     } finally {
       setLoading(false);
     }
@@ -91,14 +98,7 @@ export function useProductoDetalle(id: string | undefined) {
   // =============================================
   const handleAddToCart = async () => {
     if (!user) {
-      toast.error("❌ Inicia sesión para agregar productos al carrito", {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      showErrorToastWithFallback(new Error(authErrors.loginRequired), authErrors.loginRequired);
       return;
     }
 
@@ -116,24 +116,9 @@ export function useProductoDetalle(id: string | undefined) {
         },
         quantity
       );
-      toast.success(`✅ "${product.name}" agregado al carrito`, {
-        icon: "🛒",
-        style: {
-          border: "2px solid #00D2D3",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      showSuccessToast(`"${product.name}" ${successMessages.addedToCart}`);
     } catch (err: any) {
-      toast.error(`❌ ${err.message || "Error al agregar al carrito"}`, {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      showErrorToastWithFallback(err, cartErrors.addFailed);
     } finally {
       setAddingToCart(false);
     }
@@ -144,14 +129,7 @@ export function useProductoDetalle(id: string | undefined) {
   // =============================================
   const handleToggleFavorite = async () => {
     if (!user) {
-      toast.error("❌ Inicia sesión para guardar favoritos", {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      showErrorToastWithFallback(new Error(authErrors.loginRequired), authErrors.loginRequired);
       return;
     }
 
@@ -159,46 +137,52 @@ export function useProductoDetalle(id: string | undefined) {
       if (isFavorite) {
         await favoriteService.removeFavorite(product.id);
         setIsFavorite(false);
-        toast.success("✅ Eliminado de favoritos", {
-          icon: "💔",
-          style: {
-            border: "2px solid #FF9F43",
-            padding: "16px",
-            backgroundColor: "#FAF9E2",
-            color: "#303030",
-          },
-        });
+        showSuccessToast("Eliminado de favoritos");
       } else {
         await favoriteService.addFavorite(product.id);
         setIsFavorite(true);
-        toast.success("✅ Agregado a favoritos", {
-          icon: "❤️",
-          style: {
-            border: "2px solid #FF6B81",
-            padding: "16px",
-            backgroundColor: "#FAF9E2",
-            color: "#303030",
-          },
-        });
+        showSuccessToast("Agregado a favoritos");
       }
     } catch (err: any) {
-      toast.error(`❌ ${err.message || "Error al actualizar favoritos"}`, {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      showErrorToastWithFallback(err, "Error al actualizar favoritos");
+    }
+  };
+
+  // =============================================
+  // 🆕 DESACTIVAR PRODUCTO (solo admin)
+  // =============================================
+  /**
+   * Soft delete: marca isActive = false
+   * El producto desaparece del catálogo pero queda en admin (se puede reactivar).
+   * Después de desactivar, redirige al catálogo.
+   */
+  const handleDesactivar = async () => {
+    if (!user || user.role !== "ADMIN") {
+      showErrorToastWithFallback(new Error("No autorizado"), "No autorizado");
+      return;
+    }
+
+    try {
+      setDeactivating(true);
+      await productService.updateProduct(product.id, { isActive: false });
+      showSuccessToast(`"${product.name}" desactivado. Ya no aparece en el catálogo.`);
+      // Redirigir al catálogo (el producto ya no existe públicamente)
+      navigate("/productos");
+    } catch (err: any) {
+      showErrorToastWithFallback(err, "Error al desactivar el producto");
+    } finally {
+      setDeactivating(false);
     }
   };
 
   // =============================================
   // 📦 MANEJAR CANTIDAD
   // =============================================
-  const increaseQuantity = () => {
-    setQuantity((prev) => Math.min(product?.stock || 1, prev + 1));
-  };
+const increaseQuantity = () => {
+  // 🆕 Si stock = 0 (consultar), permitir hasta 99. Si stock > 0, limitar al stock real.
+  const max = product?.stock && product.stock > 0 ? product.stock : 99;
+  setQuantity((prev) => Math.min(max, prev + 1));
+};
 
   const decreaseQuantity = () => {
     setQuantity((prev) => Math.max(1, prev - 1));
@@ -225,10 +209,17 @@ export function useProductoDetalle(id: string | undefined) {
     finalPrice,
     isOutOfStock,
 
+    // 🆕 Usuario (para condicionales admin)
+    user,
+
+    // 🆕 Estado de desactivar
+    deactivating,
+
     // 📤 Funciones
     loadProduct,
     handleAddToCart,
     handleToggleFavorite,
+    handleDesactivar,  // 🆕
     increaseQuantity,
     decreaseQuantity,
     setQuantity,

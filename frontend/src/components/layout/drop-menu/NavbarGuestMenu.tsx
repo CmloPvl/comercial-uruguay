@@ -6,7 +6,7 @@
  * COMPONENTE DE DISEÑO
  * 
  * Muestra el menú para usuarios no autenticados.
- * Incluye: Iniciar Sesión y Registrarse.
+ * Incluye: Iniciar Sesión, Registrarse, Envíos y Retiros, Retiro en Tienda.
  * 
  * ✅ Buenas prácticas:
  * - Componente aislado y reutilizable
@@ -14,6 +14,8 @@
  * - Redirección a página anterior después de login
  * - Cierre automático del menú al hacer clic
  * - Fácil de mantener
+ * 
+ * 🆕 Links a Envíos y Retiros + Retiro en Tienda
  */
 
 import { Link, useLocation } from "react-router-dom";
@@ -21,10 +23,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
 import { Button } from "../../ui/button";
-import { User, Star } from "lucide-react";
+import { User, Star, Truck, Store } from "lucide-react";
 
 export function NavbarGuestMenu() {
   const location = useLocation();
@@ -45,7 +48,7 @@ export function NavbarGuestMenu() {
 
       <DropdownMenuContent 
         align="end" 
-        className="w-44 sm:w-48 border-2 border-[#7D5FFF] shadow-xl rounded-xl bg-white p-1"
+        className="w-48 sm:w-52 border-2 border-[#7D5FFF] shadow-xl rounded-xl bg-white p-1"
       >
         <DropdownMenuItem asChild className="hover:bg-[#7D5FFF]/10 cursor-pointer rounded-lg text-sm">
           <Link 
@@ -63,6 +66,28 @@ export function NavbarGuestMenu() {
             className="text-[#303030] hover:text-[#00D2D3] font-medium py-2.5"
           >
             <Star className="w-4 h-4 mr-2" /> Crear Cuenta
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator className="bg-[#7D5FFF]/20" />
+
+        {/* 🆕 Links informativos */}
+        <DropdownMenuItem asChild className="hover:bg-[#90C090]/10 cursor-pointer rounded-lg text-sm">
+          <Link 
+            to="/envios-y-retiros"
+            state={{ from: location.pathname }}
+            className="text-[#303030] hover:text-[#90C090] font-medium py-2.5"
+          >
+            <Truck className="w-4 h-4 mr-2" /> Envíos y Retiros
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className="hover:bg-[#FF6B81]/10 cursor-pointer rounded-lg text-sm">
+          <Link 
+            to="/retiro"
+            state={{ from: location.pathname }}
+            className="text-[#303030] hover:text-[#FF6B81] font-medium py-2.5"
+          >
+            <Store className="w-4 h-4 mr-2" /> Retiro en Tienda
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>

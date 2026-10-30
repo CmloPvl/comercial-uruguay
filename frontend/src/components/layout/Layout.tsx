@@ -1,3 +1,20 @@
+// 📁 frontend/src/components/layout/Layout.tsx
+
+/**
+ * 📌 LAYOUT
+ * 
+ * Contenedor principal de la app.
+ * Incluye Navbar, main y Footer.
+ * 
+ * ✅ Buenas prácticas:
+ * - Actualiza título de la página dinámicamente
+ * - Scroll al inicio al cambiar de ruta
+ * - Mobile-first
+ * - Sin scroll horizontal (overflow-x-hidden)
+ * 
+ * 🆕 overflow-x-hidden en el contenedor principal
+ */
+
 import { type ReactNode, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
@@ -54,9 +71,9 @@ export default function Layout({
   }, [location.pathname]);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen overflow-x-hidden">
       {showNavbar && <Navbar />}
-      <main className="flex-grow">
+      <main className="flex-grow overflow-x-hidden">
         {children}
       </main>
       {showFooter && <Footer />}

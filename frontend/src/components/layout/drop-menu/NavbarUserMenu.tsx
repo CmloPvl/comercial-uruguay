@@ -6,7 +6,7 @@
  * COMPONENTE DE DISEÑO
  * 
  * Muestra el menú desplegable del usuario autenticado.
- * Incluye: perfil, pedidos, favoritos, panel admin (si es admin) y cerrar sesión.
+ * Incluye: perfil, pedidos, favoritos, envíos/retiro, admin y cerrar sesión.
  * 
  * ✅ Buenas prácticas:
  * - Componente aislado y reutilizable
@@ -14,6 +14,8 @@
  * - Redirección a página anterior después de acciones
  * - Cierre automático del menú al hacer clic
  * - Fácil de testear
+ * 
+ * 🆕 Links a Envíos y Retiros + Retiro en Tienda
  * 
  * @param {Object} props
  * @param {User} props.user - Datos del usuario
@@ -33,7 +35,15 @@ import {
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "../../ui/avatar";
-import { User, Package, Heart, LogOut, LayoutDashboard } from "lucide-react";
+import {
+  User,
+  Package,
+  Heart,
+  LogOut,
+  LayoutDashboard,
+  Truck,   // 🆕
+  Store,   // 🆕
+} from "lucide-react";
 
 interface NavbarUserMenuProps {
   user: {
@@ -81,7 +91,7 @@ export function NavbarUserMenu({
       {/* 🔹 Contenido del menú desplegable */}
       <DropdownMenuContent 
         align="end" 
-        className="w-52 sm:w-56 border-2 border-[#7D5FFF] shadow-xl rounded-xl bg-white p-1"
+        className="w-56 sm:w-60 border-2 border-[#7D5FFF] shadow-xl rounded-xl bg-white p-1"
         onSelect={() => onClose?.()}
       >
         
@@ -140,6 +150,32 @@ export function NavbarUserMenu({
             onClick={onClose}
           >
             <Heart className="w-4 h-4 mr-2" /> Favoritos
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator className="bg-[#7D5FFF]/20" />
+
+        {/* 🆕 Envíos y Retiros */}
+        <DropdownMenuItem asChild className="hover:bg-[#90C090]/10 cursor-pointer rounded-lg text-sm">
+          <Link 
+            to="/envios-y-retiros" 
+            state={{ from: location.pathname }}
+            className="text-[#303030] hover:text-[#90C090]"
+            onClick={onClose}
+          >
+            <Truck className="w-4 h-4 mr-2" /> Envíos y Retiros
+          </Link>
+        </DropdownMenuItem>
+
+        {/* 🆕 Retiro en Tienda */}
+        <DropdownMenuItem asChild className="hover:bg-[#FFD93D]/10 cursor-pointer rounded-lg text-sm">
+          <Link 
+            to="/retiro" 
+            state={{ from: location.pathname }}
+            className="text-[#303030] hover:text-[#FFD93D]"
+            onClick={onClose}
+          >
+            <Store className="w-4 h-4 mr-2" /> Retiro en Tienda
           </Link>
         </DropdownMenuItem>
 
