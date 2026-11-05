@@ -352,3 +352,73 @@ Contenido: datos de contacto, ubicación, redes, horarios, beneficios, año actu
 **Redes:** Facebook, Instagram, TikTok
 
 ---
+
+---
+
+## 🆕 CAMBIOS RECIENTES (30/10/2026)
+
+### Páginas de Envíos y Retiros
+
+**Componentes nuevos:**
+
+- `components/info/EnviosSection.tsx` → sección de envíos (reutilizable)
+- `components/info/RetiroSection.tsx` → sección de retiro (reutilizable)
+
+**Páginas:**
+
+- `/envios-y-retiros` → tabs (Envios | Retiro) + URL directa (`?tab=retiro`)
+- `/envios` → usa `EnviosSection`
+- `/retiro` → usa `RetiroSection`
+
+**Links en menús:**
+
+- `Footer.tsx` → "Retiro en tienda"
+- `NavbarMenu.tsx` → "Envíos y Retiros" + "Retiro en Tienda"
+- `NavbarGuestMenu.tsx` → 2 links
+- `NavbarUserMenu.tsx` → 2 links
+
+### Botones admin en `ProductoDetalle`
+
+- "✏️ Editar" → `/admin/productos/:id/editar`
+- "⏸️ Desactivar" → soft delete (recuperable desde admin)
+- Badge "👑 Modo admin"
+
+### Galería de imágenes en `ProductoDetalle`
+
+- Reutiliza `ImageCarousel` (flechas, auto-scroll, indicadores)
+- Mismo tamaño que el Hero
+
+### Cantidad con stock 0
+
+- Permite subir hasta 99 (antes solo 1)
+- Mensaje explicativo del flujo WhatsApp
+
+### Fix: banner de `/retiro`
+
+- Antes: gradiente rosa/amarillo/naranja
+- Ahora: gradiente purple/cyan (paleta oficial)
+
+### Fix: `category_name`
+
+- `ProductoDetalle`, `ProductCard`, `Ofertas` → `product.category_name`
+- `productService.ts` → eliminado `category` del tipo (nunca existió)
+
+### Pendiente
+
+- Scroll horizontal en mobile (parcialmente fixeado)
+- `Ofertas.tsx` → usar `ProductCard`
+- SKU opcional
+- Descripción sin mínimo
+- Etiquetas/tags sin uso
+- Productos relacionados
+- Compartir por WhatsApp
+
+---
+
+### SQL aplicado
+
+Ninguno nuevo (todo el SQL ya estaba aplicado en `v1.2.0-beta.5`).
+
+---
+
+**📌 Última actualización:** 30/10/2026

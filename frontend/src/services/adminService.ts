@@ -14,6 +14,7 @@
  * - Reutilizable
  * 
  * 🆕 Soporte para packs promocionales (packPrice, packQuantity)
+ * 🆕 Fix: deleteProduct y updateProduct usan /products/:id (antes /admin/products/:id → 404)
  */
 
 import api from './api';
@@ -53,9 +54,9 @@ export interface Product {
   isOnSale: boolean;
   discount: number;
   images: string[];
-  destacado?: boolean;            // 🆕 Campo destacado
-  packPrice?: number | null;      // 🆕 Precio del pack (null si no hay)
-  packQuantity?: number | null;   // 🆕 Cantidad del pack (null si no hay)
+  destacado?: boolean;
+  packPrice?: number | null;
+  packQuantity?: number | null;
   createdAt: string;
 }
 
@@ -108,12 +109,14 @@ export const adminService = {
     };
   },
 
+  // 🆕 Fix: usa /products/:id (no /admin/products/:id)
   async deleteProduct(id: string): Promise<void> {
-    await api.delete(`/admin/products/${id}`);
+    await api.delete(`/products/${id}`);
   },
 
+  // 🆕 Fix: usa /products/:id (no /admin/products/:id)
   async updateProduct(id: string, data: Partial<Product>): Promise<Product> {
-    const response = await api.put(`/admin/products/${id}`, data);
+    const response = await api.put(`/products/${id}`, data);
     return response.data.data;
   },
 

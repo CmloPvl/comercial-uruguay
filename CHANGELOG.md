@@ -1,3 +1,11 @@
+markdown
+
+# 📋 CHANGELOG — Comercial Uruguay
+
+Registro de cambios por versión. Sigue [Keep a Changelog](https://keepachangelog.com/es/1.0.0/) y [Semantic Versioning](https://semver.org/lang/es/).
+
+---
+
 ## [v1.2.0-beta.6] — 30/10/2026
 
 ### Agregado ✨
@@ -62,12 +70,6 @@
 - Etiquetas/tags sin uso
 - Productos relacionados en detalle
 - Compartir por WhatsApp desde el producto
-
----
-
-# 📋 CHANGELOG — Comercial Uruguay
-
-Registro de cambios por versión. Sigue [Keep a Changelog](https://keepachangelog.com/es/1.0.0/) y [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
@@ -220,6 +222,4 @@ Corregido 🐛
     Error de tipos: packPrice: number | null → ProductInput acepta null
 
 [v1.2.0-beta.3] — (versión anterior)
-
-    (registro previo)
 ```

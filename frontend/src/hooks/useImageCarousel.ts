@@ -6,13 +6,17 @@
  * Encapsula toda la lógica de un carrusel de imágenes:
  * - Navegación (siguiente/anterior)
  * - Autoplay (reproducción automática)
- * - Pausa al hover
+ * - Pausa al hover (desktop)
+ * - Pausa al tocar (mobile) con reanudación automática
  * - Reset al cambiar imágenes
  * 
  * ✅ Buenas prácticas:
  * - Separa la lógica del diseño
  * - Reutilizable en cualquier carrusel
  * - Fácil de testear
+ * 
+ * 🆕 Navegación manual pausa el autoplay por 10s (mobile)
+ * 🆕 setIsPaused expuesto (para control externo)
  * 
  * @param {string[]} images - Lista de URLs de imágenes
  * @param {number} interval - Tiempo entre cambios (ms)
@@ -29,6 +33,7 @@ export function useImageCarousel(
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pauseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const totalImages = images.length;
 
@@ -36,20 +41,37 @@ export function useImageCarousel(
   // 📸 NAVEGACIÓN
   // =============================================
 
+  /**
+   * 🆕 Pausar autoplay temporalmente (al tocar flecha/punto)
+   * Se reanuda automáticamente después de 10s
+   */
+  const pauseTemporarily = useCallback(() => {
+    setIsPaused(true);
+    if (pauseTimeoutRef.current) {
+      clearTimeout(pauseTimeoutRef.current);
+    }
+    pauseTimeoutRef.current = setTimeout(() => {
+      setIsPaused(false);
+    }, 10000);
+  }, []);
+
   const goToNext = useCallback(() => {
     if (totalImages === 0) return;
     setCurrentIndex((prev) => (prev + 1) % totalImages);
-  }, [totalImages]);
+    pauseTemporarily();  // 🆕
+  }, [totalImages, pauseTemporarily]);
 
   const goToPrevious = useCallback(() => {
     if (totalImages === 0) return;
     setCurrentIndex((prev) => (prev - 1 + totalImages) % totalImages);
-  }, [totalImages]);
+    pauseTemporarily();  // 🆕
+  }, [totalImages, pauseTemporarily]);
 
   const goToIndex = useCallback((index: number) => {
     if (index < 0 || index >= totalImages) return;
     setCurrentIndex(index);
-  }, [totalImages]);
+    pauseTemporarily();  // 🆕
+  }, [totalImages, pauseTemporarily]);
 
   // =============================================
   // ⏱️ AUTOPLAY
@@ -69,7 +91,7 @@ export function useImageCarousel(
   }, [autoplay, interval, goToNext, totalImages, isPaused]);
 
   // =============================================
-  // 🖱️ PAUSA AL HOVER
+  // 🖱️ PAUSA AL HOVER (desktop)
   // =============================================
 
   const handleMouseEnter = () => setIsPaused(true);
@@ -84,6 +106,17 @@ export function useImageCarousel(
   }, [images]);
 
   // =============================================
+  // 🧹 LIMPIEZA
+  // =============================================
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (pauseTimeoutRef.current) clearTimeout(pauseTimeoutRef.current);
+    };
+  }, []);
+
+  // =============================================
   // 📦 EXPORTACIÓN
   // =============================================
 
@@ -95,6 +128,7 @@ export function useImageCarousel(
     goToPrevious,
     goToIndex,
     isPaused,
+    setIsPaused,      // 🆕 Exponer para control externo
     handleMouseEnter,
     handleMouseLeave,
   };
