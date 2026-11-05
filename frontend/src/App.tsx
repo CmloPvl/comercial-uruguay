@@ -82,7 +82,7 @@ function App() {
       <Toaster 
         position="top-right"
         toastOptions={{
-          duration: 4000,
+          duration: 2000,
           style: {
             background: '#363636',
             color: '#fff',
@@ -91,14 +91,14 @@ function App() {
             boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
           },
           success: {
-            duration: 3000,
+            duration: 2000,
             iconTheme: {
               primary: '#4ade80',
               secondary: '#fff',
             },
           },
           error: {
-            duration: 4000,
+            duration: 3000,
             iconTheme: {
               primary: '#ef4444',
               secondary: '#fff',

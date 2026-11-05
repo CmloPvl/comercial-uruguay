@@ -13,6 +13,7 @@
  * - Usa iconTheme en lugar de icon para evitar el icono de "visto" adicional
  * 
  * 🆕 Mensajes agregados para el carrito (éxito al actualizar/eliminar/vaciar)
+ * 🆕 Mensajes agregados para productos (deleteFailed, toggleFailed)
  */
 
 import toast from 'react-hot-toast';
@@ -40,6 +41,9 @@ export const productErrors = {
   invalidPrice: "Precio inválido.",
   fileTooLarge: "La imagen excede el tamaño máximo permitido.",
   invalidFileType: "El archivo no es una imagen válida.",
+  // 🆕 Nuevos
+  deleteFailed: "Error al eliminar el producto.",
+  toggleFailed: "Error al actualizar el estado del producto.",
 };
 
 // =============================================
@@ -53,7 +57,7 @@ export const cartErrors = {
   updateFailed: "Error al actualizar la cantidad.",
   removeFailed: "Error al eliminar el producto.",
   clearFailed: "Error al vaciar el carrito.",
-  addFailed: "Error al agregar al carrito.",  // ← ¿está?
+  addFailed: "Error al agregar al carrito.",
 };
 
 // =============================================
@@ -63,6 +67,10 @@ export const cartErrors = {
 export const categoryErrors = {
   notFound: "Categoría no encontrada.",
   hasProducts: "La categoría tiene productos asociados. No se puede eliminar.",
+  // 🆕 Nuevos
+  nameRequired: "El nombre de la categoría es obligatorio.",
+  saveFailed: "Error al guardar la categoría.",
+  deleteFailed: "Error al eliminar la categoría.",
 };
 
 // =============================================
@@ -176,7 +184,6 @@ export const successMessages = {
   imageDeleted: "Imagen eliminada exitosamente",
 
   addedToCart: "Producto agregado al carrito",
-  // 🆕 Mensajes nuevos para el carrito
   quantityUpdated: "Cantidad actualizada",
   itemRemoved: "Producto eliminado del carrito",
   cartCleared: "Carrito vaciado",

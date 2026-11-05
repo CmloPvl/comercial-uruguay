@@ -16,14 +16,22 @@
  * - Separa la lógica del diseño
  * - Reutilizable en otros componentes
  * - Fácil de testear
- * - Manejo de errores con toasts
+ * - Manejo de errores con toasts (helper centralizado)
  * - Modales de confirmación con shadcn/ui
+ * 
+ * 🆕 Toasts migrados al helper (errorMessages.ts)
  * 
  * @returns {Object} - Estados y funciones de admin categorías
  */
 
 import { useState, useEffect, useMemo } from "react";
-import toast from "react-hot-toast";
+// 🆕 Migrado: ya no se usa toast directo
+import {
+  showErrorToastWithFallback,
+  showSuccessToast,
+  successMessages,
+  categoryErrors,
+} from "../utils/errorMessages";
 import { categoryService, type Category } from "../services/categoryService";
 
 // 🎨 Emojis para el diálogo de eliminación
@@ -87,14 +95,8 @@ export function useAdminCategorias() {
     } catch (err: any) {
       const errorMessage = err.message || "Error al cargar categorías";
       setError(errorMessage);
-      toast.error(`❌ ${errorMessage}`, {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      // 🆕 Toast migrado al helper
+      showErrorToastWithFallback(err, categoryErrors.notFound);
     } finally {
       setLoading(false);
     }
@@ -144,14 +146,11 @@ export function useAdminCategorias() {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      toast.error("❌ El nombre de la categoría es obligatorio", {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      // 🆕 Toast migrado al helper (mensaje directo, no hay error de axios)
+      showErrorToastWithFallback(
+        new Error(categoryErrors.nameRequired),
+        categoryErrors.nameRequired
+      );
       return;
     }
 
@@ -162,30 +161,20 @@ export function useAdminCategorias() {
           description: formData.description,
           icon: formData.icon,
         });
-        toast.success(`✅ "${formData.name}" actualizada correctamente`, {
-          icon: "✏️",
-          style: {
-            border: "2px solid #00D2D3",
-            padding: "16px",
-            backgroundColor: "#FAF9E2",
-            color: "#303030",
-          },
-        });
+        // 🆕 Toast migrado al helper
+        showSuccessToast(
+          `${formData.name} ${successMessages.categoryUpdated}`
+        );
       } else {
         await categoryService.createCategory({
           name: formData.name,
           description: formData.description,
           icon: formData.icon,
         });
-        toast.success(`✅ "${formData.name}" creada correctamente`, {
-          icon: "✨",
-          style: {
-            border: "2px solid #00D2D3",
-            padding: "16px",
-            backgroundColor: "#FAF9E2",
-            color: "#303030",
-          },
-        });
+        // 🆕 Toast migrado al helper
+        showSuccessToast(
+          `${formData.name} ${successMessages.categoryCreated}`
+        );
       }
 
       setIsDialogOpen(false);
@@ -193,15 +182,8 @@ export function useAdminCategorias() {
       setFormData({ name: "", description: "", icon: "" });
       await loadCategories();
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || "Error al guardar categoría";
-      toast.error(`❌ ${errorMessage}`, {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      // 🆕 Toast migrado al helper
+      showErrorToastWithFallback(err, categoryErrors.saveFailed);
     }
   };
 
@@ -213,25 +195,12 @@ export function useAdminCategorias() {
 
     try {
       await categoryService.deleteCategory(categoryToDelete);
-      toast.success("🗑️ Categoría eliminada correctamente", {
-        style: {
-          border: "2px solid #00D2D3",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      // 🆕 Toast migrado al helper
+      showSuccessToast(successMessages.categoryDeleted);
       await loadCategories();
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || "Error al eliminar categoría";
-      toast.error(`❌ ${errorMessage}`, {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      // 🆕 Toast migrado al helper
+      showErrorToastWithFallback(err, categoryErrors.deleteFailed);
     } finally {
       setDeleteDialogOpen(false);
       setCategoryToDelete(null);

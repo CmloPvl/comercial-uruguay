@@ -16,14 +16,22 @@
  * - Separa la lógica del diseño
  * - Reutilizable en otros componentes
  * - Fácil de testear
- * - Manejo de errores con toasts
+ * - Manejo de errores con toasts (helper centralizado)
  * - Modales de confirmación con shadcn/ui (reemplaza confirm() nativo)
+ * 
+ * 🆕 Toasts migrados al helper (errorMessages.ts)
  * 
  * @returns {Object} - Estados y funciones de admin productos
  */
 
 import { useState, useEffect, useMemo } from "react";
-import toast from "react-hot-toast";
+// 🆕 Migrado: ya no se usa toast directo
+import {
+  showErrorToastWithFallback,
+  showSuccessToast,
+  successMessages,
+  productErrors,
+} from "../utils/errorMessages";
 import { adminService, type Product } from "../services/adminService";
 
 export function useAdminProductos() {
@@ -65,14 +73,8 @@ export function useAdminProductos() {
     } catch (err: any) {
       const errorMessage = err.message || "Error al cargar productos";
       setError(errorMessage);
-      toast.error(`❌ ${errorMessage}`, {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      // 🆕 Toast migrado al helper
+      showErrorToastWithFallback(err, productErrors.notFound);
     } finally {
       setLoading(false);
     }
@@ -141,27 +143,15 @@ export function useAdminProductos() {
 
     try {
       await adminService.deleteProduct(selectedProduct.id);
-      toast.success(`✅ "${selectedProduct.name}" eliminado correctamente`, {
-        icon: "🗑️",
-        style: {
-          border: "2px solid #00D2D3",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      // 🆕 Toast migrado al helper
+      showSuccessToast(
+        `${selectedProduct.name} ${successMessages.productDeleted}`
+      );
       // ✅ Recargar la lista después de eliminar
       await loadProducts();
     } catch (err: any) {
-      const errorMessage = err.message || "Error al eliminar el producto";
-      toast.error(`❌ ${errorMessage}`, {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      // 🆕 Toast migrado al helper
+      showErrorToastWithFallback(err, productErrors.deleteFailed);
     } finally {
       // ✅ Cerrar modal y limpiar selección
       setDeleteDialogOpen(false);
@@ -176,30 +166,19 @@ export function useAdminProductos() {
     if (!selectedProduct) return;
 
     const newStatus = !selectedProduct.isActive;
-    const action = newStatus ? "activado" : "desactivado";
 
     try {
       await adminService.updateProduct(selectedProduct.id, { isActive: newStatus });
-      toast.success(`✅ "${selectedProduct.name}" ${action} correctamente`, {
-        icon: newStatus ? "▶️" : "⏸️",
-        style: {
-          border: "2px solid #00D2D3",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      // 🆕 Toast migrado al helper (mensaje según acción)
+      showSuccessToast(
+        `${selectedProduct.name} ${
+          newStatus ? successMessages.productActivated : successMessages.productDeactivated
+        }`
+      );
       await loadProducts();
     } catch (err: any) {
-      const errorMessage = err.message || `Error al ${action} el producto`;
-      toast.error(`❌ ${errorMessage}`, {
-        style: {
-          border: "2px solid #FF6B81",
-          padding: "16px",
-          backgroundColor: "#FAF9E2",
-          color: "#303030",
-        },
-      });
+      // 🆕 Toast migrado al helper
+      showErrorToastWithFallback(err, productErrors.toggleFailed);
     } finally {
       // ✅ Cerrar modal y limpiar selección
       setToggleDialogOpen(false);

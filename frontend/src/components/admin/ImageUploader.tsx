@@ -16,9 +16,9 @@
  * - Reordenamiento con drag & drop (HTML5 nativo)
  * - Reordenamiento con botones ← → (mobile)
  * 
- * 🆕 Drag & drop nativo para reordenar (desktop)
- * 🆕 Botones ← → para reordenar (mobile)
- * 🆕 Badge "Principal" en la primera imagen
+ * 🆕 Fix: isAtMax solo cuenta existingImages (no files pendientes)
+ * 🆕 Fix: el dropzone NO se oculta mientras hay archivos pendientes
+ * 🆕 Fix: botón ✕ dentro del contenedor (antes se recortaba)
  */
 
 import { useEffect, useState } from 'react'
@@ -31,15 +31,10 @@ import {
 } from '@/utils/errorMessages'
 
 interface ImageUploaderProps {
-  /** URLs de imágenes existentes (para editar) */
   existingImages?: string[]
-  /** Callback cuando se suben imágenes */
   onImagesChange: (urls: string[]) => void
-  /** Número máximo de imágenes */
   maxFiles?: number
-  /** Tamaño máximo en MB */
   maxFileSize?: number
-  /** Label del componente */
   label?: string
 }
 
@@ -50,15 +45,9 @@ export function ImageUploader({
   maxFileSize = 10,
   label = '📸 Imágenes del Producto',
 }: ImageUploaderProps) {
-  // =============================================
-  // 🎯 ESTADO LOCAL (para drag & drop)
-  // =============================================
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
-  // =============================================
-  // 📤 CONFIGURAR EL DROPZONE
-  // =============================================
   const uploadProps = useSupabaseUpload({
     supabase: supabase,
     bucketName: PRODUCTS_BUCKET,
@@ -105,9 +94,6 @@ export function ImageUploader({
     },
   })
 
-  // =============================================
-  // 🔄 LIMPIAR DROPZONE DESPUÉS DE SUBIR
-  // =============================================
   useEffect(() => {
     if (uploadProps.isSuccess && uploadProps.files.length > 0) {
       const timer = setTimeout(() => {
@@ -118,22 +104,12 @@ export function ImageUploader({
     }
   }, [uploadProps.isSuccess]);
 
-  // =============================================
-  // 🗑️ ELIMINAR IMAGEN
-  // =============================================
   const removeImage = (index: number) => {
     const newImages = existingImages.filter((_, i) => i !== index)
     onImagesChange(newImages)
     showSuccessToast('Imagen eliminada')
   }
 
-  // =============================================
-  // 🔀 MOVER IMAGEN (← → botones)
-  // =============================================
-  /**
-   * Mueve una imagen a la posición anterior o siguiente.
-   * Usado en mobile (drag & drop no funciona bien en touch).
-   */
   const moveImage = (index: number, direction: 'left' | 'right') => {
     const newIndex = direction === 'left' ? index - 1 : index + 1
     if (newIndex < 0 || newIndex >= existingImages.length) return
@@ -144,9 +120,6 @@ export function ImageUploader({
     onImagesChange(newImages)
   }
 
-  // =============================================
-  // 🖱️ DRAG & DROP (desktop)
-  // =============================================
   const handleDragStart = (index: number) => {
     setDraggedIndex(index)
   }
@@ -184,19 +157,21 @@ export function ImageUploader({
   }
 
   // =============================================
-  // 📊 CONTADOR
+  // 📊 CONTADORES (🆕 separados)
   // =============================================
+  // Total = subidas + pendientes (para mostrar en contador)
   const totalImages = existingImages.length + uploadProps.files.length;
-  const isAtMax = totalImages >= maxFiles;
+
+  // 🆕 isAtMax = SOLO las subidas cuentan (las pendientes no bloquean)
+  const isAtMax = existingImages.length >= maxFiles;
+
 
   // =============================================
   // 🖥️ RENDER
   // =============================================
   return (
     <div className="space-y-4">
-      {/* =============================================
-      📌 LABEL CON CONTADOR
-      ============================================= */}
+      {/* LABEL CON CONTADOR */}
       <h2 className="text-xl font-bold text-[#603060] mb-4 flex items-center gap-2">
         {label}
         <span className={`text-sm font-normal ml-2 ${
@@ -206,18 +181,15 @@ export function ImageUploader({
         </span>
       </h2>
 
-      {/* =============================================
-      ⚠️ AVISO SI ESTÁ AL MÁXIMO
-      ============================================= */}
+      {/* AVISO SI ESTÁ AL MÁXIMO (solo si las subidas llegan al máximo) */}
       {isAtMax && (
-        <div className="bg-[#FFD93D]/20 border-2 border-[#FFD93D] rounded-lg p-3 text-sm text-[#603060]">
-          ⚠️ Has alcanzado el máximo de {maxFiles} imágenes. Elimina alguna para subir más.
+        <div className="bg-[#FFD93D]/20 border-2 border-[#FFD93D] rounded-lg p-3 text-sm text-[#603060] flex items-center gap-2">
+          <span>⚠️</span>
+          <span>Has alcanzado el máximo de {maxFiles} imágenes. Elimina alguna para subir más.</span>
         </div>
       )}
 
-      {/* =============================================
-      📤 DROPZONE
-      ============================================= */}
+      {/* DROPZONE (🆕 visible si no está al máximo Y no hay archivos pendientes) */}
       {!isAtMax && (
         <div className="border-2 border-dashed border-[#7D5FFF] rounded-xl p-6 text-center hover:border-[#FFD93D] transition-all bg-[#F0F0C0]/10">
           <Dropzone {...uploadProps}>
@@ -227,11 +199,9 @@ export function ImageUploader({
         </div>
       )}
 
-      {/* =============================================
-      📸 IMÁGENES EXISTENTES (reordenables)
-      ============================================= */}
+      {/* IMÁGENES EXISTENTES (siempre visibles) */}
       {existingImages.length > 0 && (
-        <div className="mt-4">
+        <div>
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-semibold text-[#303030] flex items-center gap-2">
               📸 Imágenes actuales
@@ -239,9 +209,11 @@ export function ImageUploader({
                 ({existingImages.length} {existingImages.length === 1 ? 'imagen' : 'imágenes'})
               </span>
             </p>
-            <p className="text-xs text-[#6A757C]">
-              💡 Arrastra o usa ← → para reordenar
-            </p>
+            {existingImages.length > 1 && (
+              <p className="text-xs text-[#6A757C]">
+                💡 Arrastra o usa ← → para reordenar
+              </p>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -277,49 +249,54 @@ export function ImageUploader({
                     }}
                   />
 
-                  {/* Badge "Principal" en la primera imagen */}
+                  {/* Badge Principal */}
                   {isFirst && (
-                    <div className="absolute top-1 left-1 bg-[#FFD93D] text-[#303030] text-[9px] font-bold px-1.5 py-0.5 rounded shadow">
+                    <div className="absolute top-1 left-1 bg-[#FFD93D] text-[#303030] text-[9px] font-bold px-1.5 py-0.5 rounded shadow z-10">
                       ⭐ Principal
                     </div>
                   )}
 
-                  {/* Número de orden */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] text-center py-0.5">
-                    #{index + 1}
-                  </div>
-
-                  {/* Botón eliminar */}
+                  {/* Botón eliminar (dentro del contenedor) */}
                   <button
                     type="button"
                     onClick={() => removeImage(index)}
-                    className="absolute -top-2 -right-2 bg-[#FF6B81] text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-[#603060] transition-all hover:scale-110 shadow-md z-10"
+                    className="absolute top-1 right-1 bg-[#FF6B81] text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-[#603060] transition-all hover:scale-110 shadow-md z-20"
                     title="Eliminar imagen"
+                    aria-label={`Eliminar imagen ${index + 1}`}
                   >
                     ✕
                   </button>
 
-                  {/* Botones ← → para reordenar (mobile) */}
-                  <div className="absolute inset-x-0 bottom-6 flex justify-between px-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                    <button
-                      type="button"
-                      onClick={() => moveImage(index, 'left')}
-                      disabled={index === 0}
-                      className="bg-black/60 hover:bg-black/80 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs disabled:opacity-30 disabled:cursor-not-allowed"
-                      title="Mover a la izquierda"
-                    >
-                      ←
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => moveImage(index, 'right')}
-                      disabled={index === existingImages.length - 1}
-                      className="bg-black/60 hover:bg-black/80 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs disabled:opacity-30 disabled:cursor-not-allowed"
-                      title="Mover a la derecha"
-                    >
-                      →
-                    </button>
+                  {/* Número de orden */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] text-center py-0.5 z-10">
+                    #{index + 1}
                   </div>
+
+                  {/* Botones ← → visibles en mobile */}
+                  {existingImages.length > 1 && (
+                    <div className="absolute inset-x-0 bottom-6 flex justify-between px-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10">
+                      <button
+                        type="button"
+                        onClick={() => moveImage(index, 'left')}
+                        disabled={index === 0}
+                        className="bg-black/60 hover:bg-black/80 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Mover a la izquierda"
+                        aria-label={`Mover imagen ${index + 1} a la izquierda`}
+                      >
+                        ←
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveImage(index, 'right')}
+                        disabled={index === existingImages.length - 1}
+                        className="bg-black/60 hover:bg-black/80 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Mover a la derecha"
+                        aria-label={`Mover imagen ${index + 1} a la derecha`}
+                      >
+                        →
+                      </button>
+                    </div>
+                  )}
                 </div>
               )
             })}
@@ -327,9 +304,7 @@ export function ImageUploader({
         </div>
       )}
 
-      {/* =============================================
-      ℹ️ INFO ADICIONAL
-      ============================================= */}
+      {/* INFO ADICIONAL */}
       <p className="text-xs text-[#6A757C] mt-2">
         💡 Formatos permitidos: JPG, PNG, WEBP, GIF, SVG
         <br />
