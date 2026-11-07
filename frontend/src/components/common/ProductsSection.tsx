@@ -13,36 +13,10 @@
  * - 100% reutilizable (todas las props con defaults)
  * - Usa ProductCarousel (también reutilizable)
  * - Maneja estados de carga y error visualmente
- * - Animaciones con framer-motion
- * - Responsive (mobile-first)
+ * - Mobile-first
  * 
- * 📌 Ejemplos de uso:
- * 
- * 1. Destacados (Home):
- *    <ProductsSection
- *      products={featured}
- *      loading={loading}
- *      error={error}
- *      onAddToCart={handleAddToCart}
- *      onRetry={load}
- *      badge="⭐ Destacados"
- *      title="⭐ Artículos Destacados"
- *      subtitle="Los productos que elegimos para ti"
- *    />
- * 
- * 2. Ofertas:
- *    <ProductsSection
- *      products={offers}
- *      loading={loading}
- *      error={error}
- *      onAddToCart={handleAddToCart}
- *      onRetry={load}
- *      badge="🔥 Ofertas"
- *      title="🔥 Ofertas del mes"
- *      subtitle="Aprovecha estos precios"
- *      ctaText="Ver todas las ofertas"
- *      ctaLink="/ofertas"
- *    />
+ * 🆕 Bug corregido: shadow-lghover → shadow-lg hover:shadow-xl
+ * 🆕 Carrusel con padding solo en desktop (en mobile, full width)
  */
 
 import { Link } from "react-router-dom";
@@ -58,18 +32,12 @@ import type { Product } from "../../services/productService";
 // =============================================
 
 interface ProductsSectionProps {
-  // =============================================
-  // 📦 DATOS (obligatorios)
-  // =============================================
   products: Product[];
   loading: boolean;
   error: string | null;
   onAddToCart: (productId: string, productName: string) => void;
   onRetry: () => void;
 
-  // =============================================
-  // 🎨 PERSONALIZACIÓN (opcionales con defaults)
-  // =============================================
   badge?: string;
   title?: string;
   subtitle?: string;
@@ -84,8 +52,8 @@ interface ProductsSectionProps {
 // 🎯 SKELETON DE PRODUCTOS
 // =============================================
 const ProductSkeleton = () => (
-  <div className="flex-shrink-0 w-[280px] border-2 border-[#00D2D3]/30 rounded-xl p-4 space-y-3">
-    <Skeleton className="w-full h-40 rounded-lg" />
+  <div className="flex-shrink-0 w-[70vw] max-w-[240px] border-2 border-[#00D2D3]/30 rounded-xl p-3 space-y-3">
+    <Skeleton className="w-full aspect-square rounded-lg" />
     <Skeleton className="h-4 w-3/4" />
     <Skeleton className="h-4 w-1/2" />
     <Skeleton className="h-6 w-1/3" />
@@ -98,14 +66,11 @@ const ProductSkeleton = () => (
 // =============================================
 
 export function ProductsSection({
-  // Datos
   products,
   loading,
   error,
   onAddToCart,
   onRetry,
-
-  // Personalización (con defaults)
   badge = "⭐ Destacados",
   title = "⭐ Artículos Destacados",
   subtitle = "Los productos que elegimos para ti",
@@ -116,11 +81,9 @@ export function ProductsSection({
   emptyMessage = "No hay productos disponibles.",
 }: ProductsSectionProps) {
   return (
-    <section className={`py-16 px-4 ${backgroundColor}`}>
-      <div className="max-w-6xl mx-auto">
-        {/* =============================================
-        📌 HEADER
-        ============================================= */}
+    <section className={`py-16 ${backgroundColor}`}>
+      {/* HEADER (con padding) */}
+      <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -133,23 +96,19 @@ export function ProductsSection({
           <h2 className="text-3xl md:text-4xl font-extrabold text-[#603060]">
             {title}
           </h2>
-          <p className="text-[#6A757C] mt-2">
-            {subtitle}
-          </p>
+          <p className="text-[#6A757C] mt-2">{subtitle}</p>
         </motion.div>
+      </div>
 
-        {/* =============================================
-        📦 CONTENIDO
-        ============================================= */}
+      {/* CARRUSEL (padding solo en desktop) */}
+      <div className="max-w-6xl mx-auto px-4 md:px-4">
         {loading ? (
-          // 🔄 Estado de carga
-          <div className="flex gap-4 overflow-hidden">
+          <div className="flex gap-3 sm:gap-4 overflow-hidden">
             {[...Array(5)].map((_, i) => (
               <ProductSkeleton key={i} />
             ))}
           </div>
         ) : error ? (
-          // ❌ Estado de error
           <div className="text-center py-12">
             <p className="text-[#FF6B81]">❌ {error}</p>
             <button
@@ -160,7 +119,6 @@ export function ProductsSection({
             </button>
           </div>
         ) : (
-          // ✅ Carrusel de productos con auto-scroll
           <ProductCarousel
             products={products}
             onAddToCart={onAddToCart}
@@ -168,20 +126,19 @@ export function ProductsSection({
             autoScroll={true}
           />
         )}
-
-        {/* =============================================
-        🔗 CTA (opcional)
-        ============================================= */}
-        {showCTA && (
-          <div className="text-center mt-8">
-            <Link to={ctaLink}>
-              <Button className="bg-gradient-to-r from-[#FF6B81] to-[#FF9F43] hover:from-[#FF9F43] hover:to-[#FF6B81] text-white font-bold px-7 py-5 text-base rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105">
-                {ctaText}
-              </Button>
-            </Link>
-          </div>
-        )}
       </div>
+
+      {/* CTA (con padding) */}
+      {showCTA && (
+        <div className="text-center mt-8 px-4">
+          <Link to={ctaLink}>
+            {/* 🆕 BUG CORREGIDO: shadow-lg hover:shadow-xl */}
+            <Button className="bg-gradient-to-r from-[#FF6B81] to-[#FF9F43] hover:from-[#FF9F43] hover:to-[#FF6B81] text-white font-bold px-7 py-5 text-base rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105">
+              {ctaText}
+            </Button>
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

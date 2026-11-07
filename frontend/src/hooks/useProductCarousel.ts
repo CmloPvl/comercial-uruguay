@@ -13,10 +13,10 @@
  * - Separa la lógica del diseño
  * - Reutilizable en cualquier carrusel de productos
  * - Fácil de testear
+ * - Scroll dinámico (detecta ancho real de la card)
  * 
- * @param {Product[]} products - Lista de productos
- * @param {boolean} autoScroll - Auto-scroll activado
- * @returns {Object} - Estados y funciones del carrusel
+ * 🆕 Scroll dinámico: detecta el ancho real de la card
+ * 🆕 scrollToIndex funcional (1 página = 4 cards)
  */
 
 import { useRef, useEffect, useState } from "react";
@@ -26,9 +26,9 @@ import type { Product } from "../services/productService";
 // 📦 CONSTANTES
 // =============================================
 
-const SCROLL_AMOUNT = 320; // Ancho de cada producto + gap
-const AUTO_SCROLL_INTERVAL = 4000; // 4 segundos
+const AUTO_SCROLL_INTERVAL = 4000;
 const MIN_PRODUCTS_FOR_ARROWS = 4;
+const CARDS_PER_PAGE = 4;
 
 // =============================================
 // 🎯 HOOK PRINCIPAL
@@ -43,25 +43,50 @@ export function useProductCarousel(
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // =============================================
+  // 🆕 CALCULAR ANCHO DE CARD (dinámico)
+  // =============================================
+  /**
+   * Detecta el ancho real de una card + gap.
+   * Se actualiza al montar y al cambiar el tamaño de pantalla.
+   */
+  const getScrollAmount = (): number => {
+    if (!scrollRef.current) return 240;
+    const firstCard = scrollRef.current.firstElementChild as HTMLElement;
+    if (!firstCard) return 240;
+    // Ancho de la card + gap (12px mobile, 16px desktop)
+    const gap = window.innerWidth >= 640 ? 16 : 12;
+    return firstCard.offsetWidth + gap;
+  };
+
+  // =============================================
   // ⬅️➡️ NAVEGACIÓN
   // =============================================
 
   const scrollLeft = () => {
     if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: -SCROLL_AMOUNT, behavior: "smooth" });
+      scrollRef.current.scrollBy({
+        left: -getScrollAmount() * CARDS_PER_PAGE,
+        behavior: "smooth",
+      });
     }
   };
 
   const scrollRight = () => {
     if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: SCROLL_AMOUNT, behavior: "smooth" });
+      scrollRef.current.scrollBy({
+        left: getScrollAmount() * CARDS_PER_PAGE,
+        behavior: "smooth",
+      });
     }
   };
 
-  const scrollToIndex = (index: number) => {
+  /**
+   * 🆕 Va a la página N (1 página = 4 cards)
+   */
+  const scrollToIndex = (pageIndex: number) => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({
-        left: index * SCROLL_AMOUNT * 4,
+        left: pageIndex * getScrollAmount() * CARDS_PER_PAGE,
         behavior: "smooth",
       });
     }
@@ -82,7 +107,10 @@ export function useProductCarousel(
         if (isAtEnd) {
           scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
         } else {
-          scrollRef.current.scrollBy({ left: SCROLL_AMOUNT, behavior: "smooth" });
+          scrollRef.current.scrollBy({
+            left: getScrollAmount(),
+            behavior: "smooth",
+          });
         }
       }
     }, AUTO_SCROLL_INTERVAL);
@@ -91,7 +119,7 @@ export function useProductCarousel(
   }, [autoScroll, products.length, isHovered]);
 
   // =============================================
-  // 📊 DETECTAR ÍNDICE ACTUAL (para indicadores)
+  // 📊 DETECTAR ÍNDICE ACTUAL
   // =============================================
 
   useEffect(() => {
@@ -99,8 +127,9 @@ export function useProductCarousel(
     if (!el) return;
 
     const handleScroll = () => {
-      const index = Math.round(el.scrollLeft / SCROLL_AMOUNT);
-      setCurrentIndex(index);
+      const amount = getScrollAmount();
+      const page = Math.round(el.scrollLeft / (amount * CARDS_PER_PAGE));
+      setCurrentIndex(page);
     };
 
     el.addEventListener("scroll", handleScroll);
@@ -128,5 +157,6 @@ export function useProductCarousel(
     handleMouseEnter,
     handleMouseLeave,
     showArrows: products.length > MIN_PRODUCTS_FOR_ARROWS,
+    cardsPerPage: CARDS_PER_PAGE,
   };
 }

@@ -5,27 +5,22 @@
  * 
  * Encapsula toda la lógica de la página de administración de productos:
  * - Carga de productos
- * - Eliminación de productos (con modal de confirmación)
- * - Activación/desactivación de productos (con modal de confirmación)
+ * - Filtro por categoría (reutiliza useCategories)
  * - Búsqueda de productos por nombre o SKU
  * - Paginación de productos
- * - Estados de carga, error y datos
- * - Estados para control de modales (AlertDialog de shadcn/ui)
+ * - Eliminación / activación / desactivación (con modales)
  * 
  * ✅ Buenas prácticas:
  * - Separa la lógica del diseño
- * - Reutilizable en otros componentes
+ * - Reutiliza useCategories (evita duplicación)
  * - Fácil de testear
  * - Manejo de errores con toasts (helper centralizado)
- * - Modales de confirmación con shadcn/ui (reemplaza confirm() nativo)
  * 
- * 🆕 Toasts migrados al helper (errorMessages.ts)
- * 
- * @returns {Object} - Estados y funciones de admin productos
+ * 🆕 Filtro por categoría (selectedCategory + setSelectedCategory)
+ * 🆕 filteredProducts ahora filtra por categoría + búsqueda
  */
 
 import { useState, useEffect, useMemo } from "react";
-// 🆕 Migrado: ya no se usa toast directo
 import {
   showErrorToastWithFallback,
   showSuccessToast,
@@ -33,8 +28,14 @@ import {
   productErrors,
 } from "../utils/errorMessages";
 import { adminService, type Product } from "../services/adminService";
+import { useCategories } from "./useCategories";  // 🆕
 
 export function useAdminProductos() {
+  // =============================================
+  // 🆕 CATEGORÍAS (reutiliza hook existente)
+  // =============================================
+  const { categoriesWithIcons, loading: categoriesLoading } = useCategories();
+
   // =============================================
   // 🎯 ESTADOS
   // =============================================
@@ -43,14 +44,15 @@ export function useAdminProductos() {
   const [error, setError] = useState<string | null>(null);
 
   // =============================================
-  // 🎯 ESTADOS PARA BÚSQUEDA Y PAGINACIÓN
+  // 🎯 ESTADOS PARA BÚSQUEDA, FILTRO Y PAGINACIÓN
   // =============================================
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");  // 🆕
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   // =============================================
-  // 🎯 ESTADOS PARA MODALES (shadcn/ui AlertDialog)
+  // 🎯 ESTADOS PARA MODALES
   // =============================================
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [toggleDialogOpen, setToggleDialogOpen] = useState(false);
@@ -68,12 +70,10 @@ export function useAdminProductos() {
       setLoading(true);
       setError(null);
       const data = await adminService.getProducts(1, 50);
-      // ✅ Manejo seguro de datos
       setProducts(data?.data || []);
     } catch (err: any) {
       const errorMessage = err.message || "Error al cargar productos";
       setError(errorMessage);
-      // 🆕 Toast migrado al helper
       showErrorToastWithFallback(err, productErrors.notFound);
     } finally {
       setLoading(false);
@@ -81,20 +81,29 @@ export function useAdminProductos() {
   };
 
   // =============================================
-  // 🔍 PRODUCTOS FILTRADOS (búsqueda)
+  // 🔍 PRODUCTOS FILTRADOS (búsqueda + categoría)
   // =============================================
   const filteredProducts = useMemo(() => {
-    if (!searchTerm.trim()) {
-      return products;
+    let result = products;
+
+    // 🆕 Filtro por categoría
+    if (selectedCategory) {
+      result = result.filter((p) => p.category_name === selectedCategory);
     }
-    const term = searchTerm.toLowerCase().trim();
-    return products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(term) ||
-        p.sku?.toLowerCase().includes(term) ||
-        p.description?.toLowerCase().includes(term)
-    );
-  }, [products, searchTerm]);
+
+    // Filtro por búsqueda
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+      result = result.filter(
+        (p) =>
+          p.name.toLowerCase().includes(term) ||
+          p.sku?.toLowerCase().includes(term) ||
+          p.description?.toLowerCase().includes(term)
+      );
+    }
+
+    return result;
+  }, [products, searchTerm, selectedCategory]);
 
   // =============================================
   // 📄 PRODUCTOS PAGINADOS
@@ -112,11 +121,17 @@ export function useAdminProductos() {
   const inactiveCount = products.filter((p) => !p.isActive).length;
 
   // =============================================
-  // 🔄 RESETEAR PÁGINA AL BUSCAR
+  // 🔄 RESETEAR PÁGINA AL BUSCAR/FILTRAR
   // =============================================
   const handleSearch = (term: string) => {
     setSearchTerm(term);
-    setCurrentPage(1); // Volver a la primera página al buscar
+    setCurrentPage(1);
+  };
+
+  // 🆕 Cambiar categoría y resetear página
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
   };
 
   // =============================================
@@ -136,31 +151,27 @@ export function useAdminProductos() {
   };
 
   // =============================================
-  // 🗑️ CONFIRMAR ELIMINAR (se ejecuta desde el modal)
+  // 🗑️ CONFIRMAR ELIMINAR
   // =============================================
   const confirmDelete = async () => {
     if (!selectedProduct) return;
 
     try {
       await adminService.deleteProduct(selectedProduct.id);
-      // 🆕 Toast migrado al helper
       showSuccessToast(
         `${selectedProduct.name} ${successMessages.productDeleted}`
       );
-      // ✅ Recargar la lista después de eliminar
       await loadProducts();
     } catch (err: any) {
-      // 🆕 Toast migrado al helper
       showErrorToastWithFallback(err, productErrors.deleteFailed);
     } finally {
-      // ✅ Cerrar modal y limpiar selección
       setDeleteDialogOpen(false);
       setSelectedProduct(null);
     }
   };
 
   // =============================================
-  // 🔄 CONFIRMAR ACTIVAR/DESACTIVAR (se ejecuta desde el modal)
+  // 🔄 CONFIRMAR ACTIVAR/DESACTIVAR
   // =============================================
   const confirmToggle = async () => {
     if (!selectedProduct) return;
@@ -169,7 +180,6 @@ export function useAdminProductos() {
 
     try {
       await adminService.updateProduct(selectedProduct.id, { isActive: newStatus });
-      // 🆕 Toast migrado al helper (mensaje según acción)
       showSuccessToast(
         `${selectedProduct.name} ${
           newStatus ? successMessages.productActivated : successMessages.productDeactivated
@@ -177,17 +187,15 @@ export function useAdminProductos() {
       );
       await loadProducts();
     } catch (err: any) {
-      // 🆕 Toast migrado al helper
       showErrorToastWithFallback(err, productErrors.toggleFailed);
     } finally {
-      // ✅ Cerrar modal y limpiar selección
       setToggleDialogOpen(false);
       setSelectedProduct(null);
     }
   };
 
   // =============================================
-  // ❌ CERRAR MODALES (sin ejecutar acción)
+  // ❌ CERRAR MODALES
   // =============================================
   const closeDialogs = () => {
     setDeleteDialogOpen(false);
@@ -215,31 +223,31 @@ export function useAdminProductos() {
     activeCount,
     inactiveCount,
 
+    // 🆕 Categorías
+    categoriesWithIcons,
+    categoriesLoading,
+
     // 📊 Paginación
     currentPage,
     totalPages,
     itemsPerPage,
     setCurrentPage,
 
-    // 🔍 Búsqueda
+    // 🔍 Búsqueda y filtro
     searchTerm,
+    selectedCategory,        // 🆕
     handleSearch,
+    handleCategoryChange,    // 🆕
 
     // 📤 Funciones principales
     loadProducts,
 
-    // 🗑️ Funciones para abrir modales
+    // 🗑️ Modales
     openDeleteDialog,
     openToggleDialog,
-
-    // ✅ Funciones de confirmación
     confirmDelete,
     confirmToggle,
-
-    // ❌ Cerrar modales
     closeDialogs,
-
-    // 🎯 Estados de los modales
     deleteDialogOpen,
     toggleDialogOpen,
     selectedProduct,

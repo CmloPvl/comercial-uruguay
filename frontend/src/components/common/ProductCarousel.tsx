@@ -13,10 +13,12 @@
  * - Flechas de navegación (desktop)
  * - Auto-scroll (opcional)
  * - Indicadores de scroll (puntos)
- * - Responsive (mobile-first)
+ * - Mobile-first
  * - Reutilizable en toda la app
  * 
- * 🆕 Usa ProductCard con variant="carousel" (unificado)
+ * 🆕 Ancho de card FIJO (260px mobile, 280px desktop)
+ * 🆕 Sin depender de vw (funciona en todos los celulares)
+ * 🆕 Bugs corregidos (opacity-0 group-hover)
  */
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -46,9 +48,6 @@ export function ProductCarousel({
   emptyMessage = "No hay productos disponibles.",
   autoScroll = false,
 }: ProductCarouselProps) {
-  // =============================================
-  // 🧠 LÓGICA (extraída a useProductCarousel)
-  // =============================================
   const {
     scrollRef,
     currentIndex,
@@ -58,6 +57,7 @@ export function ProductCarousel({
     handleMouseEnter,
     handleMouseLeave,
     showArrows,
+    cardsPerPage,
   } = useProductCarousel(products, autoScroll);
 
   // =============================================
@@ -70,6 +70,11 @@ export function ProductCarousel({
       </div>
     );
   }
+
+  // =============================================
+  // 📊 CALCULAR PÁGINAS
+  // =============================================
+  const totalPages = Math.ceil(products.length / cardsPerPage);
 
   // =============================================
   // 🖥️ RENDER
@@ -86,16 +91,16 @@ export function ProductCarousel({
         <button
           onClick={scrollLeft}
           className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-[#7D5FFF] hover:text-white text-[#7D5FFF] p-3 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100 hidden md:flex items-center justify-center"
-          aria-label="Anterior"
+          aria-label="Página anterior"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
       )}
 
-      {/* 📦 CARRUSEL */}
+      {/* 📦 CARRUSEL (🆕 sin padding interno) */}
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory"
+        className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {products.map((product, index) => (
@@ -104,7 +109,8 @@ export function ProductCarousel({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
-            className="flex-shrink-0 w-[280px] snap-start"
+            // 🆕 Ancho FIJO (no vw): 260px mobile, 280px desktop
+            className="flex-shrink-0 w-[260px] sm:w-[280px] snap-start"
           >
             <ProductCard
               product={product}
@@ -120,7 +126,7 @@ export function ProductCarousel({
         <button
           onClick={scrollRight}
           className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-[#7D5FFF] hover:text-white text-[#7D5FFF] p-3 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100 hidden md:flex items-center justify-center"
-          aria-label="Siguiente"
+          aria-label="Página siguiente"
         >
           <ChevronRight className="w-6 h-6" />
         </button>
@@ -129,20 +135,20 @@ export function ProductCarousel({
       {/* 🎨 GRADIENTES INDICADORES (móvil) */}
       {products.length > 1 && (
         <>
-          <div className="absolute left-0 top-0 bottom-4 w-8 bg-gradient-to-r from-white to-transparent pointer-events-none md:hidden" />
-          <div className="absolute right-0 top-0 bottom-4 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden" />
+          <div className="absolute left-0 top-0 bottom-4 w-6 sm:w-8 bg-gradient-to-r from-white to-transparent pointer-events-none md:hidden" />
+          <div className="absolute right-0 top-0 bottom-4 w-6 sm:w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden" />
         </>
       )}
 
       {/* 🟢 INDICADORES (puntos) */}
-      {showArrows && (
+      {showArrows && totalPages > 1 && (
         <div className="flex justify-center gap-1.5 mt-4">
-          {products.slice(0, Math.ceil(products.length / 4)).map((_, index) => (
+          {Array.from({ length: totalPages }).map((_, index) => (
             <button
               key={index}
               onClick={() => scrollToIndex(index)}
               className={`h-2 rounded-full transition-all ${
-                Math.floor(currentIndex / 4) === index
+                currentIndex === index
                   ? "bg-[#7D5FFF] w-6"
                   : "bg-[#7D5FFF]/30 w-2"
               }`}

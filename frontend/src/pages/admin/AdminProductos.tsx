@@ -11,17 +11,13 @@
  * - Código limpio y fácil de leer
  * - Toasts para feedback
  * - Skeleton de shadcn/ui para carga
- * - Acciones completas (eliminar, activar/desactivar)
  * - Modales de confirmación con AlertDialog de shadcn/ui
- * - Breadcrumb con estilo consistente
- * - Tooltips en botones de acciones
- * - Contadores de activos/inactivos
  * - Buscador de productos
  * - Paginación
  * - Botón para volver al Dashboard
  * 
+ * 🆕 Filtro por categoría (pills con iconos de la BD)
  * 🆕 Sin <Layout>: App.tsx ya envuelve con <AdminLayout>
- *    (evita doble layout)
  */
 
 import { Link } from "react-router-dom";
@@ -57,11 +53,10 @@ import {
 import { useAdminProductos } from "../../hooks/useAdminProductos";
 
 // =============================================
-// 🎯 SKELETON DE LA TABLA (usando shadcn)
+// 🎯 SKELETON DE LA TABLA
 // =============================================
 const TableSkeleton = () => (
   <div className="space-y-3">
-    {/* Encabezados */}
     <div className="flex gap-4 pb-2 border-b border-gray-200">
       <Skeleton className="h-4 w-24" />
       <Skeleton className="h-4 w-16" />
@@ -70,8 +65,6 @@ const TableSkeleton = () => (
       <Skeleton className="h-4 w-16" />
       <Skeleton className="h-4 w-24 ml-auto" />
     </div>
-
-    {/* Filas */}
     {[...Array(5)].map((_, i) => (
       <div key={i} className="flex items-center gap-4 py-2 border-b border-gray-100">
         <Skeleton className="h-4 w-24" />
@@ -106,7 +99,10 @@ export default function AdminProductos() {
     totalPages,
     setCurrentPage,
     searchTerm,
+    selectedCategory,
+    categoriesWithIcons,
     handleSearch,
+    handleCategoryChange,
     openDeleteDialog,
     openToggleDialog,
     confirmDelete,
@@ -118,20 +114,17 @@ export default function AdminProductos() {
   } = useAdminProductos();
 
   // =============================================
-  // 🔄 ESTADO DE CARGA (con Skeleton)
+  // 🔄 ESTADO DE CARGA
   // =============================================
   if (loading) {
     return (
       <>
-        {/* Breadcrumb skeleton */}
         <div className="bg-[#FF6B81]/10 py-3 px-4 border-b-2 border-[#FF6B81]">
           <div className="max-w-7xl mx-auto">
             <Skeleton className="h-5 w-64" />
           </div>
         </div>
-
         <div className="max-w-7xl mx-auto px-4 py-8">
-          {/* Header skeleton */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
               <Skeleton className="h-8 w-48" />
@@ -139,8 +132,6 @@ export default function AdminProductos() {
             </div>
             <Skeleton className="h-10 w-40 rounded-xl" />
           </div>
-
-          {/* Tabla skeleton */}
           <Card className="border-2 border-[#00D2D3] shadow-lg overflow-x-auto">
             <CardContent className="p-4">
               <TableSkeleton />
@@ -156,9 +147,7 @@ export default function AdminProductos() {
   // =============================================
   return (
     <>
-      {/* =============================================
-      📍 BREADCRUMB (con estilo consistente)
-      ============================================= */}
+      {/* BREADCRUMB */}
       <div className="bg-[#FF6B81]/10 py-3 px-4 border-b-2 border-[#FF6B81]">
         <div className="max-w-7xl mx-auto">
           <Breadcrumb>
@@ -186,9 +175,7 @@ export default function AdminProductos() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* =============================================
-        📌 HEADER
-        ============================================= */}
+        {/* HEADER */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <div className="flex items-center flex-wrap gap-3">
@@ -225,21 +212,53 @@ export default function AdminProductos() {
           </div>
         </div>
 
-        {/* =============================================
-        🔍 BUSCADOR
-        ============================================= */}
-        <div className="mb-4">
+        {/* BUSCADOR + FILTRO POR CATEGORÍA */}
+        <div className="mb-4 space-y-3">
           <Input
             placeholder="🔍 Buscar productos por nombre, SKU o descripción..."
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
             className="max-w-md border-[#7D5FFF] focus:border-[#603060]"
           />
+
+          {/* 🆕 Pills de categorías */}
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <button
+              onClick={() => handleCategoryChange("")}
+              className={`
+                flex-shrink-0 px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all
+                ${selectedCategory === ""
+                  ? "bg-gradient-to-r from-[#7D5FFF] to-[#603060] text-white shadow-md"
+                  : "bg-[#FAF9E2] text-[#603060] border border-[#7D5FFF]/30 hover:border-[#7D5FFF]"
+                }
+              `}
+              aria-pressed={selectedCategory === ""}
+            >
+              🏷️ Todas
+            </button>
+
+            {categoriesWithIcons.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() =>
+                  handleCategoryChange(selectedCategory === cat.name ? "" : cat.name)
+                }
+                className={`
+                  flex-shrink-0 px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all
+                  ${selectedCategory === cat.name
+                    ? "bg-gradient-to-r from-[#7D5FFF] to-[#603060] text-white shadow-md"
+                    : "bg-[#FAF9E2] text-[#603060] border border-[#7D5FFF]/30 hover:border-[#7D5FFF]"
+                  }
+                `}
+                aria-pressed={selectedCategory === cat.name}
+              >
+                {cat.icon} {cat.name}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* =============================================
-        ❌ ERROR
-        ============================================= */}
+        {/* ERROR */}
         {error && (
           <div className="bg-[#FF6B81]/10 border-2 border-[#FF6B81] text-[#FF6B81] px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
             <span className="text-xl">⚠️</span>
@@ -253,9 +272,7 @@ export default function AdminProductos() {
           </div>
         )}
 
-        {/* =============================================
-        📦 LISTA DE PRODUCTOS
-        ============================================= */}
+        {/* LISTA DE PRODUCTOS */}
         {products.length === 0 ? (
           <Card className="border-2 border-[#00D2D3] shadow-lg">
             <CardContent className="p-12 text-center">
@@ -274,13 +291,16 @@ export default function AdminProductos() {
             <CardContent className="p-12 text-center">
               <p className="text-4xl mb-3">🔍</p>
               <p className="text-[#6A757C] font-medium">
-                No hay productos que coincidan con "{searchTerm}"
+                No hay productos que coincidan con los filtros
               </p>
               <button
-                onClick={() => handleSearch("")}
+                onClick={() => {
+                  handleSearch("");
+                  handleCategoryChange("");
+                }}
                 className="mt-4 text-[#7D5FFF] hover:underline font-medium"
               >
-                Limpiar búsqueda →
+                Limpiar filtros →
               </button>
             </CardContent>
           </Card>
@@ -333,52 +353,35 @@ export default function AdminProductos() {
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex flex-wrap gap-2">
-                            {/* Editar */}
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Link to={`/admin/productos/${product.id}/editar`}>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="border-[#00D2D3] text-[#00D2D3] hover:bg-[#00D2D3] hover:text-white transition"
-                                    >
+                                    <Button variant="outline" size="sm" className="border-[#00D2D3] text-[#00D2D3] hover:bg-[#00D2D3] hover:text-white transition">
                                       ✏️
                                     </Button>
                                   </Link>
                                 </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Editar producto</p>
-                                </TooltipContent>
+                                <TooltipContent><p>Editar producto</p></TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
 
-                            {/* Activar/Desactivar */}
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className={
-                                      product.isActive
-                                        ? "border-[#FF9F43] text-[#FF9F43] hover:bg-[#FF9F43] hover:text-white transition"
-                                        : "border-[#00D2D3] text-[#00D2D3] hover:bg-[#00D2D3] hover:text-white transition"
-                                    }
-                                    onClick={() =>
-                                      openToggleDialog(product.id, product.isActive, product.name)
-                                    }
+                                    className={product.isActive ? "border-[#FF9F43] text-[#FF9F43] hover:bg-[#FF9F43] hover:text-white transition" : "border-[#00D2D3] text-[#00D2D3] hover:bg-[#00D2D3] hover:text-white transition"}
+                                    onClick={() => openToggleDialog(product.id, product.isActive, product.name)}
                                   >
                                     {product.isActive ? "⏸️" : "▶️"}
                                   </Button>
                                 </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{product.isActive ? "Desactivar producto" : "Activar producto"}</p>
-                                </TooltipContent>
+                                <TooltipContent><p>{product.isActive ? "Desactivar producto" : "Activar producto"}</p></TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
 
-                            {/* Eliminar */}
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -391,9 +394,7 @@ export default function AdminProductos() {
                                     🗑️
                                   </Button>
                                 </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Eliminar producto</p>
-                                </TooltipContent>
+                                <TooltipContent><p>Eliminar producto</p></TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
                           </div>
@@ -405,35 +406,22 @@ export default function AdminProductos() {
               </CardContent>
             </Card>
 
-            {/* =============================================
-            📄 PAGINACIÓN
-            ============================================= */}
+            {/* PAGINACIÓN */}
             {totalPages > 1 && (
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4">
                 <span className="text-sm text-[#6A757C]">
                   Mostrando {paginatedProducts.length} de {filteredProducts.length} productos
-                  {searchTerm && ` (filtrados de ${products.length} totales)`}
+                  {selectedCategory && ` en "${selectedCategory}"`}
+                  {searchTerm && ` (búsqueda: "${searchTerm}")`}
                 </span>
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="border-[#603060] text-[#603060] hover:bg-[#603060] hover:text-white transition"
-                  >
+                  <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="border-[#603060] text-[#603060] hover:bg-[#603060] hover:text-white transition">
                     Anterior
                   </Button>
                   <span className="flex items-center px-3 text-sm text-[#6A757C]">
                     Página {currentPage} de {totalPages}
                   </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                    className="border-[#603060] text-[#603060] hover:bg-[#603060] hover:text-white transition"
-                  >
+                  <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="border-[#603060] text-[#603060] hover:bg-[#603060] hover:text-white transition">
                     Siguiente
                   </Button>
                 </div>
@@ -443,9 +431,7 @@ export default function AdminProductos() {
         )}
       </div>
 
-      {/* =============================================
-      🗑️ MODAL DE ELIMINAR (AlertDialog shadcn)
-      ============================================= */}
+      {/* MODAL ELIMINAR */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={closeDialogs}>
         <AlertDialogContent className="border-2 border-[#FF6B81]">
           <AlertDialogHeader>
@@ -465,29 +451,18 @@ export default function AdminProductos() {
             <AlertDialogCancel className="border-[#6A757C] text-[#6A757C] hover:bg-gray-100">
               Cancelar
             </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-[#FF6B81] hover:bg-[#603060] text-white"
-            >
+            <AlertDialogAction onClick={confirmDelete} className="bg-[#FF6B81] hover:bg-[#603060] text-white">
               🗑️ Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* =============================================
-      🔄 MODAL DE ACTIVAR/DESACTIVAR (AlertDialog shadcn)
-      ============================================= */}
+      {/* MODAL ACTIVAR/DESACTIVAR */}
       <AlertDialog open={toggleDialogOpen} onOpenChange={closeDialogs}>
-        <AlertDialogContent
-          className={`border-2 ${selectedProduct?.isActive ? "border-[#FF9F43]" : "border-[#00D2D3]"}`}
-        >
+        <AlertDialogContent className={`border-2 ${selectedProduct?.isActive ? "border-[#FF9F43]" : "border-[#00D2D3]"}`}>
           <AlertDialogHeader>
-            <AlertDialogTitle
-              className={`flex items-center gap-2 ${
-                selectedProduct?.isActive ? "text-[#FF9F43]" : "text-[#00D2D3]"
-              }`}
-            >
+            <AlertDialogTitle className={`flex items-center gap-2 ${selectedProduct?.isActive ? "text-[#FF9F43]" : "text-[#00D2D3]"}`}>
               <span className="text-2xl">🔄</span>
               {selectedProduct?.isActive ? "Desactivar" : "Activar"} producto?
             </AlertDialogTitle>
@@ -509,11 +484,7 @@ export default function AdminProductos() {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmToggle}
-              className={
-                selectedProduct?.isActive
-                  ? "bg-[#FF9F43] hover:bg-[#603060] text-white"
-                  : "bg-[#00D2D3] hover:bg-[#603060] text-white"
-              }
+              className={selectedProduct?.isActive ? "bg-[#FF9F43] hover:bg-[#603060] text-white" : "bg-[#00D2D3] hover:bg-[#603060] text-white"}
             >
               {selectedProduct?.isActive ? "⏸️ Desactivar" : "▶️ Activar"}
             </AlertDialogAction>
