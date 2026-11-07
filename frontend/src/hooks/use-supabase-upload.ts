@@ -12,6 +12,9 @@
  * - Callbacks para éxito y error
  * - Generación de URLs públicas
  * 
+ * 🆕 Compresión automática de imágenes antes de subir
+ *    (browser-image-compression)
+ * 
  * 🎯 Uso:
  * - ImageUploader.tsx
  * - CrearPublicacion.tsx
@@ -21,6 +24,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDropzone, type FileError, type FileRejection, type FileWithPath } from 'react-dropzone';
 import { supabase as defaultSupabase } from '@/lib/supabase';
+import imageCompression from 'browser-image-compression';  // 🆕
 
 // =============================================
 // 📋 INTERFACES
@@ -29,7 +33,7 @@ import { supabase as defaultSupabase } from '@/lib/supabase';
 interface FileWithPreview extends FileWithPath {
   preview?: string;
   errors: readonly FileError[];
-  publicUrl?: string; // ✅ URL pública del archivo subido
+  publicUrl?: string;
 }
 
 interface UploadResponse {
@@ -39,26 +43,20 @@ interface UploadResponse {
 }
 
 type UseSupabaseUploadOptions = {
-  /** Cliente de Supabase (opcional, usa el default si no se proporciona) */
   supabase?: any;
-  /** Nombre del bucket en Supabase Storage */
   bucketName: string;
-  /** Carpeta dentro del bucket (opcional) */
   path?: string;
-  /** Tipos MIME permitidos (ej: 'image/*') */
   allowedMimeTypes?: string[];
-  /** Tamaño máximo de archivo en bytes */
   maxFileSize?: number;
-  /** Número máximo de archivos */
   maxFiles?: number;
-  /** Cache-Control en segundos (default: 3600) */
   cacheControl?: number;
-  /** Sobrescribir archivo si existe (default: false) */
   upsert?: boolean;
-  /** Callback cuando se completan las subidas */
   onUploadComplete?: (files: any[]) => void;
-  /** Callback cuando hay error en una subida */
   onUploadError?: (file: any, error: any) => void;
+  // 🆕 Opciones de compresión
+  compressImages?: boolean;
+  maxCompressedSizeMB?: number;
+  maxWidthOrHeight?: number;
 };
 
 type UseSupabaseUploadReturn = ReturnType<typeof useSupabaseUpload>;
@@ -79,6 +77,10 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     upsert = false,
     onUploadComplete,
     onUploadError,
+    // 🆕 Defaults de compresión
+    compressImages = true,
+    maxCompressedSizeMB = 1,
+    maxWidthOrHeight = 1920,
   } = options;
 
   // =============================================
@@ -87,6 +89,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
 
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [compressing, setCompressing] = useState<boolean>(false);  // 🆕
   const [errors, setErrors] = useState<{ name: string; message: string }[]>([]);
   const [successes, setSuccesses] = useState<string[]>([]);
 
@@ -112,7 +115,6 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     <T extends File>(
       acceptedFiles: T[],
       fileRejections: FileRejection[],
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       _event: any
     ) => {
       const validFiles = acceptedFiles
@@ -151,6 +153,46 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
   });
 
   // =============================================
+  // 🆕 COMPRIMIR ARCHIVO
+  // =============================================
+  /**
+   * Comprime una imagen si:
+   * - compressImages = true
+   * - Es una imagen (image/*)
+   * - Pesa más de maxCompressedSizeMB
+   * 
+   * Si falla la compresión, devuelve el archivo original.
+   */
+  const compressFile = async (file: File): Promise<File> => {
+    // Solo comprimir si es imagen y pesa más del límite
+    if (
+      !compressImages ||
+      !file.type.startsWith('image/') ||
+      file.size <= maxCompressedSizeMB * 1024 * 1024
+    ) {
+      return file;
+    }
+
+    try {
+      const compressedFile = await imageCompression(file, {
+        maxSizeMB: maxCompressedSizeMB,
+        maxWidthOrHeight: maxWidthOrHeight,
+        useWebWorker: true,
+      });
+
+      console.log(
+        `📦 Comprimido: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB → ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB)`
+      );
+
+      // Mantener el nombre original
+      return new File([compressedFile], file.name, { type: file.type });
+    } catch (error) {
+      console.warn(`⚠️ Error al comprimir ${file.name}, usando original:`, error);
+      return file;
+    }
+  };
+
+  // =============================================
   // 🚀 SUBIR ARCHIVOS A SUPABASE
   // =============================================
 
@@ -167,10 +209,21 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
           ]
         : files;
 
-    // 📤 Subir cada archivo a Supabase
+    // 🆕 Comprimir archivos antes de subir
+    setCompressing(true);
+    let compressedFiles: File[];
+    try {
+      compressedFiles = await Promise.all(filesToUpload.map(compressFile));
+    } finally {
+      setCompressing(false);
+    }
+
+    // 📤 Subir cada archivo (comprimido) a Supabase
     const responses: UploadResponse[] = await Promise.all(
-      filesToUpload.map(async (file) => {
-        const filePath = !!path ? `${path}/${file.name}` : file.name;
+      compressedFiles.map(async (file, index) => {
+        const originalFile = filesToUpload[index];  // Para mantener el nombre original
+        const filePath = !!path ? `${path}/${originalFile.name}` : originalFile.name;
+        
         const { error } = await supabase.storage
           .from(bucketName)
           .upload(filePath, file, {
@@ -179,7 +232,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
           });
 
         if (error) {
-          return { name: file.name, message: error.message };
+          return { name: originalFile.name, message: error.message };
         } else {
           // ✅ Obtener la URL pública del archivo subido
           const { data: publicUrlData } = supabase.storage
@@ -188,7 +241,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
           const publicUrl = publicUrlData?.publicUrl;
 
           return {
-            name: file.name,
+            name: originalFile.name,
             message: undefined,
             publicUrl: publicUrl,
           };
@@ -214,7 +267,6 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
       const uploadedFiles = files
         .filter((f) => responseSuccesses.some((s) => s.name === f.name))
         .map((f) => {
-          // ✅ Buscar la URL pública de la respuesta
           const response = responses.find((r) => r.name === f.name);
           return {
             ...f,
@@ -235,7 +287,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     }
 
     setLoading(false);
-  }, [files, path, bucketName, errors, successes, supabase, onUploadComplete, onUploadError]);
+  }, [files, path, bucketName, errors, successes, supabase, onUploadComplete, onUploadError, compressImages, maxCompressedSizeMB, maxWidthOrHeight]);
 
   // =============================================
   // 🔄 EFECTO: LIMPIAR ERRORES AL ELIMINAR ARCHIVOS
@@ -271,11 +323,12 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     successes,
     isSuccess,
     loading,
+    compressing,  // 🆕 Exponer estado
     errors,
     setErrors,
     onUpload,
-    maxFileSize: maxFileSize,
-    maxFiles: maxFiles,
+    maxFileSize,
+    maxFiles,
     allowedMimeTypes,
     ...dropzoneProps,
   };
