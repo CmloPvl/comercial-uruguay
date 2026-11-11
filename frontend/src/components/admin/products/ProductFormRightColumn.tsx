@@ -8,6 +8,7 @@
  * 
  * 🆕 Stock opcional (si vacío → "Consultar disponibilidad" en tienda)
  * 🆕 Pack promocional
+ * 🆕 Soporte para crops (recortes de imagen)
  */
 
 import { Input } from "../../ui/input";
@@ -15,10 +16,12 @@ import { FormField } from "../../ui/form-field";
 import { Card, CardContent } from "../../ui/card";
 import { ImageUploader } from "../ImageUploader";
 import { ProductFormAdvancedOptions } from "../products/ProductFormAdvancedOptions";
+import type { CropData } from "../../../services/adminService";  // 🆕
 
 interface ProductFormRightColumnProps {
   images: string[];
-  setImages: (images: string[]) => void;
+  crops: CropData[];                                          // 🆕
+  onImagesChange: (urls: string[], crops: CropData[]) => void; // 🆕
   formData: {
     precio: string;
     stock: string;
@@ -35,7 +38,8 @@ interface ProductFormRightColumnProps {
 
 export function ProductFormRightColumn({
   images,
-  setImages,
+  crops,
+  onImagesChange,
   formData,
   errors,
   handleChange,
@@ -47,7 +51,8 @@ export function ProductFormRightColumn({
         <CardContent className="p-6">
           <ImageUploader
             existingImages={images}
-            onImagesChange={setImages}
+            existingCrops={crops}        // 🆕
+            onImagesChange={onImagesChange} // 🆕
             maxFiles={5}
             maxFileSize={10}
           />
@@ -80,7 +85,7 @@ export function ProductFormRightColumn({
               />
             </FormField>
 
-            {/* 🆕 Stock opcional */}
+            {/* Stock opcional */}
             <FormField
               label="Stock disponible (opcional)"
               error={errors.stock}

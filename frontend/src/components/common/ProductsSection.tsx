@@ -15,8 +15,8 @@
  * - Maneja estados de carga y error visualmente
  * - Mobile-first
  * 
- * 🆕 Bug corregido: shadow-lghover → shadow-lg hover:shadow-xl
- * 🆕 Carrusel con padding solo en desktop (en mobile, full width)
+ * 🆕 Prop `compact` para versión más pequeña (catálogo, ofertas)
+ * 🆕 `compact` reduce padding, título y espacios
  */
 
 import { Link } from "react-router-dom";
@@ -46,13 +46,14 @@ interface ProductsSectionProps {
   ctaLink?: string;
   backgroundColor?: string;
   emptyMessage?: string;
+  compact?: boolean;  // 🆕
 }
 
 // =============================================
 // 🎯 SKELETON DE PRODUCTOS
 // =============================================
-const ProductSkeleton = () => (
-  <div className="flex-shrink-0 w-[70vw] max-w-[240px] border-2 border-[#00D2D3]/30 rounded-xl p-3 space-y-3">
+const ProductSkeleton = ({ compact }: { compact?: boolean }) => (
+  <div className={`flex-shrink-0 ${compact ? "w-[60vw] max-w-[200px]" : "w-[70vw] max-w-[240px]"} border-2 border-[#00D2D3]/30 rounded-xl p-3 space-y-3`}>
     <Skeleton className="w-full aspect-square rounded-lg" />
     <Skeleton className="h-4 w-3/4" />
     <Skeleton className="h-4 w-1/2" />
@@ -79,37 +80,40 @@ export function ProductsSection({
   ctaLink = "/productos",
   backgroundColor = "bg-white",
   emptyMessage = "No hay productos disponibles.",
+  compact = false,  // 🆕
 }: ProductsSectionProps) {
   return (
-    <section className={`py-16 ${backgroundColor}`}>
+    <section className={`${compact ? "py-6" : "py-16"} ${backgroundColor}`}>
       {/* HEADER (con padding) */}
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-10"
+          className={`text-center ${compact ? "mb-4" : "mb-10"}`}
         >
-          <Badge className="bg-[#00D2D3] text-white mb-2 px-4 py-1 rounded-full">
+          <Badge className={`bg-[#00D2D3] text-white mb-2 ${compact ? "px-3 py-0.5 text-xs" : "px-4 py-1"} rounded-full`}>
             {badge}
           </Badge>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-[#603060]">
+          <h2 className={`${compact ? "text-xl md:text-2xl" : "text-3xl md:text-4xl"} font-extrabold text-[#603060]`}>
             {title}
           </h2>
-          <p className="text-[#6A757C] mt-2">{subtitle}</p>
+          <p className={`text-[#6A757C] ${compact ? "mt-1 text-sm" : "mt-2"}`}>
+            {subtitle}
+          </p>
         </motion.div>
       </div>
 
-      {/* CARRUSEL (padding solo en desktop) */}
-      <div className="max-w-6xl mx-auto px-4 md:px-4">
+      {/* CARRUSEL */}
+      <div className="max-w-6xl mx-auto px-4">
         {loading ? (
           <div className="flex gap-3 sm:gap-4 overflow-hidden">
             {[...Array(5)].map((_, i) => (
-              <ProductSkeleton key={i} />
+              <ProductSkeleton key={i} compact={compact} />
             ))}
           </div>
         ) : error ? (
-          <div className="text-center py-12">
+          <div className="text-center py-8">
             <p className="text-[#FF6B81]">❌ {error}</p>
             <button
               onClick={onRetry}
@@ -132,7 +136,6 @@ export function ProductsSection({
       {showCTA && (
         <div className="text-center mt-8 px-4">
           <Link to={ctaLink}>
-            {/* 🆕 BUG CORREGIDO: shadow-lg hover:shadow-xl */}
             <Button className="bg-gradient-to-r from-[#FF6B81] to-[#FF9F43] hover:from-[#FF9F43] hover:to-[#FF6B81] text-white font-bold px-7 py-5 text-base rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105">
               {ctaText}
             </Button>

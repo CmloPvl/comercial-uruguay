@@ -3,13 +3,7 @@
 /**
  * 📌 CONTROLADOR DE PRODUCTOS
  * 
- * Maneja todas las operaciones relacionadas con productos:
- * - Obtener todos los productos
- * - Obtener productos destacados
- * - Obtener producto por ID
- * - Crear producto
- * - Actualizar producto
- * - Eliminar producto
+ * Maneja todas las operaciones relacionadas con productos.
  * 
  * ✅ Buenas prácticas:
  * - Separación de responsabilidades
@@ -18,6 +12,7 @@
  * - Respuestas consistentes
  * 
  * 🆕 Soporte para packs promocionales (packPrice, packQuantity)
+ * 🆕 Soporte para recortes de imagen (crops)
  */
 
 import { Response } from 'express';
@@ -105,14 +100,15 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
       sku, 
       stock, 
       images, 
+      crops,                  // 🆕 Extraer crops
       categoryId, 
       isOnSale, 
       discount, 
       tags, 
       variants,
-      destacado,              // 🆕 Extraer destacado
-      packPrice,              // 🆕 Extraer packPrice
-      packQuantity,           // 🆕 Extraer packQuantity
+      destacado,
+      packPrice,
+      packQuantity,
     } = req.body;
 
     console.log('📦 Campos extraídos:');
@@ -127,14 +123,13 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
     console.log('  - tags:', tags);
     console.log('  - variants:', variants);
     console.log('  - destacado:', destacado);
-    console.log('  - packPrice:', packPrice);           // 🆕 Log
-    console.log('  - packQuantity:', packQuantity);   // 🆕 Log
+    console.log('  - packPrice:', packPrice);
+    console.log('  - packQuantity:', packQuantity);
     console.log('  - images:', images);
-    console.log('  - type of images:', typeof images);
-    console.log('  - images es array:', Array.isArray(images));
-    console.log('  - cantidad de imágenes:', images?.length || 0);
+    console.log('  - crops:', crops);                        // 🆕 Log
+    console.log('  - type of crops:', typeof crops);       // 🆕 Log
+    console.log('  - crops es array:', Array.isArray(crops)); // 🆕 Log
 
-    // 🛡️ Validación de campos obligatorios
     if (!name || !description || !price || !sku) {
       console.log('❌ Faltan campos obligatorios');
       return res.status(400).json({
@@ -152,14 +147,15 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
       sku,
       stock: stock ? Number(stock) : 0,
       images: images || [],
+      crops: crops || [],               // 🆕 Pasar al modelo
       categoryId: categoryId ? Number(categoryId) : undefined,
       isOnSale: isOnSale || false,
       discount: discount ? Number(discount) : 0,
       tags: tags || [],
       variants: variants || [],
       destacado: destacado || false,
-      packPrice: packPrice ? Number(packPrice) : null,        // 🆕 Pasar al modelo
-      packQuantity: packQuantity ? Number(packQuantity) : null, // 🆕 Pasar al modelo
+      packPrice: packPrice ? Number(packPrice) : null,
+      packQuantity: packQuantity ? Number(packQuantity) : null,
     };
 
     console.log('📦 Datos a enviar al modelo:', JSON.stringify(productData, null, 2));
@@ -210,16 +206,18 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
       sku, 
       stock, 
       images, 
+      crops,                  // 🆕 Extraer crops
       categoryId, 
       isOnSale, 
       discount,
-      destacado,              // 🆕 Extraer destacado
-      packPrice,              // 🆕 Extraer packPrice
-      packQuantity,           // 🆕 Extraer packQuantity
+      destacado,
+      packPrice,
+      packQuantity,
     } = req.body;
 
     console.log('📦 Actualizando producto ID:', id);
     console.log('📦 Datos de actualización:', { name, description, price, sku, stock, categoryId, destacado, packPrice, packQuantity });
+    console.log('📦 crops en actualización:', crops);        // 🆕 Log
 
     const updatedProduct = await ProductModel.update(id, {
       name,
@@ -228,12 +226,13 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
       sku,
       stock,
       images,
+      crops,                  // 🆕 Pasar al modelo
       categoryId,
       isOnSale,
       discount,
       destacado,
-      packPrice: packPrice ? Number(packPrice) : null,          // 🆕 Pasar al modelo
-      packQuantity: packQuantity ? Number(packQuantity) : null, // 🆕 Pasar al modelo
+      packPrice: packPrice ? Number(packPrice) : null,
+      packQuantity: packQuantity ? Number(packQuantity) : null,
     });
 
     if (!updatedProduct) {

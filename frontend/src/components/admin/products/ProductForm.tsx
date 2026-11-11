@@ -13,8 +13,10 @@
  * - Soporte para packs promocionales (packPrice, packQuantity)
  * - Prop description opcional (el header la muestra)
  * - ProductForm autocontenido (sin header duplicado en páginas)
+ * - Stock opcional (si vacío → 0, frontend muestra "Consultar disponibilidad")
  * 
- * 🆕 Stock opcional (si vacío → 0, frontend muestra "Consultar disponibilidad")
+ * 🆕 Soporte para crops (recortes de imagen)
+ * 🆕 Maneja images + crops juntos
  */
 
 import { useState, useEffect } from "react";
@@ -25,7 +27,7 @@ import { ProductFormHeader } from "./ProductFormHeader";
 import { ProductFormActions } from "./ProductFormActions";
 import { ProductFormLeftColumn } from "./ProductFormLeftColumn";
 import { ProductFormRightColumn } from "./ProductFormRightColumn";
-import type { Product } from "../../../services/adminService";
+import type { Product, CropData } from "../../../services/adminService";  // 🆕
 import type { Category } from "../../../services/categoryService";
 
 interface ProductFormProps {
@@ -71,6 +73,7 @@ export default function ProductForm({
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [images, setImages] = useState<string[]>(product?.images || []);
+  const [crops, setCrops] = useState<CropData[]>(product?.crops || []);  // 🆕
 
   // =============================================
   // 🔄 EFECTO: CARGAR DATOS DEL PRODUCTO
@@ -93,6 +96,7 @@ export default function ProductForm({
         packPrice: product.packPrice?.toString() || "",
       });
       setImages(product.images || []);
+      setCrops(product.crops || []);  // 🆕
     }
   }, [product]);
 
@@ -118,6 +122,12 @@ export default function ProductForm({
     }
   };
 
+  // 🆕 Handler de imágenes (recibe urls y crops)
+  const handleImagesChange = (urls: string[], newCrops: CropData[]) => {
+    setImages(urls);
+    setCrops(newCrops);
+  };
+
   // =============================================
   // ✅ VALIDACIÓN
   // =============================================
@@ -139,7 +149,6 @@ export default function ProductForm({
     if (!formData.precio || Number(formData.precio) <= 0) {
       newErrors.precio = "El precio debe ser mayor a 0";
     }
-    // 🆕 Stock ya NO es obligatorio (se permite vacío)
     if (formData.enOferta && (!formData.descuento || Number(formData.descuento) <= 0 || Number(formData.descuento) > 100)) {
       newErrors.descuento = "Debes indicar un descuento válido (1-100)";
     }
@@ -184,9 +193,9 @@ export default function ProductForm({
         sku: formData.sku,
         categoryId: Number(formData.categoriaId),
         price: Number(formData.precio),
-        // 🆕 Stock opcional: si vacío → 0
         stock: formData.stock ? Number(formData.stock) : 0,
         images: images.length > 0 ? images : ["https://via.placeholder.com/300x300?text=Sin+Imagen"],
+        crops: crops,  // 🆕 Enviar crops
         isOnSale: formData.enOferta,
         discount: formData.enOferta ? Number(formData.descuento) : 0,
         isActive: true,
@@ -220,7 +229,7 @@ export default function ProductForm({
   // =============================================
   return (
     <form onSubmit={handleSubmit} className="space-y-6" aria-label={`Formulario de ${title}`}>
-      {/* Header (título, descripción, badges) */}
+      {/* Header */}
       <ProductFormHeader
         title={title}
         description={description}
@@ -259,7 +268,8 @@ export default function ProductForm({
         {/* Columna Derecha */}
         <ProductFormRightColumn
           images={images}
-          setImages={setImages}
+          crops={crops}                      // 🆕
+          onImagesChange={handleImagesChange} // 🆕
           formData={formData}
           errors={errors}
           handleChange={handleChange}

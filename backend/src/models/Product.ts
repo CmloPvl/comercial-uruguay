@@ -18,8 +18,10 @@
  * - Soft delete (no eliminar realmente)
  * - SQL parametrizado para prevenir inyecciones
  * 
- * 🆕 Soporte para packs promocionales (ej: "3 por $1000")
- * 🆕 packPrice y packQuantity aceptan null (para borrar pack)
+ * 🆕 Soporte para packs promocionales
+ * 🆕 Soporte para recortes de imagen (crops)
+ *    - crops: array de objetos { x, y, zoom, aspect }
+ *    - Mismo orden que images
  */
 
 import pool from '../config/database';
@@ -27,6 +29,16 @@ import pool from '../config/database';
 // =============================================
 // 📋 INTERFACES
 // =============================================
+
+/**
+ * 🆕 Interfaz para el recorte de una imagen
+ */
+export interface CropData {
+  x: number;
+  y: number;
+  zoom: number;
+  aspect: number;
+}
 
 /**
  * Interfaz que representa un producto completo
@@ -40,6 +52,7 @@ export interface Product {
   sku: string;
   stock: number;
   images: string[];
+  crops: CropData[];          // 🆕 Array de recortes
   categoryId: number | null;
   isActive: boolean;
   isOnSale: boolean;
@@ -57,7 +70,7 @@ export interface Product {
  * Interfaz para crear/actualizar un producto
  * Todos los campos son opcionales excepto los obligatorios
  * 
- * 🆕 packPrice y packQuantity aceptan null para permitir "borrar" el pack
+ * 🆕 crops: opcional, array de recortes
  */
 export interface ProductInput {
   name: string;
@@ -66,14 +79,15 @@ export interface ProductInput {
   sku: string;
   stock: number;
   images?: string[];
+  crops?: CropData[];              // 🆕
   categoryId?: number;
   isOnSale?: boolean;
   discount?: number;
   tags?: string[];
   variants?: string[];
   destacado?: boolean;
-  packPrice?: number | null;       // 🆕 Acepta null (borrar pack)
-  packQuantity?: number | null;    // 🆕 Acepta null (borrar pack)
+  packPrice?: number | null;
+  packQuantity?: number | null;
 }
 
 // =============================================
@@ -122,6 +136,7 @@ export const ProductModel = {
       sku, 
       stock, 
       images, 
+      crops,                     // 🆕
       categoryId, 
       isOnSale, 
       discount,
@@ -133,6 +148,7 @@ export const ProductModel = {
     } = product;
     
     const imagesJson = images && images.length > 0 ? JSON.stringify(images) : '[]';
+    const cropsJson = crops && crops.length > 0 ? JSON.stringify(crops) : '[]';  // 🆕
     const tagsJson = tags && tags.length > 0 ? JSON.stringify(tags) : '[]';
     const variantsJson = variants && variants.length > 0 ? JSON.stringify(variants) : '[]';
     
@@ -144,6 +160,7 @@ export const ProductModel = {
         sku, 
         stock, 
         images, 
+        crops,                   -- 🆕
         "categoryId", 
         "isOnSale", 
         discount,
@@ -153,7 +170,7 @@ export const ProductModel = {
         "packPrice",
         "packQuantity"
       )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
        RETURNING *`,
       [
         name, 
@@ -162,14 +179,15 @@ export const ProductModel = {
         sku, 
         stock, 
         imagesJson,
+        cropsJson,               // 🆕
         categoryId || null, 
         isOnSale || false, 
         discount || 0,
         tagsJson,
         variantsJson,
         destacado || false,
-        packPrice ?? null,        // 🆕 null si undefined
-        packQuantity ?? null,     // 🆕 null si undefined
+        packPrice ?? null,
+        packQuantity ?? null,
       ]
     );
     return result.rows[0];
@@ -204,6 +222,11 @@ export const ProductModel = {
       fields.push(`images = $${index++}`);
       values.push(JSON.stringify(product.images));
     }
+    // 🆕 crops
+    if (product.crops !== undefined) {
+      fields.push(`crops = $${index++}`);
+      values.push(JSON.stringify(product.crops));
+    }
     if (product.categoryId !== undefined) {
       fields.push(`"categoryId" = $${index++}`);
       values.push(product.categoryId);
@@ -228,12 +251,10 @@ export const ProductModel = {
       fields.push(`destacado = $${index++}`);
       values.push(product.destacado);
     }
-    // 🆕 packPrice: acepta number o null
     if (product.packPrice !== undefined) {
       fields.push(`"packPrice" = $${index++}`);
       values.push(product.packPrice);
     }
-    // 🆕 packQuantity: acepta number o null
     if (product.packQuantity !== undefined) {
       fields.push(`"packQuantity" = $${index++}`);
       values.push(product.packQuantity);

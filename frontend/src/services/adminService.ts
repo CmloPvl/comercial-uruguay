@@ -14,7 +14,8 @@
  * - Reutilizable
  * 
  * 🆕 Soporte para packs promocionales (packPrice, packQuantity)
- * 🆕 Fix: deleteProduct y updateProduct usan /products/:id (antes /admin/products/:id → 404)
+ * 🆕 Soporte para recortes de imagen (crops)
+ * 🆕 Fix: deleteProduct y updateProduct usan /products/:id
  */
 
 import api from './api';
@@ -22,6 +23,16 @@ import api from './api';
 // =============================================
 // 📋 INTERFACES
 // =============================================
+
+/**
+ * 🆕 Interfaz para el recorte de una imagen
+ */
+export interface CropData {
+  x: number;
+  y: number;
+  zoom: number;
+  aspect: number;
+}
 
 export interface DashboardStats {
   totalProducts: number;
@@ -54,6 +65,7 @@ export interface Product {
   isOnSale: boolean;
   discount: number;
   images: string[];
+  crops: CropData[];              // 🆕
   destacado?: boolean;
   packPrice?: number | null;
   packQuantity?: number | null;
@@ -109,12 +121,10 @@ export const adminService = {
     };
   },
 
-  // 🆕 Fix: usa /products/:id (no /admin/products/:id)
   async deleteProduct(id: string): Promise<void> {
     await api.delete(`/products/${id}`);
   },
 
-  // 🆕 Fix: usa /products/:id (no /admin/products/:id)
   async updateProduct(id: string, data: Partial<Product>): Promise<Product> {
     const response = await api.put(`/products/${id}`, data);
     return response.data.data;

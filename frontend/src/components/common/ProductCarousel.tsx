@@ -16,8 +16,7 @@
  * - Mobile-first
  * - Reutilizable en toda la app
  * 
- * 🆕 Ancho de card FIJO (260px mobile, 280px desktop)
- * 🆕 Sin depender de vw (funciona en todos los celulares)
+ * 🆕 Ancho responsive: 45vw en mobile (más chico que el catálogo)
  * 🆕 Bugs corregidos (opacity-0 group-hover)
  */
 
@@ -97,7 +96,7 @@ export function ProductCarousel({
         </button>
       )}
 
-      {/* 📦 CARRUSEL (🆕 sin padding interno) */}
+      {/* 📦 CARRUSEL (🆕 cards más chicas que el catálogo) */}
       <div
         ref={scrollRef}
         className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory"
@@ -109,8 +108,9 @@ export function ProductCarousel({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
-            // 🆕 Ancho FIJO (no vw): 260px mobile, 280px desktop
-            className="flex-shrink-0 w-[260px] sm:w-[280px] snap-start"
+            // 🆕 Ancho responsive: 45vw en mobile (más chico que el catálogo 50%)
+            // En desktop, máximo 220px
+            className="flex-shrink-0 w-[45vw] max-w-[220px] snap-start"
           >
             <ProductCard
               product={product}

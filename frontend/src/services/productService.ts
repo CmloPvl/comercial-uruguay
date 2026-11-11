@@ -3,13 +3,7 @@
 /**
  * 📌 SERVICIO DE PRODUCTOS
  * 
- * Maneja todas las operaciones relacionadas con productos:
- * - Obtener todos los productos
- * - Obtener productos destacados
- * - Obtener producto por ID
- * - Crear producto
- * - Actualizar producto
- * - Eliminar producto
+ * Maneja todas las operaciones relacionadas con productos.
  * 
  * ✅ Buenas prácticas:
  * - Separación de responsabilidades
@@ -18,6 +12,7 @@
  * - Sin logs innecesarios (solo en desarrollo)
  * 
  * 🆕 Soporte para packs promocionales (packPrice, packQuantity)
+ * 🆕 Soporte para recortes de imagen (crops)
  * 🆕 Eliminado `category` del tipo (el backend devuelve `category_name`)
  */
 
@@ -27,6 +22,16 @@ import api from './api';
 // 📋 INTERFACES
 // =============================================
 
+/**
+ * 🆕 Interfaz para el recorte de una imagen
+ */
+export interface CropData {
+  x: number;
+  y: number;
+  zoom: number;
+  aspect: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -35,6 +40,7 @@ export interface Product {
   sku: string;
   stock: number;
   images: string[];
+  crops: CropData[];              // 🆕
   categoryId: string;
   category_name?: string;
   isActive: boolean;
@@ -67,6 +73,7 @@ export interface CreateProductData {
   price: number;
   stock: number;
   images: string[];
+  crops?: CropData[];             // 🆕
   isOnSale?: boolean;
   discount?: number;
   tags?: string[];

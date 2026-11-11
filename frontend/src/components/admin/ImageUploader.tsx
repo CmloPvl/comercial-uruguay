@@ -16,9 +16,9 @@
  * - Reordenamiento con drag & drop (HTML5 nativo)
  * - Reordenamiento con botones ← → (mobile)
  * 
+ * 🆕 Soporte para crops (recortes de imagen)
+ * 🆕 Editor de recorte al hacer clic en una imagen
  * 🆕 Fix: isAtMax solo cuenta existingImages (no files pendientes)
- * 🆕 Fix: el dropzone NO se oculta mientras hay archivos pendientes
- * 🆕 Fix: botón ✕ dentro del contenedor (antes se recortaba)
  */
 
 import { useEffect, useState } from 'react'
@@ -29,25 +29,51 @@ import {
   showSuccessToast,
   showErrorToastWithFallback,
 } from '@/utils/errorMessages'
+import { ImageCropper } from './ImageCropper'  // 🆕
+import type { CropData } from '@/services/productService'  // 🆕
+
+// =============================================
+// 📋 INTERFAZ DE PROPS
+// =============================================
 
 interface ImageUploaderProps {
-  existingImages?: string[]
-  onImagesChange: (urls: string[]) => void
-  maxFiles?: number
-  maxFileSize?: number
-  label?: string
+  /** URLs de imágenes existentes (para editar) */
+  existingImages?: string[];
+  /** 🆕 Recortes de las imágenes existentes (mismo orden que existingImages) */
+  existingCrops?: CropData[];
+  /** 🆕 Callback cuando se suben imágenes (recibe URLs y crops) */
+  onImagesChange: (urls: string[], crops: CropData[]) => void;
+  /** Número máximo de imágenes */
+  maxFiles?: number;
+  /** Tamaño máximo en MB */
+  maxFileSize?: number;
+  /** Label del componente */
+  label?: string;
 }
+
+// =============================================
+// 🎯 COMPONENTE PRINCIPAL
+// =============================================
 
 export function ImageUploader({
   existingImages = [],
+  existingCrops = [],
   onImagesChange,
   maxFiles = 5,
   maxFileSize = 10,
   label = '📸 Imágenes del Producto',
 }: ImageUploaderProps) {
+  // =============================================
+  // 🎯 ESTADOS LOCALES
+  // =============================================
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const [crops, setCrops] = useState<CropData[]>(existingCrops)  // 🆕
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)  // 🆕
 
+  // =============================================
+  // 📤 CONFIGURAR EL DROPZONE
+  // =============================================
   const uploadProps = useSupabaseUpload({
     supabase: supabase,
     bucketName: PRODUCTS_BUCKET,
@@ -77,8 +103,9 @@ export function ImageUploader({
 
       const urls = validFiles.map((f: any) => f.publicUrl);
       const allUrls = [...existingImages, ...urls];
+      const allCrops = [...crops, ...urls.map(() => null)] as CropData[];  // 🆕
 
-      onImagesChange(allUrls);
+      onImagesChange(allUrls, allCrops);
 
       showSuccessToast(
         `${validFiles.length} ${validFiles.length === 1 ? 'imagen subida' : 'imágenes subidas'} correctamente`
@@ -94,6 +121,9 @@ export function ImageUploader({
     },
   })
 
+  // =============================================
+  // 🔄 LIMPIAR DROPZONE DESPUÉS DE SUBIR
+  // =============================================
   useEffect(() => {
     if (uploadProps.isSuccess && uploadProps.files.length > 0) {
       const timer = setTimeout(() => {
@@ -104,12 +134,20 @@ export function ImageUploader({
     }
   }, [uploadProps.isSuccess]);
 
+  // =============================================
+  // 🗑️ ELIMINAR IMAGEN
+  // =============================================
   const removeImage = (index: number) => {
     const newImages = existingImages.filter((_, i) => i !== index)
-    onImagesChange(newImages)
+    const newCrops = crops.filter((_, i) => i !== index)  // 🆕
+    setCrops(newCrops)
+    onImagesChange(newImages, newCrops)
     showSuccessToast('Imagen eliminada')
   }
 
+  // =============================================
+  // 🔀 MOVER IMAGEN
+  // =============================================
   const moveImage = (index: number, direction: 'left' | 'right') => {
     const newIndex = direction === 'left' ? index - 1 : index + 1
     if (newIndex < 0 || newIndex >= existingImages.length) return
@@ -117,21 +155,26 @@ export function ImageUploader({
     const newImages = [...existingImages]
     const [moved] = newImages.splice(index, 1)
     newImages.splice(newIndex, 0, moved)
-    onImagesChange(newImages)
+
+    const newCrops = [...crops]  // 🆕 mover también el crop
+    const [movedCrop] = newCrops.splice(index, 1)
+    newCrops.splice(newIndex, 0, movedCrop)
+
+    setCrops(newCrops)
+    onImagesChange(newImages, newCrops)
   }
 
-  const handleDragStart = (index: number) => {
-    setDraggedIndex(index)
-  }
+  // =============================================
+  // 🖱️ DRAG & DROP
+  // =============================================
+  const handleDragStart = (index: number) => setDraggedIndex(index)
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault()
     setDragOverIndex(index)
   }
 
-  const handleDragLeave = () => {
-    setDragOverIndex(null)
-  }
+  const handleDragLeave = () => setDragOverIndex(null)
 
   const handleDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault()
@@ -145,7 +188,13 @@ export function ImageUploader({
     const newImages = [...existingImages]
     const [moved] = newImages.splice(draggedIndex, 1)
     newImages.splice(dropIndex, 0, moved)
-    onImagesChange(newImages)
+
+    const newCrops = [...crops]  // 🆕 mover también el crop
+    const [movedCrop] = newCrops.splice(draggedIndex, 1)
+    newCrops.splice(dropIndex, 0, movedCrop)
+
+    setCrops(newCrops)
+    onImagesChange(newImages, newCrops)
 
     setDraggedIndex(null)
     setDragOverIndex(null)
@@ -157,14 +206,24 @@ export function ImageUploader({
   }
 
   // =============================================
-  // 📊 CONTADORES (🆕 separados)
+  // ✂️ GUARDAR RECORTE
   // =============================================
-  // Total = subidas + pendientes (para mostrar en contador)
+  const handleSaveCrop = (cropData: CropData) => {
+    if (editingIndex === null) return
+
+    const newCrops = [...crops]
+    newCrops[editingIndex] = cropData
+    setCrops(newCrops)
+    onImagesChange(existingImages, newCrops)
+    setEditingIndex(null)
+    showSuccessToast('Recorte guardado')
+  }
+
+  // =============================================
+  // 📊 CONTADORES
+  // =============================================
   const totalImages = existingImages.length + uploadProps.files.length;
-
-  // 🆕 isAtMax = SOLO las subidas cuentan (las pendientes no bloquean)
   const isAtMax = existingImages.length >= maxFiles;
-
 
   // =============================================
   // 🖥️ RENDER
@@ -181,7 +240,7 @@ export function ImageUploader({
         </span>
       </h2>
 
-      {/* AVISO SI ESTÁ AL MÁXIMO (solo si las subidas llegan al máximo) */}
+      {/* AVISO SI ESTÁ AL MÁXIMO */}
       {isAtMax && (
         <div className="bg-[#FFD93D]/20 border-2 border-[#FFD93D] rounded-lg p-3 text-sm text-[#603060] flex items-center gap-2">
           <span>⚠️</span>
@@ -189,7 +248,7 @@ export function ImageUploader({
         </div>
       )}
 
-      {/* DROPZONE (🆕 visible si no está al máximo Y no hay archivos pendientes) */}
+      {/* DROPZONE */}
       {!isAtMax && (
         <div className="border-2 border-dashed border-[#7D5FFF] rounded-xl p-6 text-center hover:border-[#FFD93D] transition-all bg-[#F0F0C0]/10">
           <Dropzone {...uploadProps}>
@@ -199,7 +258,7 @@ export function ImageUploader({
         </div>
       )}
 
-      {/* IMÁGENES EXISTENTES (siempre visibles) */}
+      {/* IMÁGENES EXISTENTES */}
       {existingImages.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-2">
@@ -256,7 +315,18 @@ export function ImageUploader({
                     </div>
                   )}
 
-                  {/* Botón eliminar (dentro del contenedor) */}
+                  {/* Botón editar recorte (🆕) */}
+                  <button
+                    type="button"
+                    onClick={() => setEditingIndex(index)}
+                    className="absolute bottom-6 right-1 bg-[#00D2D3] text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-[#7D5FFF] transition-all hover:scale-110 shadow-md z-20"
+                    title="Ajustar recorte"
+                    aria-label={`Ajustar recorte de imagen ${index + 1}`}
+                  >
+                    ✂️
+                  </button>
+
+                  {/* Botón eliminar */}
                   <button
                     type="button"
                     onClick={() => removeImage(index)}
@@ -272,7 +342,7 @@ export function ImageUploader({
                     #{index + 1}
                   </div>
 
-                  {/* Botones ← → visibles en mobile */}
+                  {/* Botones ← → */}
                   {existingImages.length > 1 && (
                     <div className="absolute inset-x-0 bottom-6 flex justify-between px-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10">
                       <button
@@ -281,7 +351,6 @@ export function ImageUploader({
                         disabled={index === 0}
                         className="bg-black/60 hover:bg-black/80 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs disabled:opacity-30 disabled:cursor-not-allowed"
                         title="Mover a la izquierda"
-                        aria-label={`Mover imagen ${index + 1} a la izquierda`}
                       >
                         ←
                       </button>
@@ -291,7 +360,6 @@ export function ImageUploader({
                         disabled={index === existingImages.length - 1}
                         className="bg-black/60 hover:bg-black/80 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs disabled:opacity-30 disabled:cursor-not-allowed"
                         title="Mover a la derecha"
-                        aria-label={`Mover imagen ${index + 1} a la derecha`}
                       >
                         →
                       </button>
@@ -312,6 +380,15 @@ export function ImageUploader({
         <br />
         Máximo {maxFiles} imágenes por producto
       </p>
+
+      {/* 🆕 MODAL EDITOR DE RECORTE */}
+      {editingIndex !== null && existingImages[editingIndex] && (
+        <ImageCropper
+          imageUrl={existingImages[editingIndex]}
+          onSave={handleSaveCrop}
+          onCancel={() => setEditingIndex(null)}
+        />
+      )}
     </div>
   )
 }

@@ -17,6 +17,10 @@
  * - Reutilizable en otros componentes
  * - Fácil de testear
  * - Manejo de errores con toasts centralizados
+ * 
+ * 🆕 Lee `?categoria=` de la URL (Home → Catálogo con filtro)
+ * 🆕 Pasa `category` al servicio (filtro desde backend)
+ * 🆕 Normaliza comparación (case-insensitive + trim)
  */
 
 import { useState, useEffect } from "react";
@@ -41,6 +45,7 @@ export function useProducts() {
   // =============================================
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
+  const categoryQuery = decodeURIComponent(searchParams.get("categoria") || "");  // 🆕
 
   // =============================================
   // 🔐 CONTEXTOS
@@ -59,7 +64,7 @@ export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>(categoryQuery);
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [showFilters, setShowFilters] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -71,7 +76,11 @@ export function useProducts() {
     try {
       setLoading(true);
       setError(null);
-      const data = await productService.getProducts({ search: searchQuery });
+      // 🆕 Pasar category al servicio
+      const data = await productService.getProducts({
+        search: searchQuery,
+        category: categoryQuery || undefined,
+      });
       setProducts(data || []);
     } catch (err) {
       const errorMessage = productErrors.notFound;
@@ -153,10 +162,14 @@ export function useProducts() {
   };
 
   // =============================================
-  // 📊 FILTRAR PRODUCTOS
+  // 📊 FILTRAR PRODUCTOS (🆕 normalizado)
   // =============================================
   const filteredProducts = products.filter((p) => {
-    const matchesCategory = !selectedCategory || p.category_name === selectedCategory;
+    // 🆕 Normalizar para comparar (case-insensitive + trim)
+    const productCategory = (p.category_name || "").trim().toLowerCase();
+    const selectedCat = (selectedCategory || "").trim().toLowerCase();
+    
+    const matchesCategory = !selectedCat || productCategory === selectedCat;
     const minPrice = priceRange.min !== "" ? Number(priceRange.min) : 0;
     const maxPrice = priceRange.max !== "" ? Number(priceRange.max) : Infinity;
     const matchesPrice = p.price >= minPrice && p.price <= maxPrice;
@@ -171,7 +184,12 @@ export function useProducts() {
     if (user) {
       loadFavorites();
     }
-  }, [searchQuery]);
+  }, [searchQuery, categoryQuery]);  // 🆕 Escucha cambios en la URL
+
+  // 🆕 Sincronizar selectedCategory con la URL
+  useEffect(() => {
+    setSelectedCategory(categoryQuery);
+  }, [categoryQuery]);
 
   // =============================================
   // 📦 EXPORTACIÓN

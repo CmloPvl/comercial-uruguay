@@ -15,8 +15,9 @@
  * - CORS y Helmet para seguridad
  * - Separación de rutas por módulo
  * 
- * 🆕 Rate limits aumentados (500 general, 10 login)
- *    Antes 100 general se agotaba navegando el admin
+ * 🆕 Rate limits ajustados:
+ *    - apiLimiter: 3000/15min (antes 500 → usuarios normales se bloqueaban)
+ *    - loginLimiter: 10/15min (sigue protegiendo fuerza bruta)
  */
 
 import express from 'express';
@@ -57,7 +58,7 @@ app.set('trust proxy', true);
 // Límite general para toda la API
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 500, // 🆕 Subido de 100 a 500
+  max: 3000, // 🆕 Subido de 500 a 3000 (usuarios normales no se bloquean)
   message: {
     success: false,
     message: 'Demasiadas peticiones. Por favor, intenta de nuevo en 15 minutos.',
@@ -66,10 +67,10 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Límite específico para login (más restrictivo)
+// Límite específico para login (más restrictivo, NO se toca)
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 10, // 🆕 Subido de 5 a 10 (más margen para errores de tipeo)
+  max: 10, // Se mantiene para proteger contra fuerza bruta
   message: {
     success: false,
     message: 'Demasiados intentos de inicio de sesión. Por favor, intenta de nuevo en 15 minutos.',
@@ -121,7 +122,7 @@ if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
     console.log(`📡 Health check: http://localhost:${PORT}/api/health`);
-    console.log(`🔒 Rate Limiting: 500 peticiones/15min (general) | 10 intentos/15min (login)`);
+    console.log(`🔒 Rate Limiting: 3000 peticiones/15min (general) | 10 intentos/15min (login)`);
     console.log(`👑 Admin routes activadas`);
     console.log(`👥 User admin routes activadas`);
     console.log(`🛡️ Trust proxy habilitado para Render`);

@@ -139,6 +139,7 @@ export default function Productos() {
           title="⭐ Artículos Destacados"
           subtitle="Los productos que elegimos para ti"
           showCTA={false}  // ✅ Sin botón "Ver tienda" (ya estás en ella)
+          compact={true}
         />
       )}
 
