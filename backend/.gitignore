@@ -1,0 +1,36 @@
+# ============================================
+# GITIGNORE — Backend (Node + Express)
+# ============================================
+
+# --- Dependencias ---
+node_modules/
+
+# --- Entorno ---
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# --- Build ---
+dist/
+build/
+*.tsbuildinfo
+
+# --- Logs ---
+logs/
+*.log
+npm-debug.log*
+
+# --- Testing ---
+coverage/
+.nyc_output/
+
+# --- Prisma (aunque no se use, por si acaso) ---
+*.db
+*.sqlite
+*.sqlite3
+
+# --- Temporales ---
+*.tmp
+*.temp
+*.bak

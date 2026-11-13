@@ -1,19 +1,110 @@
-markdown
-
 # 📋 CHANGELOG — Comercial Uruguay
 
-Registro de cambios por versión. Sigue [Keep a Changelog](https://keepachangelog.com/es/1.0.0/) y [Semantic Versioning](https://semver.org/lang/es/).
+> Registro de cambios por versión.
+> Sigue [Keep a Changelog](https://keepachangelog.com/es/1.0.0/) y [Semantic Versioning](https://semver.org/lang/es/).
+> **Última actualización:** 2026-10-30
 
 ---
 
-## [v1.2.0-beta.6] — 30/10/2026
+## 📑 Índice de versiones
+
+- [[Unreleased]](#unreleased)
+- [v1.2.0-beta.7 — 2026-10-30](#v120-beta7--2026-10-30)
+- [v1.2.0-beta.6 — 2026-10-30](#v120-beta6--2026-10-30)
+- [v1.2.0-beta.5 — 2026-10-29](#v120-beta5--2026-10-29)
+- [v1.2.0-beta.4 — 2026-10-26](#v120-beta4--2026-10-26)
+- [v1.2.0-beta.3 — versión anterior](#v120-beta3--versión-anterior)
+- [Pendientes globales](#-pendientes-globales)
+- [Documentos relacionados](#-documentos-relacionados)
+
+---
+
+## 🧭 Cómo leer este changelog
+
+- **`[Unreleased]`**: cambios en curso, aún no versionados.
+- **`Agregado ✨`**: funcionalidad nueva.
+- **`Cambiado 🔄`**: cambio en funcionalidad existente.
+- **`Corregido 🐛`**: bug fix.
+- **`Eliminado 🗑️`**: funcionalidad removida.
+- **`Seguridad 🔒`**: cambios de seguridad.
+- **`SQL aplicado`**: migraciones ejecutadas en Supabase para esa versión.
+- **`Pendientes globales`**: todo lo que falta, consolidado en un solo lugar (no repetido por versión).
+
+---
+
+## [Unreleased]
+
+> Cambios en curso. Se moverán a una versión cuando estén estables.
+
+### Agregado ✨
+
+- _(vacío por ahora)_
+
+### Cambiado 🔄
+
+- _(vacío por ahora)_
+
+### Corregido 🐛
+
+- _(vacío por ahora)_
+
+---
+
+## [v1.2.0-beta.7] — 2026-10-30
+
+### Cambiado 🔄
+
+- **Refactor:** `ImageCropper` usa `useImageCropper` (SoC)
+  - Lógica extraída a hook (`crop`, `zoom`, `aspect`, `croppedArea`)
+  - Componente queda solo UI (presentacional)
+  - `CropData` unificado: se importa de `productService` (única fuente de verdad)
+
+### Agregado ✨
+
+- **Hook `useImageCropper`** (nuevo)
+  - Estados: `crop`, `zoom`, `aspect`, `croppedArea`
+  - Callbacks: `handleCropComplete`, `handleSave`
+  - Cierre con `Escape` (`useEffect` + `keydown`)
+  - Exporta `ASPECT_RATIOS` (constante reutilizable)
+
+- **Vista previa real con Canvas** (`getCroppedImg`)
+  - Antes: `img` con `objectPosition` y `transform: scale()` (falsa)
+  - Ahora: imagen recortada real (base64) generada con `<canvas>`
+
+- **Zoom permite alejar** (min 0.5x)
+  - Antes: `min="1"`
+  - Ahora: `min="0.5"` → permite alejar
+
+- **Altura dinámica del cropper**
+  - `3/4` → `h-[350px] sm:h-[450px]`
+  - `16/9` → `h-[220px] sm:h-[300px]`
+  - Otros → `h-[300px] sm:h-[400px]`
+
+- **Mobile-first mejorado**
+  - Padding: `p-3 sm:p-4`, `p-3 sm:p-6`
+  - Tipografía: `text-lg sm:text-xl`, `text-xs sm:text-sm`
+  - Botones: `py-2 sm:py-2.5`, `text-sm sm:text-base`
+  - Fondo blanco sólido en el modal (`bg-white`)
+  - `max-h-[90vh] flex flex-col` + `overflow-y-auto`
+
+- **Accesibilidad**
+  - `type="button"` en todos los botones (evita submit accidental)
+  - `aria-label` en el botón de cerrar
+
+### SQL aplicado en Supabase
+
+Ninguno nuevo (cambios solo de frontend).
+
+---
+
+## [v1.2.0-beta.6] — 2026-10-30
 
 ### Agregado ✨
 
 - **Páginas de Envíos y Retiros** (reutilizables)
   - `components/info/EnviosSection.tsx` (envíos a todo Chile)
   - `components/info/RetiroSection.tsx` (retiro en tienda)
-  - `/envios-y-retiros` con tabs (Envios | Retiro) + URL directa (`?tab=retiro`)
+  - `/envios-y-retiros` con tabs (Envíos | Retiro) + URL directa (`?tab=retiro`)
   - `/envios` y `/retiro` usan las secciones (sin duplicar contenido)
 
 - **Links de Envíos/Retiro en menús**
@@ -61,165 +152,8 @@ Registro de cambios por versión. Sigue [Keep a Changelog](https://keepachangelo
 - **`Ofertas.tsx`** → `product.category_name` (antes `product.category`)
 - **`productService.ts`** → eliminado `category` del tipo `Product` (nunca existió)
 
-### Pendiente ⚠️
-
-- **Scroll horizontal en mobile** (parcialmente fixeado, revisar después)
-- `Ofertas.tsx` → usar `ProductCard` (sigue con card hardcodeado)
-- SKU opcional (backend autogenera)
-- Descripción sin mínimo de 20 caracteres
-- Etiquetas/tags sin uso
-- Productos relacionados en detalle
-- Compartir por WhatsApp desde el producto
-
----
-
-## [v1.2.0-beta.5] — 29/10/2026
-
-### Agregado ✨
-
-- **Loader en botón "Agregar al carrito"** (`ProductCard`)
-  - Estado `adding` local
-  - Botón deshabilitado mientras procesa
-  - Previene doble click
-
-- **Mensaje "📲 Stock por WhatsApp"** cuando stock = 0
-  - En `ProductCard` (catálogo, destacados, ofertas)
-  - En `ProductoDetalle` (bloque grande)
-  - Reemplaza "Sin Stock" (más honesto con el flujo WhatsApp)
-
-- **Mensajes nuevos en `errorMessages.ts`**
-  - `cartErrors.addFailed`: "Error al agregar al carrito."
-
-- **Helper `calculateSubtotal` en `backend/src/utils/`**
-  - Función única para calcular subtotal con packs
-  - Importada desde `Cart.ts` y `cart.controller.ts`
-  - Elimina duplicación de código
-
-- **Toasts en el carrito** (`useCarrito`)
-  - Éxito al actualizar/eliminar/vaciar
-  - Error con mensajes del helper
-
-### Cambiado 🔄
-
-- **Refactor:** `ProductCard` unificado con `variant="default" | "carousel"`
-  - Un solo componente para grid y carrusel
-  - `ProductCarousel` ahora usa `ProductCard` (elimina card hardcodeado)
-  - Consistencia total (pack, stock, favoritos se ven igual)
-
-- **Refactor:** Admin sin doble layout
-  - Eliminado `<Layout>` de las 6 páginas admin
-  - `App.tsx` ya envuelve con `<AdminLayout>`
-
-- **Refactor:** Header unificado en `ProductForm`
-  - Eliminado header manual de `CrearPublicacion` y `EditarPublicacion`
-  - Nuevo prop `description` en `ProductForm`
-  - `ProductFormHeader` maneja todo el header
-
-- **Stock opcional** en el formulario de productos
-  - Ya no es obligatorio (`required` eliminado)
-  - Si está vacío → `stock = 0` → "📲 Stock por WhatsApp"
-  - Backend permite agregar productos con `stock = 0`
-
-- **UI/UX:** Imágenes en `ImageUploader`
-  - Toasts de éxito/error
-  - Limpiar dropzone después de subir
-  - Contador incluye pendientes
-  - Aviso de máximo alcanzado
-
-### Corregido 🐛
-
-- **Categoría invisible** en `ProductCard`, `ProductoDetalle` y `Ofertas`
-  - Backend devuelve `category_name`, no `category`
-  - Fix: usar `product.category_name` en todos lados
-  - Eliminado `category` del tipo `Product` (nunca existió)
-
-- **Productos con stock 0 no se agregaban al carrito**
-  - Backend validaba `stock < quantity` (0 < 1 = true → rechazaba)
-  - Fix: `stock > 0 && stock < quantity` (solo bloquea si hay stock real)
-
-- **Toast de error incorrecto al agregar al carrito**
-  - Mostraba "El carrito está vacío" (incorrecto)
-  - Fix: usa `cartErrors.addFailed`
-
-- **Doble emoji 📸 en `ImageUploader`**
-  - Estaba `label.split(' ')[0]` + `label` completo
-  - Fix: solo `label`
-
-- **Doble título y badge en crear/editar producto**
-  - Header manual en la página + header en `ProductForm`
-  - Fix: solo `ProductFormHeader`
-
 ### SQL aplicado en Supabase
 
-```sql
--- Destacados
-ALTER TABLE products ADD COLUMN IF NOT EXISTS destacado BOOLEAN DEFAULT false;
+Ninguno nuevo (todo el SQL ya estaba aplicado en `v1.2.0-beta.5`).
 
--- Packs promocionales
-ALTER TABLE products
-ADD COLUMN IF NOT EXISTS "packPrice" DECIMAL(10,2) DEFAULT NULL,
-ADD COLUMN IF NOT EXISTS "packQuantity" INTEGER DEFAULT NULL;
-
-Pendiente ⚠️
-
-    Ofertas.tsx sigue con card hardcodeado (usar ProductCard)
-
-    SKU opcional (backend autogenera)
-
-    Descripción sin mínimo de 20 caracteres
-
-    Etiquetas/tags sin uso (dejar o aprovechar en búsqueda)
-
-    Galería de imágenes en ProductoDetalle
-
-    Productos relacionados
-
-    Compartir por WhatsApp
-
-[v1.2.0-beta.4] — 26/10/2026
-Agregado ✨
-
-    Sistema de artículos destacados
-
-        Campo destacado en productos (manual por admin)
-
-        Endpoint GET /api/products/destacados
-
-        Hook useFeaturedProducts (responsabilidad única)
-
-        Componente ProductsSection (100% reutilizable)
-
-    Sistema de packs promocionales
-
-        Campos packPrice y packQuantity en productos
-
-        Card "Pack Promocional" en admin
-
-        Badge de pack en el catálogo (ProductCard)
-
-        Bloque de pack en el detalle (ProductoDetalle) con "Ahorras $X"
-
-Cambiado 🔄
-
-    Refactor: FeaturedProductsSection → ProductsSection
-
-        Movido de home/ a common/
-
-        8 props nuevas con defaults
-
-    Refactor: useHome limpio (destacados en useFeaturedProducts)
-
-    UI/UX: Productos.tsx
-
-        Eliminado ProductsBanner
-
-        Breadcrumb compacto
-
-        ProductsSection arriba del grid
-
-Corregido 🐛
-
-    Error de tipos: packPrice: number | null → ProductInput acepta null
-
-[v1.2.0-beta.3] — (versión anterior)
-```
+--- FIN PARTE 1/2 ---

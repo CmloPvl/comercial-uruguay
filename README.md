@@ -1,8 +1,7 @@
-markdown
-
 # 🏪 Comercial Uruguay — Catálogo Virtual
 
 **Estado:** En desarrollo activo
+**Versión:** v1.2.0-beta.6
 **Tipo:** Catálogo vitrina con pedidos por WhatsApp
 **Desarrollador:** Camilo Riquelme
 **Ubicación del negocio:** Valparaíso, Chile
@@ -12,6 +11,27 @@ markdown
 - **Web App:** https://comercial-uruguay.vercel.app
 - **API:** https://comercial-uruguay-backend.onrender.com
 - **Repositorio:** https://github.com/CmloPvl/comercial-uruguay
+
+---
+
+## 📑 Índice
+
+1. [Descripción](#descripción)
+2. [Objetivo del proyecto](#objetivo-del-proyecto)
+3. [Flujo del cliente](#flujo-del-cliente)
+4. [Funcionalidades](#funcionalidades)
+5. [Paleta de colores](#paleta-de-colores)
+6. [Instalación rápida](#instalación-rápida)
+7. [Variables de entorno](#variables-de-entorno)
+8. [Estructura del proyecto](#estructura-del-proyecto)
+9. [Metodología de trabajo](#metodología-de-trabajo)
+10. [Sobre el desarrollador](#sobre-el-desarrollador)
+11. [Contacto](#contacto)
+12. [Roadmap](#roadmap)
+13. [Capturas](#capturas)
+14. [Contribuir](#contribuir)
+15. [Licencia](#licencia)
+16. [Documentos relacionados](#documentos-relacionados)
 
 ---
 
@@ -25,10 +45,10 @@ Este proyecto es la **web app oficial del negocio**: un catálogo virtual que pe
 
 Mejorar la experiencia de venta del local mediante una vitrina digital que:
 
-- Permita **explorar el catálogo** desde cualquier lugar
-- Facilite **armar un pedido** sin necesidad de ir al local
-- Cierre la venta por **WhatsApp** (confirmación de stock + envío o retiro)
-- Permita al cliente **llegar y retirar** con el pedido ya reservado
+- Permita **explorar el catálogo** desde cualquier lugar.
+- Facilite **armar un pedido** sin necesidad de ir al local.
+- Cierre la venta por **WhatsApp** (confirmación de stock + envío o retiro).
+- Permita al cliente **llegar y retirar** con el pedido ya reservado.
 
 > ⚠️ **Nota:** Actualmente el negocio **no cuenta con caja registradora integrada**, por lo que el catálogo **no opera en vivo**. El flujo termina en WhatsApp, donde se confirma stock y se concreta la venta. Cuando el negocio implemente su sistema de caja, el proyecto podrá escalar a e-commerce en vivo.
 
@@ -36,13 +56,13 @@ Mejorar la experiencia de venta del local mediante una vitrina digital que:
 
 ## 🛒 Flujo del cliente
 
-1. Cliente entra al catálogo
-2. Explora productos por categoría / búsqueda
-3. Agrega productos al carrito
-4. Finaliza el pedido
-5. Se genera un mensaje de WhatsApp con el detalle
-6. El vendedor confirma stock y coordina envío/retiro
-7. Venta concretada ✅
+1. Cliente entra al catálogo.
+2. Explora productos por categoría / búsqueda.
+3. Agrega productos al carrito.
+4. Finaliza el pedido.
+5. Se genera un mensaje de WhatsApp con el detalle.
+6. El vendedor confirma stock y coordina envío/retiro.
+7. Venta concretada ✅.
 
 ---
 
@@ -50,49 +70,32 @@ Mejorar la experiencia de venta del local mediante una vitrina digital que:
 
 ### Catálogo
 
-- Explorar productos por categoría
-- Búsqueda por nombre
-- Filtros por categoría y precio
-- Destacados (elegidos manualmente por el admin)
-- Packs promocionales (ej: "3 por $1000")
-- Stock por WhatsApp (si no hay stock real)
+- Explorar productos por categoría.
+- Búsqueda por nombre.
+- Filtros por categoría y precio.
+- Destacados (elegidos manualmente por el admin).
+- Packs promocionales (ej: "3 por $1000").
+- Stock por WhatsApp (si no hay stock real).
 
 ### Pedidos
 
-- Carrito de compras
-- Generación de pedido por WhatsApp
-- Confirmación de stock en el local
+- Carrito de compras.
+- Generación de pedido por WhatsApp.
+- Confirmación de stock en el local.
 
 ### Admin
 
-- CRUD de productos
-- CRUD de categorías
-- Gestión de pedidos
-- Gestión de usuarios
-- Marcar productos como destacados
-- Configurar packs promocionales
-- Subir múltiples imágenes (Supabase Storage)
+- CRUD de productos.
+- CRUD de categorías.
+- Gestión de pedidos.
+- Gestión de usuarios.
+- Marcar productos como destacados.
+- Configurar packs promocionales.
+- Subir múltiples imágenes (Supabase Storage).
 
 ---
 
-## 🛠️ Stack Tecnológico
-
-| Capa               | Tecnología                           |
-| ------------------ | ------------------------------------ |
-| **Frontend**       | React 19 + TypeScript + Vite         |
-| **Backend**        | Node.js 22 + Express + TypeScript    |
-| **Base de Datos**  | PostgreSQL + Supabase                |
-| **Estilos**        | Tailwind 3.4 + shadcn/ui             |
-| **Storage**        | Supabase Storage                     |
-| **Autenticación**  | JWT + bcryptjs                       |
-| **Validación**     | Zod                                  |
-| **Notificaciones** | react-hot-toast                      |
-| **Email**          | Resend                               |
-| **Despliegue**     | Vercel (frontend) + Render (backend) |
-
----
-
-## 🎨 Paleta de Colores
+## 🎨 Paleta de colores
 
 | Rol        | Color           | Hex       |
 | ---------- | --------------- | --------- |
@@ -109,132 +112,156 @@ Mejorar la experiencia de venta del local mediante una vitrina digital que:
 
 ---
 
-## 🚀 Instalación Rápida
+## 🚀 Instalación rápida
 
-````bash
-# Clonar repositorio
-git clone https://github.com/CmloPvl/comercial-uruguay.git
-cd comercial-uruguay
+### Requisitos previos
 
-# Backend
-cd backend
-cp .env.example .env
-npm install
-npm run dev
+- **Node.js 22** o superior.
+- **PostgreSQL** (o cuenta en Supabase).
+- **Git**.
+- Cuenta en **Supabase** (Storage + Base de Datos).
+- Cuenta en **Resend** (envío de emails).
 
-# Frontend (en otra terminal)
-cd frontend
-cp .env.example .env
-npm install
-npm run dev
+### Pasos
 
-🔐 Variables de Entorno
+1. Clonar el repositorio:
+   - `git clone https://github.com/CmloPvl/comercial-uruguay.git`
+   - `cd comercial-uruguay`
 
-Frontend (.env):
-env
+2. Configurar el backend:
+   - `cd backend`
+   - `cp .env.example .env`
+   - `npm install`
+   - `npm run dev`
 
-VITE_API_URL=http://localhost:5000/api
-VITE_SUPABASE_URL=tu-url
-VITE_SUPABASE_ANON_KEY=tu-key
+3. Configurar el frontend (en otra terminal):
+   - `cd frontend`
+   - `cp .env.example .env`
+   - `npm install`
+   - `npm run dev`
 
-Backend (.env):
-env
-
-PORT=5000
-DATABASE_URL=postgresql://...
-JWT_SECRET=...
-RESEND_API_KEY=re_...
-FRONTEND_URL=http://localhost:5173
-
-🧠 Metodología de Trabajo
-
-El proyecto sigue el principio de Separación de Lógica y Diseño (SoC):
-Capa	Responsabilidad	Ejemplo
-components/	Diseño (UI) — Solo JSX, estilos	Login.tsx
-hooks/	Lógica — Estados, API, validaciones	useLogin.ts
-pages/	Conexión — Une UI + lógica	LoginPage.tsx
-context/	Estado Global	AuthContext.tsx
-services/	API — Comunicación con el backend	api.ts
-
-Estrategia:
-
-    Trabajo componente por componente
-
-    Micro-pasos (cambios pequeños y controlados)
-
-    Probar después de cada cambio
-
-    Comentarios explicativos en el código
-
-    Documentar cada mejora
-
-🧑‍💻 Sobre el Desarrollador
-
-Proyecto desarrollado por Camilo Riquelme, tras completar un bootcamp de JavaScript Full Stack, como parte del crecimiento digital del negocio familiar Comercial Uruguay.
-
-El objetivo es doble:
-
-    Aplicar lo aprendido en un proyecto real
-
-    Mejorar la venta del local mediante una vitrina digital
-
-📞 Contacto
-
-    Dirección: Uruguay 660, Valparaíso, Chile
-
-    Horario: Lun-Vie 9:00-18:30, Sáb 10:00-15:00
-
-    WhatsApp: +56975303324
-
-    Email: comercialuruguayvalpo@gmail.com
-
-    Redes: Facebook, Instagram, TikTok
-
-📄 Licencia
-
-Proyecto de uso académico y comercial para Comercial Uruguay.
-text
-
+4. Abrir en el navegador: `http://localhost:5173`
 
 ---
 
-## ✅ Verificación
+## 🔐 Variables de entorno
 
-Después de aplicar el `README.md`:
+### Frontend (`.env`)
 
-```bash
-git status
+- `VITE_API_URL`: URL del backend (ej: `http://localhost:5000/api`).
+- `VITE_SUPABASE_URL`: URL del proyecto Supabase.
+- `VITE_SUPABASE_ANON_KEY`: Clave anónima de Supabase.
 
-Debería mostrar los 3 archivos modificados:
+### Backend (`.env`)
 
-    CHANGELOG.md ✅
+- `PORT`: Puerto del servidor (ej: `5000`).
+- `DATABASE_URL`: Cadena de conexión PostgreSQL.
+- `JWT_SECRET`: Clave secreta para firmar los tokens JWT.
+- `RESEND_API_KEY`: API key de Resend (emails).
+- `FRONTEND_URL`: URL del frontend (para CORS, ej: `http://localhost:5173`).
 
-    PROMPT.md ✅
+> 💡 **Nota:** los archivos `.env.example` (backend y frontend) contienen todas las variables con valores placeholder. **Nunca** subas `.env` real al repositorio.
 
-    README.md ✅
+---
 
-🚀 Commit + Push
-bash
+## 📂 Estructura del proyecto
 
-git add -A
-git commit -m "docs: actualizar CHANGELOG, PROMPT y README (v1.2.0-beta.5)
+- **`backend/`** → API REST (Node + Express + TypeScript).
+  - `src/controllers/` → lógica de endpoints.
+  - `src/models/` → acceso a datos (SQL puro con `pg`).
+  - `src/routes/` → definición de rutas.
+  - `src/middlewares/` → auth, rate limit, sanitización.
+  - `src/schemas/` → validación con Zod.
+  - `src/services/` → servicios externos (email).
+  - `src/utils/` → helpers compartidos.
 
-- CHANGELOG: agregar v1.2.0-beta.5 con todo lo de hoy
-- PROMPT: actualizar estructura, hooks y componentes clave
-- README: agregar sección de funcionalidades
+- **`frontend/`** → React + TypeScript + Vite.
+  - `src/components/` → UI (solo JSX y estilos).
+  - `src/hooks/` → lógica (estados, API, validaciones).
+  - `src/pages/` → conexión UI + lógica.
+  - `src/context/` → estado global (auth).
+  - `src/services/` → comunicación con el backend.
+  - `src/utils/` → helpers (toasts, mensajes).
+  - `src/config/` → configuración centralizada (empresa).
 
-Cambios funcionales incluidos:
-- Fix doble layout en admin
-- Fix doble header en crear/editar
-- Stock opcional + 'Stock por WhatsApp'
-- Loader en ProductCard
-- Unificación ProductCard (variant)
-- Fix category_name (categoría visible)
-- calculateSubtotal en utils (backend)
-- Toasts del helper en carrito
+> 📖 **Detalle completo:** ver [`PROMPT.md`](./PROMPT.md).
 
-Versión: v1.2.0-beta.5
-Fecha: 29/10/2026"
-git push origin master
+---
 
-````
+## 🧠 Metodología de trabajo
+
+El proyecto sigue el principio de **Separación de Lógica y Diseño (SoC)**:
+
+| Capa          | Responsabilidad                     | Ejemplo           |
+| ------------- | ----------------------------------- | ----------------- |
+| `components/` | Diseño (UI) — Solo JSX, estilos     | `Login.tsx`       |
+| `hooks/`      | Lógica — Estados, API, validaciones | `useLogin.ts`     |
+| `pages/`      | Conexión — Une UI + lógica          | `LoginPage.tsx`   |
+| `context/`    | Estado Global                       | `AuthContext.tsx` |
+| `services/`   | API — Comunicación con el backend   | `api.ts`          |
+
+**Estrategia:**
+
+- Trabajo componente por componente.
+- Micro-pasos (cambios pequeños y controlados).
+- Probar después de cada cambio.
+- Comentarios explicativos en el código.
+- Documentar cada mejora en `CHANGELOG.md`.
+
+---
+
+## 🧑‍💻 Sobre el desarrollador
+
+Proyecto desarrollado por **Camilo Riquelme**, tras completar un bootcamp de JavaScript Full Stack, como parte del crecimiento digital del negocio familiar **Comercial Uruguay**.
+
+El objetivo es doble:
+
+- Aplicar lo aprendido en un proyecto real.
+- Mejorar la venta del local mediante una vitrina digital.
+
+---
+
+## 📞 Contacto
+
+- **Dirección:** Uruguay 660, Valparaíso, Chile.
+- **Horario:** Lun-Vie 9:00-18:30, Sáb 10:00-15:00.
+- **WhatsApp:** +56975303324.
+- **Email:** comercialuruguayvalpo@gmail.com.
+- **Redes:** Facebook, Instagram, TikTok.
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] **SEO básico**: sitemap, metadatos por producto, Open Graph para compartir por WhatsApp.
+- [ ] **Analítica**: Vercel Analytics o Plausible (sin caja registradora, la analítica web es la única fuente de datos).
+- [ ] **Tests**: al menos tests de los hooks críticos (`useCarrito`, `useProducts`) y de `calculateSubtotal`.
+- [ ] **PWA**: catálogo instalable/offline (opcional).
+- [ ] **E-commerce en vivo**: cuando el negocio implemente caja registradora.
+
+---
+
+## 📸 Capturas
+
+> _(Placeholder — agregar capturas del catálogo, carrito y panel admin cuando estén disponibles)._
+
+---
+
+## 🤝 Contribuir
+
+... 3. Haz un fork, crea una rama y envía un pull request.
+
+---
+
+## 📄 Licencia
+
+Todos los derechos reservados. Ver [`LICENSE`](./LICENSE) para más detalles.
+
+---
+
+## 📚 Documentos relacionados
+
+- [`PROMPT.md`](./PROMPT.md) — Contexto, reglas, stack, convenciones.
+- [`ESTADO.md`](./ESTADO.md) — Estado actual del proyecto (módulos, últimos cambios).
+- [`CHANGELOG.md`](./CHANGELOG.md) — Historial completo de cambios por versión.
+- [`CONTRIBUTING.md`](./CONTRIBUTING.md) — Flujo de trabajo, commits, cómo contribuir.
