@@ -5,6 +5,7 @@
  * 
  * Gestiona todas las operaciones de productos en la base de datos:
  * - Obtener todos los productos
+ * - Buscar productos con filtros (search + category + price)
  * - Obtener productos destacados
  * - Obtener producto por ID
  * - Crear producto
@@ -17,11 +18,15 @@
  * - Manejo de arrays como JSON en PostgreSQL
  * - Soft delete (no eliminar realmente)
  * - SQL parametrizado para prevenir inyecciones
+ * - DRY: findAll() reutiliza findAllWithFilters({})
  * 
  * 🆕 Soporte para packs promocionales
  * 🆕 Soporte para recortes de imagen (crops)
- *    - crops: array de objetos { x, y, zoom, aspect }
- *    - Mismo orden que images
+ * 🆕 Búsqueda con filtros dinámicos (search + category + price)
+ * 
+ * 📝 Deuda técnica futura:
+ * - Índice GIN + pg_trgm en `name` para búsquedas ILIKE rápidas (>5000 productos)
+ * - ORDER BY configurable (precio, nombre, fecha)
  */
 
 import pool from '../config/database';
@@ -90,19 +95,79 @@ export interface ProductInput {
   packQuantity?: number | null;
 }
 
+/**
+ * 🆕 Filtros para búsqueda de productos
+ */
+export interface ProductFilters {
+  search?: string;
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+}
+
 // =============================================
 // 📦 MODELO
 // =============================================
 
 export const ProductModel = {
+  /**
+   * 📋 Obtener todos los productos activos
+   * 
+   * Reutiliza findAllWithFilters({}) para mantener una sola fuente de verdad (DRY).
+   */
   async findAll(): Promise<Product[]> {
+    return this.findAllWithFilters({});
+  },
+
+  /**
+   * 🆕 Buscar productos con filtros (search + category + price)
+   * 
+   * Construye el SQL dinámicamente según los filtros recibidos.
+   * Solo busca en `name` (por ahora). Escalable a `description` + `tags`.
+   * 
+   * @param filters - { search?, category?, minPrice?, maxPrice? }
+   * @returns Product[]
+   */
+  async findAllWithFilters(filters: ProductFilters): Promise<Product[]> {
+    const conditions: string[] = ['p."isActive" = true'];
+    const values: any[] = [];
+    let index = 1;
+
+    // 🔍 Búsqueda por nombre (ILIKE = case-insensitive)
+    if (filters.search && filters.search.trim() !== '') {
+      conditions.push(`p.name ILIKE $${index++}`);
+      values.push(`%${filters.search.trim()}%`);
+    }
+
+    // 📂 Filtro por categoría (por nombre)
+    if (filters.category && filters.category.trim() !== '') {
+      conditions.push(`c.name ILIKE $${index++}`);
+      values.push(filters.category.trim());
+    }
+
+    // 💰 Filtro por precio mínimo
+    if (filters.minPrice !== undefined && filters.minPrice !== null) {
+      conditions.push(`p.price >= $${index++}`);
+      values.push(filters.minPrice);
+    }
+
+    // 💰 Filtro por precio máximo
+    if (filters.maxPrice !== undefined && filters.maxPrice !== null) {
+      conditions.push(`p.price <= $${index++}`);
+      values.push(filters.maxPrice);
+    }
+
+    const whereClause = conditions.join(' AND ');
+
     const result = await pool.query(
       `SELECT p.*, c.name as category_name 
        FROM products p
        LEFT JOIN categories c ON p."categoryId" = c.id
-       WHERE p."isActive" = true
-       ORDER BY p.id DESC`
+       WHERE ${whereClause}
+       ORDER BY p.id DESC`,
+      values
     );
+
     return result.rows;
   },
 

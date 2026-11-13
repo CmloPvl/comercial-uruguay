@@ -13,6 +13,7 @@
  * 
  * 🆕 Soporte para packs promocionales (packPrice, packQuantity)
  * 🆕 Soporte para recortes de imagen (crops)
+ * 🆕 Soporte para filtros: search + category + minPrice + maxPrice
  * 🆕 Eliminado `category` del tipo (el backend devuelve `category_name`)
  */
 
@@ -87,6 +88,8 @@ export interface CreateProductData {
 export interface GetProductsParams {
   category?: string;
   search?: string;
+  minPrice?: number;              // 🆕
+  maxPrice?: number;              // 🆕
   page?: number;
   limit?: number;
 }
@@ -104,6 +107,13 @@ export const productService = {
       const queryParams = new URLSearchParams();
       if (params?.category) queryParams.append('category', params.category);
       if (params?.search) queryParams.append('search', params.search);
+      // 🆕 Precios: solo agregar si son números válidos
+      if (params?.minPrice !== undefined && params.minPrice !== null) {
+        queryParams.append('minPrice', params.minPrice.toString());
+      }
+      if (params?.maxPrice !== undefined && params.maxPrice !== null) {
+        queryParams.append('maxPrice', params.maxPrice.toString());
+      }
       if (params?.page) queryParams.append('page', params.page.toString());
       if (params?.limit) queryParams.append('limit', params.limit.toString());
 

@@ -4,8 +4,8 @@
  * 📌 HOOK PERSONALIZADO: useProducts
  * 
  * Encapsula toda la lógica de la página de productos (tienda):
- * - Carga de productos
- * - Filtros (categoría, precio)
+ * - Carga de productos (con filtros desde backend)
+ * - Filtros (search, categoría, precio) → backend con debounce
  * - Favoritos
  * - Carrito
  * - Estados de carga y error
@@ -18,9 +18,12 @@
  * - Fácil de testear
  * - Manejo de errores con toasts centralizados
  * 
- * 🆕 Lee `?categoria=` de la URL (Home → Catálogo con filtro)
- * 🆕 Pasa `category` al servicio (filtro desde backend)
- * 🆕 Normaliza comparación (case-insensitive + trim)
+ * 🆕 Debounce de 300ms en search (evita peticiones por tecla)
+ * 🆕 Debounce de 300ms en precios (evita recarga por tecla)
+ * 🆕 Filtros van al backend (search + category + minPrice + maxPrice)
+ * 🆕 Categoría se sincroniza con la URL (`?categoria=...`)
+ * 🆕 `setLoading` solo en carga inicial (evita parpadeo)
+ * 🆕 `filteredProducts` ya no filtra en cliente (backend es fuente de verdad)
  */
 
 import { useState, useEffect } from "react";
@@ -43,9 +46,9 @@ export function useProducts() {
   // =============================================
   // 🔍 PARÁMETROS DE URL
   // =============================================
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
-  const categoryQuery = decodeURIComponent(searchParams.get("categoria") || "");  // 🆕
+  const categoryQuery = decodeURIComponent(searchParams.get("categoria") || "");
 
   // =============================================
   // 🔐 CONTEXTOS
@@ -64,22 +67,42 @@ export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>(categoryQuery);
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [showFilters, setShowFilters] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
+  // 🆕 Valores debounced (300ms)
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
+  const [debouncedPriceRange, setDebouncedPriceRange] = useState({ min: "", max: "" });
+
+  // 🆕 selectedCategory derivado de la URL (fuente de verdad)
+  const selectedCategory = categoryQuery;
+
   // =============================================
-  // 🔄 CARGAR PRODUCTOS
+  // 🆕 CAMBIAR CATEGORÍA (sincroniza con URL)
   // =============================================
-  const loadProducts = async () => {
+  const handleCategoryChange = (category: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (category) {
+      newParams.set("categoria", category);
+    } else {
+      newParams.delete("categoria");
+    }
+    setSearchParams(newParams);
+  };
+
+  // =============================================
+  // 🔄 CARGAR PRODUCTOS (con filtros al backend)
+  // =============================================
+  const loadProducts = async (showLoading = false) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       setError(null);
-      // 🆕 Pasar category al servicio
       const data = await productService.getProducts({
-        search: searchQuery,
+        search: debouncedSearch || undefined,
         category: categoryQuery || undefined,
+        minPrice: debouncedPriceRange.min !== "" ? Number(debouncedPriceRange.min) : undefined,
+        maxPrice: debouncedPriceRange.max !== "" ? Number(debouncedPriceRange.max) : undefined,
       });
       setProducts(data || []);
     } catch (err) {
@@ -156,40 +179,55 @@ export function useProducts() {
   };
 
   const handleClearFilters = () => {
-    setSelectedCategory("");
     setPriceRange({ min: "", max: "" });
+    setDebouncedSearch("");
+    setDebouncedPriceRange({ min: "", max: "" });
+    // 🆕 Limpiar categoría de la URL
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("categoria");
+    newParams.delete("search");
+    setSearchParams(newParams);
     showSuccessToast("Filtros limpiados");
   };
 
   // =============================================
-  // 📊 FILTRAR PRODUCTOS (🆕 normalizado)
+  // 📊 PRODUCTOS FILTRADOS
+  // El backend ya filtra, así que no filtramos en cliente
   // =============================================
-  const filteredProducts = products.filter((p) => {
-    // 🆕 Normalizar para comparar (case-insensitive + trim)
-    const productCategory = (p.category_name || "").trim().toLowerCase();
-    const selectedCat = (selectedCategory || "").trim().toLowerCase();
-    
-    const matchesCategory = !selectedCat || productCategory === selectedCat;
-    const minPrice = priceRange.min !== "" ? Number(priceRange.min) : 0;
-    const maxPrice = priceRange.max !== "" ? Number(priceRange.max) : Infinity;
-    const matchesPrice = p.price >= minPrice && p.price <= maxPrice;
-    return matchesCategory && matchesPrice;
-  });
+  const filteredProducts = products;
 
   // =============================================
   // 🚀 EFECTOS
   // =============================================
+
+  // 🆕 Debounce del search (300ms)
   useEffect(() => {
-    loadProducts();
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // 🆕 Debounce de precios (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedPriceRange(priceRange);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [priceRange]);
+
+  // 🆕 Cargar productos cuando cambian los filtros debounced
+  // Solo muestra loading si no hay productos (evita parpadeo)
+  useEffect(() => {
+    loadProducts(products.length === 0);
+  }, [debouncedSearch, categoryQuery, debouncedPriceRange.min, debouncedPriceRange.max]);
+
+  // 🆕 Cargar favoritos al montar (si hay usuario)
+  useEffect(() => {
     if (user) {
       loadFavorites();
     }
-  }, [searchQuery, categoryQuery]);  // 🆕 Escucha cambios en la URL
-
-  // 🆕 Sincronizar selectedCategory con la URL
-  useEffect(() => {
-    setSelectedCategory(categoryQuery);
-  }, [categoryQuery]);
+  }, [user]);
 
   // =============================================
   // 📦 EXPORTACIÓN
@@ -208,7 +246,7 @@ export function useProducts() {
     searchQuery,
 
     // Funciones
-    setSelectedCategory,
+    setSelectedCategory: handleCategoryChange,  // 🆕 Ahora actualiza la URL
     setShowFilters,
     handlePriceChange,
     handleClearFilters,
