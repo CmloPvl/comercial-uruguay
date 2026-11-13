@@ -18,6 +18,8 @@
  * - Responsive (mobile-first)
  * - Accesible con aria-label
  * 
+ * 🔧 Fix: auto-rows-fr para que todas las filas tengan la misma altura
+ * 
  * @param {Object} props
  * @param {Product[]} props.products - Lista de productos a mostrar
  * @param {Set<string>} [props.favorites] - Set con IDs de productos favoritos
@@ -60,7 +62,7 @@ export default function ProductGrid({
 
   return (
     <div 
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr"
       aria-label={`Grid de ${products.length} productos`}
     >
       {products.map((product) => (

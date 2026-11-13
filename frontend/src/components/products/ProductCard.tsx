@@ -19,7 +19,7 @@
  * 
  * ✅ Buenas prácticas:
  * - Mobile first
- * - Altura consistente
+ * - Altura consistente (min-h fijo en nombre)
  * - Jerarquía visual clara
  * - Imagen edge-to-edge (ocupa todo el ancho, sin padding)
  * 
@@ -27,6 +27,10 @@
  *    - Si hay crop: aplica objectPosition + scale + aspect dinámico
  *    - Si no hay crop: object-cover (llena el contenedor)
  *    - El fondo degradado solo se ve si no hay imagen
+ * 
+ * 🔧 Fix: CardContent sin flex-grow (evita espacio blanco abajo)
+ * 🔧 Fix: min-h del nombre subido a 48px/56px (2 líneas fijas)
+ * 🔧 Fix: text-xssm:text-sm → text-xs sm:text-sm (typo)
  */
 
 import { useState } from "react";
@@ -141,11 +145,8 @@ export default function ProductCard({
         ${isCarousel ? "min-h-[400px]" : ""}
       `}
     >
-      <CardContent
-        className={`
-          flex flex-col flex-grow p-0
-        `}
-      >
+      {/* 🔧 CardContent: h-full (no flex-grow) para no dejar espacio blanco */}
+      <CardContent className="flex flex-col h-full p-0">
         {/* =============================================
         🖼️ IMAGEN (edge-to-edge, ocupa todo el ancho)
         ============================================= */}
@@ -216,8 +217,8 @@ export default function ProductCard({
                 font-bold text-[#303030] hover:text-[#7D5FFF] transition-colors
                 line-clamp-2
                 ${isCarousel
-                  ? "text-sm sm:text-base min-h-[36px] sm:min-h-[44px]"
-                  : "text-sm sm:text-base min-h-[40px] sm:min-h-[48px]"
+                  ? "text-sm sm:text-base min-h-[40px] sm:min-h-[48px]"
+                  : "text-sm sm:text-base min-h-[48px] sm:min-h-[56px]"
                 }
               `}
             >
