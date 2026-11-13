@@ -2,8 +2,8 @@
 
 > **Fuente única de verdad del estado actual.**
 > Pega este archivo junto con `PROMPT.md` al inicio de cada chat nuevo.
-> **Última actualización:** 2026-10-30
-> **Versión del proyecto:** v1.2.0-beta.6
+> **Última actualización:** 2026-11-13
+> **Versión del proyecto:** v1.2.0-beta.8
 
 ---
 
@@ -58,12 +58,35 @@ Leyenda: ✅ Completado · 🔄 En progreso · ⏳ Pendiente
 | **Editar Publicación** | `EditarPublicacion.tsx`   | `useEditarPublicacion.ts` | ✅     |
 | **Envíos y Retiros**   | `EnviosYRetiros.tsx`      | -                         | ✅     |
 | **ImageCropper**       | `ImageCropper.tsx`        | `useImageCropper.ts`      | ✅     |
+| **SearchBar**          | `SearchBar.tsx`           | `useProducts.ts`          | ✅     |
 
 ---
 
 ## 🕒 Últimos cambios
 
 > Resumen ultra-corto de lo último que se hizo. El detalle completo está en [`CHANGELOG.md`](./CHANGELOG.md).
+
+### v1.2.0-beta.8 — 2026-11-13
+
+- Buscador conectado al backend (search + category + minPrice + maxPrice).
+- Debounce de 300ms en search y precios.
+- Categoría sincronizada con la URL (`?categoria=...`).
+- Cards con altura uniforme (min-h fijo + auto-rows-fr).
+- Fix: recarga de página al escribir precios.
+- Fix: filtro de categoría no funcionaba.
+- `apple-touch-icon.png` agregado.
+- Limpieza de assets residuales en `public/`.
+
+### v1.2.0-beta.7 — 2026-10-30
+
+- Refactor: `ImageCropper` usa `useImageCropper` (SoC).
+- Nuevo: hook `useImageCropper` (estados, callbacks, cierre con Escape).
+- Nuevo: vista previa real con Canvas (`getCroppedImg`).
+- Nuevo: zoom permite alejar (min 0.5x).
+- Nuevo: altura dinámica del cropper según aspect.
+- Nuevo: mobile-first mejorado (padding, tipografía, `max-h-[90vh]`).
+- Nuevo: `type="button"` en botones (accesibilidad).
+- Fix: `CropData` unificado (se importa de `productService`).
 
 ### v1.2.0-beta.6 — 2026-10-30
 
@@ -90,17 +113,6 @@ Leyenda: ✅ Completado · 🔄 En progreso · ⏳ Pendiente
 - Fix: toast de error incorrecto al agregar al carrito.
 - Fix: doble emoji en `ImageUploader`.
 - Fix: doble título y badge en crear/editar producto.
-
-### v1.2.0-beta.7 — 2026-10-30
-
-- Refactor: `ImageCropper` usa `useImageCropper` (SoC).
-- Nuevo: hook `useImageCropper` (estados, callbacks, cierre con Escape).
-- Nuevo: vista previa real con Canvas (`getCroppedImg`).
-- Nuevo: zoom permite alejar (min 0.5x).
-- Nuevo: altura dinámica del cropper según aspect.
-- Nuevo: mobile-first mejorado (padding, tipografía, `max-h-[90vh]`).
-- Nuevo: `type="button"` en botones (accesibilidad).
-- Fix: `CropData` unificado (se importa de `productService`).
 
 ---
 
