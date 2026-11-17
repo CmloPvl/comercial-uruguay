@@ -322,7 +322,15 @@ export default function AdminProductos() {
                   <tbody>
                     {paginatedProducts.map((product) => (
                       <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                        <td className="py-3 px-4 font-medium text-[#303030]">{product.name}</td>
+                        <td className="py-3 px-4 font-medium text-[#303030]">
+  <Link
+    to={`/producto/${product.id}`}
+    className="hover:text-[#7D5FFF] hover:underline transition"
+    title="Ver detalle del producto"
+  >
+    {product.name}
+  </Link>
+</td>
                         <td className="py-3 px-4 text-[#6A757C]">{product.sku}</td>
                         <td className="py-3 px-4 font-bold text-[#603060]">
                           ${Number(product.price).toLocaleString("es-CL")}
