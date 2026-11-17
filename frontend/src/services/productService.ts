@@ -15,6 +15,7 @@
  * 🆕 Soporte para recortes de imagen (crops)
  * 🆕 Soporte para filtros: search + category + minPrice + maxPrice
  * 🆕 Eliminado `category` del tipo (el backend devuelve `category_name`)
+ * 🔧 Fix: CropData con width y height (unificado con adminService)
  */
 
 import api from './api';
@@ -25,10 +26,13 @@ import api from './api';
 
 /**
  * 🆕 Interfaz para el recorte de una imagen
+ * 🔧 Unificada con adminService: incluye width y height
  */
 export interface CropData {
   x: number;
   y: number;
+  width: number;      // 🆕
+  height: number;     // 🆕
   zoom: number;
   aspect: number;
 }

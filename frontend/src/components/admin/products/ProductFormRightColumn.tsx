@@ -9,6 +9,7 @@
  * 🆕 Stock opcional (si vacío → "Consultar disponibilidad" en tienda)
  * 🆕 Pack promocional
  * 🆕 Soporte para crops (recortes de imagen)
+ * 🔧 Fix: CropData importado desde productService (tiene width/height)
  */
 
 import { Input } from "../../ui/input";
@@ -16,7 +17,7 @@ import { FormField } from "../../ui/form-field";
 import { Card, CardContent } from "../../ui/card";
 import { ImageUploader } from "../ImageUploader";
 import { ProductFormAdvancedOptions } from "../products/ProductFormAdvancedOptions";
-import type { CropData } from "../../../services/adminService";  // 🆕
+import type { CropData } from "../../../services/productService";  // 🔧 Cambiado de adminService a productService
 
 interface ProductFormRightColumnProps {
   images: string[];

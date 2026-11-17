@@ -16,6 +16,7 @@
  * 
  * 🆕 Hook nuevo (separado de ImageCropper.tsx)
  * 🔧 CropData ahora se importa desde productService (única fuente de verdad)
+ * 🔧 Fix: si aspect === 0 (Original), se envía un crop vacío (no se guarda el recorte)
  */
 
 import { useState, useCallback, useEffect } from "react";
@@ -80,13 +81,22 @@ export function useImageCropper({ onSave, onCancel }: UseImageCropperProps) {
 
   // =============================================
   // 💾 GUARDAR RECORTE
+  // 🔧 Fix: si aspect === 0 (Original), enviar crop vacío
   // =============================================
   const handleSave = useCallback(() => {
+    // 🆕 Si es "Original" (aspect === 0), enviar crop vacío (sin recorte)
+    if (aspect === 0) {
+      onSave({ x: 0, y: 0, width: 0, height: 0, zoom: 1, aspect: 0 });
+      return;
+    }
+
     if (!croppedArea) return;
 
     onSave({
       x: croppedArea.x,
       y: croppedArea.y,
+      width: croppedArea.width,
+      height: croppedArea.height,
       zoom,
       aspect,
     });

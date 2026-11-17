@@ -17,6 +17,7 @@
  * 
  * 🆕 Soporte para crops (recortes de imagen)
  * 🆕 Maneja images + crops juntos
+ * 🔧 Fix: CropData importado desde productService (tiene width/height)
  */
 
 import { useState, useEffect } from "react";
@@ -27,7 +28,8 @@ import { ProductFormHeader } from "./ProductFormHeader";
 import { ProductFormActions } from "./ProductFormActions";
 import { ProductFormLeftColumn } from "./ProductFormLeftColumn";
 import { ProductFormRightColumn } from "./ProductFormRightColumn";
-import type { Product, CropData } from "../../../services/adminService";  // 🆕
+import type { Product } from "../../../services/adminService";  // 🆕
+import type { CropData } from "../../../services/productService";  // 🔧 Cambiado de adminService a productService
 import type { Category } from "../../../services/categoryService";
 
 interface ProductFormProps {

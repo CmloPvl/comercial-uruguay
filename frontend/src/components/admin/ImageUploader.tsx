@@ -19,6 +19,8 @@
  * 🆕 Soporte para crops (recortes de imagen)
  * 🆕 Editor de recorte al hacer clic en una imagen
  * 🆕 Fix: isAtMax solo cuenta existingImages (no files pendientes)
+ * 🔧 Fix: si aspect === 0 (Original), guardar null en crops (sin recorte)
+ * 🔧 Fix: al guardar crop, subir imagen recortada a Supabase y reemplazar la original
  */
 
 import { useEffect, useState } from 'react'
@@ -29,7 +31,7 @@ import {
   showSuccessToast,
   showErrorToastWithFallback,
 } from '@/utils/errorMessages'
-import { ImageCropper } from './ImageCropper'  // 🆕
+import { ImageCropper, getCroppedImg } from './ImageCropper'  // 🆕
 import type { CropData } from '@/services/productService'  // 🆕
 
 // =============================================
@@ -103,7 +105,7 @@ export function ImageUploader({
 
       const urls = validFiles.map((f: any) => f.publicUrl);
       const allUrls = [...existingImages, ...urls];
-      const allCrops = [...crops, ...urls.map(() => null)] as CropData[];  // 🆕
+      const allCrops = [...crops, ...urls.map(() => ({ x: 0, y: 0, width: 0, height: 0, zoom: 1, aspect: 1 } as CropData))];
 
       onImagesChange(allUrls, allCrops);
 
@@ -206,17 +208,67 @@ export function ImageUploader({
   }
 
   // =============================================
-  // ✂️ GUARDAR RECORTE
+  // ✂️ GUARDAR RECORTE (con subida a Supabase)
   // =============================================
-  const handleSaveCrop = (cropData: CropData) => {
+  const handleSaveCrop = async (cropData: CropData) => {
     if (editingIndex === null) return
 
-    const newCrops = [...crops]
-    newCrops[editingIndex] = cropData
-    setCrops(newCrops)
-    onImagesChange(existingImages, newCrops)
-    setEditingIndex(null)
-    showSuccessToast('Recorte guardado')
+    // 🆕 Si es "Original" (aspect === 0), no subir imagen recortada
+    if (cropData.aspect === 0) {
+      const newCrops = [...crops]
+      newCrops[editingIndex] = null as any
+      setCrops(newCrops)
+      onImagesChange(existingImages, newCrops)
+      setEditingIndex(null)
+      showSuccessToast('Sin recorte')
+      return
+    }
+
+    try {
+      // 🆕 Generar imagen recortada con Canvas
+      const imageUrl = existingImages[editingIndex]
+      const croppedBase64 = await getCroppedImg(imageUrl, {
+        x: cropData.x,
+        y: cropData.y,
+        width: cropData.width,
+        height: cropData.height,
+      })
+
+      // 🆕 Convertir base64 a Blob
+      const response = await fetch(croppedBase64)
+      const blob = await response.blob()
+
+      // 🆕 Subir a Supabase Storage
+      const fileName = `productos/crop-${Date.now()}.jpg`
+      const { error } = await supabase.storage
+        .from(PRODUCTS_BUCKET)
+        .upload(fileName, blob, { contentType: 'image/jpeg', upsert: true })
+
+      if (error) {
+        showErrorToastWithFallback(error, 'Error al subir imagen recortada')
+        return
+      }
+
+      // 🆕 Obtener URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from(PRODUCTS_BUCKET)
+        .getPublicUrl(fileName)
+
+      // 🆕 Reemplazar la imagen original con la recortada
+      const newImages = [...existingImages]
+      newImages[editingIndex] = publicUrl
+
+      const newCrops = [...crops]
+      newCrops[editingIndex] = null as any  // Ya no necesitamos el crop
+
+      setCrops(newCrops)
+      onImagesChange(newImages, newCrops)
+      setEditingIndex(null)
+      showSuccessToast('Recorte guardado')
+    } catch (err) {
+      console.error('❌ Error al guardar recorte:', err)
+      showErrorToastWithFallback(err, 'Error al guardar recorte')
+    }
   }
 
   // =============================================

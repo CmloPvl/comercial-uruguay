@@ -1,48 +1,11 @@
 // 📁 frontend/src/components/products/ProductCard.tsx
 
-/**
- * 📌 PRODUCT CARD
- * 
- * COMPONENTE DE DISEÑO (UI)
- * 
- * Tarjeta individual de producto reutilizable en:
- * - Grid del catálogo (variant="default")
- * - Carrusel de destacados (variant="carousel")
- * 
- * ✅ Responsabilidades:
- * - Mostrar info del producto (imagen, nombre, precio, categoría)
- * - Mostrar oferta y descuento
- * - Mostrar estado de stock (disponible / consultar)
- * - Mostrar pack promocional
- * - Botón "Agregar al carrito" con loader
- * - Botón "Favoritos" (corazón)
- * 
- * ✅ Buenas prácticas:
- * - Mobile first
- * - Altura consistente (min-h fijo en nombre)
- * - Jerarquía visual clara
- * - Imagen edge-to-edge (ocupa todo el ancho, sin padding)
- * 
- * 🆕 Soporte para crops (recortes de imagen)
- *    - Si hay crop: aplica objectPosition + scale + aspect dinámico
- *    - Si no hay crop: object-cover (llena el contenedor)
- *    - El fondo degradado solo se ve si no hay imagen
- * 
- * 🔧 Fix: CardContent sin flex-grow (evita espacio blanco abajo)
- * 🔧 Fix: min-h del nombre subido a 48px/56px (2 líneas fijas)
- * 🔧 Fix: text-xssm:text-sm → text-xs sm:text-sm (typo)
- */
-
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
 import { Badge } from "../ui/badge";
 import { Card, CardContent } from "../ui/card";
 import type { Product } from "../../services/productService";
-
-// =============================================
-// 📌 INTERFAZ DE PROPS
-// =============================================
 
 interface ProductCardProps {
   product: Product;
@@ -52,10 +15,6 @@ interface ProductCardProps {
   showActions?: boolean;
   variant?: "default" | "carousel";
 }
-
-// =============================================
-// 🎯 COMPONENTE PRINCIPAL
-// =============================================
 
 export default function ProductCard({
   product,
@@ -67,15 +26,13 @@ export default function ProductCard({
 }: ProductCardProps) {
   const [adding, setAdding] = useState(false);
 
-  // =============================================
-  // 🧮 CÁLCULOS DERIVADOS
-  // =============================================
   const finalPrice =
     product.isOnSale && product.discount > 0
       ? product.price * (1 - product.discount / 100)
       : product.price;
 
-  const needsStockCheck = product.stock === 0;
+  // 🆕 Como el catálogo no opera en vivo, siempre mostrar "Stock a confirmar"
+  const needsStockCheck = true;
 
   const hasImage =
     product.images && Array.isArray(product.images) && product.images.length > 0;
@@ -90,39 +47,9 @@ export default function ProductCard({
 
   const isCarousel = variant === "carousel";
 
-  // =============================================
-  // 🆕 CROP: recorte de la primera imagen
-  // =============================================
-  const crop = product.crops?.[0] || null;
-  const hasCrop = !!crop;
+  // 🆕 Ya no necesitamos crop (la imagen ya está recortada en Supabase)
+  const aspectClass = "aspect-square";
 
-  // =============================================
-  // 🆕 ESTILOS DE IMAGEN SEGÚN CROP
-  // =============================================
-  const imageStyle: React.CSSProperties = hasCrop
-    ? {
-        objectFit: "cover",
-        objectPosition: `${crop.x}px ${crop.y}px`,
-        transform: `scale(${crop.zoom})`,
-        transformOrigin: "top left",
-      }
-    : {
-        objectFit: "cover",
-      };
-
-  // =============================================
-  // 🆕 ASPECT DINÁMICO SEGÚN CROP
-  // =============================================
-  const aspectClass =
-    hasCrop && crop.aspect === 16 / 9
-      ? "aspect-video"
-      : hasCrop && crop.aspect === 3 / 4
-      ? "aspect-[3/4]"
-      : "aspect-square";
-
-  // =============================================
-  // 🆕 HANDLER: AGREGAR AL CARRITO (con loader)
-  // =============================================
   const handleAddClick = async () => {
     if (!onAddToCart) return;
     setAdding(true);
@@ -133,9 +60,6 @@ export default function ProductCard({
     }
   };
 
-  // =============================================
-  // 🖥️ RENDERIZADO
-  // =============================================
   return (
     <Card
       className={`
@@ -145,11 +69,7 @@ export default function ProductCard({
         ${isCarousel ? "min-h-[400px]" : ""}
       `}
     >
-      {/* 🔧 CardContent: h-full (no flex-grow) para no dejar espacio blanco */}
       <CardContent className="flex flex-col h-full p-0">
-        {/* =============================================
-        🖼️ IMAGEN (edge-to-edge, ocupa todo el ancho)
-        ============================================= */}
         <Link to={`/producto/${product.id}`} className="block relative">
           <div
             className={`
@@ -169,15 +89,12 @@ export default function ProductCard({
                 src={product.images[0]}
                 alt={product.name}
                 loading="lazy"
-                className="w-full h-full transition-transform duration-300 sm:group-hover:scale-105"
-                style={imageStyle}
+                className="w-full h-full object-cover transition-transform duration-300 sm:group-hover:scale-105"
               />
             ) : (
-              // Sin imagen: mostrar ícono placeholder sobre el fondo degradado
               <span className="text-5xl sm:text-6xl">📦</span>
             )}
 
-            {/* Badge de oferta */}
             {isOnSale && (
               <Badge
                 className={`
@@ -194,23 +111,18 @@ export default function ProductCard({
           </div>
         </Link>
 
-        {/* =============================================
-        📝 CONTENIDO (con padding para que respire)
-        ============================================= */}
         <div
           className={`
             flex flex-col flex-grow
             ${isCarousel ? "p-3 sm:p-3.5 space-y-1.5" : "p-3 sm:p-4 space-y-2"}
           `}
         >
-          {/* Categoría */}
           {product.category_name && (
             <Badge className="bg-[#00D2D3]/10 text-[#00D2D3] hover:bg-[#00D2D3]/20 w-fit text-[10px] sm:text-xs">
               {product.category_name}
             </Badge>
           )}
 
-          {/* Nombre */}
           <Link to={`/producto/${product.id}`}>
             <h3
               className={`
@@ -226,7 +138,6 @@ export default function ProductCard({
             </h3>
           </Link>
 
-          {/* Precio */}
           <div className="flex flex-col">
             {isOnSale && (
               <span className="text-[10px] sm:text-xs text-gray-400 line-through">
@@ -244,7 +155,6 @@ export default function ProductCard({
             </span>
           </div>
 
-          {/* Pack promocional */}
           {hasPack && (
             <div className="bg-[#FFD93D]/20 border border-[#FFD93D] rounded-lg p-1.5 sm:p-2">
               <p className="text-[10px] sm:text-xs font-bold text-[#603060] text-center">
@@ -253,18 +163,14 @@ export default function ProductCard({
             </div>
           )}
 
-          {/* Stock por WhatsApp */}
           {needsStockCheck && (
             <div className="bg-[#FFD93D]/20 border border-[#FFD93D] rounded-lg p-1.5 sm:p-2">
               <p className="text-[10px] sm:text-xs font-bold text-[#603060] text-center">
-                📲 Stock por WhatsApp
+                📲 Stock a confirmar por WhatsApp
               </p>
             </div>
           )}
 
-          {/* =============================================
-          🎯 ACCIONES (dentro del padding del contenido)
-          ============================================= */}
           {showActions && (
             <div className="flex gap-1.5 sm:gap-2 mt-auto pt-2 sm:pt-3">
               <Button

@@ -16,6 +16,7 @@
  * 🆕 Zoom permite alejar (min 0.5x)
  * 🆕 Fondo blanco sólido en el modal
  * 🆕 Vista previa con Canvas (imagen recortada real)
+ * 🔧 Fix: preview se actualiza también con aspect === 0 (Original)
  */
 
 import { useState, useEffect } from "react";
@@ -43,7 +44,7 @@ interface ImageCropperProps {
  * Toma la imagen original y el área de recorte (en píxeles)
  * y devuelve una URL de datos (base64) con la imagen recortada.
  */
-async function getCroppedImg(
+export async function getCroppedImg(
   imageUrl: string,
   cropArea: { x: number; y: number; width: number; height: number }
 ): Promise<string> {
@@ -61,8 +62,14 @@ async function getCroppedImg(
         return;
       }
 
-      canvas.width = cropArea.width;
-      canvas.height = cropArea.height;
+      // 🆕 Limitar tamaño máximo del canvas (evita crops gigantes)
+      const MAX_SIZE = 1200;
+      const ratio = Math.min(MAX_SIZE / cropArea.width, MAX_SIZE / cropArea.height, 1);
+      const finalWidth = Math.round(cropArea.width * ratio);
+      const finalHeight = Math.round(cropArea.height * ratio);
+
+      canvas.width = finalWidth;
+      canvas.height = finalHeight;
 
       ctx.drawImage(
         image,
@@ -72,8 +79,8 @@ async function getCroppedImg(
         cropArea.height,
         0,
         0,
-        cropArea.width,
-        cropArea.height
+        finalWidth,
+        finalHeight
       );
 
       resolve(canvas.toDataURL("image/jpeg", 0.9));
@@ -111,9 +118,17 @@ export function ImageCropper({ imageUrl, onSave, onCancel }: ImageCropperProps) 
 
   // =============================================
   // 🆕 EFECTO: GENERAR VISTA PREVIA CUANDO CAMBIA EL CROP
+  // 🔧 Fix: si aspect === 0 (Original), mostrar la imagen completa
   // =============================================
   useEffect(() => {
-    if (!croppedArea || aspect === 0) {
+    // 🆕 Si es "Original" (aspect === 0), mostrar la imagen completa
+    if (aspect === 0) {
+      setPreviewUrl(imageUrl);
+      setPreviewLoading(false);
+      return;
+    }
+
+    if (!croppedArea) {
       setPreviewUrl(null);
       return;
     }
