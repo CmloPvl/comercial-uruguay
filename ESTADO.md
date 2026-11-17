@@ -2,8 +2,8 @@
 
 > **Fuente única de verdad del estado actual.**
 > Pega este archivo junto con `PROMPT.md` al inicio de cada chat nuevo.
-> **Última actualización:** 2026-11-13
-> **Versión del proyecto:** v1.2.0-beta.8
+> **Última actualización:** 2026-11-17
+> **Versión del proyecto:** v1.2.0-beta.9
 
 ---
 
@@ -65,6 +65,15 @@ Leyenda: ✅ Completado · 🔄 En progreso · ⏳ Pendiente
 ## 🕒 Últimos cambios
 
 > Resumen ultra-corto de lo último que se hizo. El detalle completo está en [`CHANGELOG.md`](./CHANGELOG.md).
+
+### v1.2.0-beta.9 — 2026-11-17
+
+- Cropper: imagen recortada se guarda en Supabase (nueva URL).
+- Stock siempre "a confirmar por WhatsApp" (todos los productos).
+- Carrito: mensaje de WhatsApp con aviso de disponibilidad.
+- Admin: clic en nombre del producto → detalle.
+- Fix: emojis en WhatsApp (api.whatsapp.com/send).
+- Fix: navegación admin (enlace al detalle).
 
 ### v1.2.0-beta.8 — 2026-11-13
 

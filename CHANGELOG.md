@@ -9,6 +9,7 @@
 ## 📑 Índice de versiones
 
 - [[Unreleased]](#unreleased)
+- [v1.2.0-beta.9 — 2026-11-17](#v120-beta9--2026-11-17)
 - [v1.2.0-beta.8 — 2026-11-13](#v120-beta8--2026-11-13)
 - [v1.2.0-beta.7 — 2026-10-30](#v120-beta7--2026-10-30)
 - [v1.2.0-beta.6 — 2026-10-30](#v120-beta6--2026-10-30)
@@ -50,6 +51,42 @@
 - _(vacío por ahora)_
 
 ---
+
+## [v1.2.0-beta.9] — 2026-11-17
+
+### Agregado ✨
+
+- **Cropper: imagen recortada se guarda en Supabase**
+  - `ImageCropper`: exporta `getCroppedImg` para reutilizar
+  - `ImageUploader`: al guardar crop, sube imagen recortada a Supabase y reemplaza URL
+  - `ProductCard`: simplificado (imagen ya recortada, sin `background-image`)
+
+- **Stock siempre "a confirmar por WhatsApp"**
+  - `ProductCard`: `needsStockCheck = true` (siempre)
+  - `ProductoDetalle`: `needsStockCheck = true` (siempre)
+  - `Carrito`: mensaje de WhatsApp con aviso de disponibilidad
+
+- **Navegación admin: enlace al detalle desde nombre de producto**
+  - `AdminProductos`: clic en nombre → `/producto/:id`
+
+### Cambiado 🔄
+
+- `useCarrito`: `api.whatsapp.com/send` en vez de `wa.me` (evita corrupción de emojis)
+- `useCarrito`: `encodeURIComponent` en vez de `encodeURI` (codifica emojis correctamente)
+- `ProductForm`: `CropData` importado desde `productService` (con `width`/`height`)
+- `ProductFormRightColumn`: `CropData` importado desde `productService`
+- `adminService`: `CropData` con `width` y `height` (unificado con `productService`)
+
+### Corregido 🐛
+
+- **Cropper no aplicaba el recorte** → ahora se guarda como nueva imagen en Supabase
+- **Stock 0 no bloqueaba agregar al carrito** → backend ya lo permitía
+- **Emojis en WhatsApp se veían como `�`** → ahora se ven bien
+- **Navegación lenta en admin** → ahora clic en nombre lleva al detalle
+
+### SQL aplicado en Supabase
+
+Ninguno nuevo (cambios solo de frontend).
 
 ## [v1.2.0-beta.8] — 2026-11-13
 
