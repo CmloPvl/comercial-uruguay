@@ -176,8 +176,8 @@ export default function CartSummary({
         </Button>
 
         {/* Nota informativa */}
-        <p className="text-xs text-[#6A757C] text-center mt-2">
-          El pedido se enviará para confirmar disponibilidad
+               <p className="text-xs text-[#6A757C] text-center mt-2">
+          ⚠️ La disponibilidad de los productos será confirmada por WhatsApp
         </p>
       </CardContent>
     </Card>

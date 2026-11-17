@@ -19,6 +19,7 @@
  * 
  * 🆕 Galería de imágenes con ImageCarousel (flechas + auto-scroll)
  * 🆕 Mensaje de stock más explicativo
+ * 🔧 Fix: siempre mostrar "Stock a confirmar" (catálogo no opera en vivo)
  */
 
 import { Link, useParams } from "react-router-dom";
@@ -105,9 +106,6 @@ export default function ProductoDetalle() {
   const packSavings = hasPack
     ? product.price * product.packQuantity! - product.packPrice!
     : 0;
-
-  // stock = 0 → "Consultar" (no bloquea)
-  const needsStockCheck = product.stock === 0;
 
   // ¿Es admin?
   const isAdmin = user?.role === "ADMIN";
@@ -225,29 +223,17 @@ export default function ProductoDetalle() {
               </div>
             )}
 
-            {/* 🆕 STOCK (mensaje explicativo) */}
-            <div
-              className={`p-4 rounded-xl ${
-                needsStockCheck
-                  ? "bg-[#FFD93D]/10 border-[#FFD93D]"
-                  : "bg-[#00D2D3]/10 border-[#00D2D3]"
-              } border-2`}
-            >
-              {needsStockCheck ? (
-                <div>
-                  <p className="font-bold text-[#603060] mb-1">
-                    📲 Stock a confirmar
-                  </p>
-                  <p className="text-sm text-[#6A757C] leading-relaxed">
-  Por el momento no contamos con stock en línea.
-  El stock se confirmará al finalizar la compra y ser enviada por WhatsApp por el personal de Comercial Uruguay.
-</p>
-                </div>
-              ) : (
-                <p className="font-bold text-[#00D2D3]">
-                  ✅ {product.stock} unidades disponibles
+            {/* 🆕 STOCK (siempre "Stock a confirmar") */}
+            <div className="p-4 rounded-xl bg-[#FFD93D]/10 border-[#FFD93D] border-2">
+              <div>
+                <p className="font-bold text-[#603060] mb-1">
+                  📲 Stock a confirmar por WhatsApp
                 </p>
-              )}
+                <p className="text-sm text-[#6A757C] leading-relaxed">
+                  Por el momento no contamos con stock en línea.
+                  El stock se confirmará al finalizar la compra y ser enviada por WhatsApp por el personal de Comercial Uruguay.
+                </p>
+              </div>
             </div>
 
             {/* Cantidad */}
@@ -268,7 +254,7 @@ export default function ProductoDetalle() {
                   +
                 </button>
                 <span className="text-sm text-[#6A757C]">
-                  {needsStockCheck ? "(Stock a confirmar)" : `(${product.stock} disponibles)`}
+                  (Stock a confirmar)
                 </span>
               </div>
             </div>
