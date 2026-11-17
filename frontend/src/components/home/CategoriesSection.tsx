@@ -103,7 +103,7 @@ export function CategoriesSection() {
                 transition={{ delay: index * 0.1 }}
               >
                 <Link
-                  to={`/productos?categoria=${cat.name}`}
+                                      to={`/productos?categoria=${encodeURIComponent(cat.name.trim())}`}
                   className={`
                     bg-white 
                     p-4 

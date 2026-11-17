@@ -41,6 +41,8 @@ import pool from '../config/database';
 export interface CropData {
   x: number;
   y: number;
+  width: number;      // 🆕
+  height: number;     // 🆕
   zoom: number;
   aspect: number;
 }
