@@ -9,6 +9,7 @@
  * - Agregar al carrito
  * - Agregar/eliminar favoritos
  * - Desactivar producto (solo admin)
+ * - Productos relacionados (misma categoría)
  * - Estados de carga, error y datos
  * 
  * ✅ Buenas prácticas:
@@ -19,6 +20,7 @@
  * 
  * 🆕 handleDesactivar (soft delete, solo admin)
  * 🆕 user expuesto (para condicionales admin)
+ * 🆕 Productos relacionados (misma categoría, excluyendo el actual)
  * 
  * @param {string} id - ID del producto
  * @returns {Object} - Estados y funciones del detalle de producto
@@ -54,6 +56,7 @@ export function useProductoDetalle(id: string | undefined) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [deactivating, setDeactivating] = useState(false);  // 🆕
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]); // 🆕
 
   // =============================================
   // 📊 DATOS DERIVADOS
@@ -83,6 +86,23 @@ export function useProductoDetalle(id: string | undefined) {
       if (user) {
         const fav = await favoriteService.isFavorite(id);
         setIsFavorite(fav);
+      }
+
+      // 🆕 Cargar productos relacionados (misma categoría, excluyendo el actual)
+      if (data?.categoryId) {
+        try {
+          const related = await productService.getProducts({
+            category: data.category_name || undefined,
+          });
+          // Excluir el producto actual y limitar a 4
+          const filtered = (related || [])
+            .filter((p: any) => p.id !== data.id)
+            .slice(0, 4);
+          setRelatedProducts(filtered);
+        } catch (err) {
+          // Silencioso (no es crítico)
+          setRelatedProducts([]);
+        }
       }
     } catch (err: any) {
       const errorMessage = err.message || productErrors.notFound;
@@ -151,11 +171,6 @@ export function useProductoDetalle(id: string | undefined) {
   // =============================================
   // 🆕 DESACTIVAR PRODUCTO (solo admin)
   // =============================================
-  /**
-   * Soft delete: marca isActive = false
-   * El producto desaparece del catálogo pero queda en admin (se puede reactivar).
-   * Después de desactivar, redirige al catálogo.
-   */
   const handleDesactivar = async () => {
     if (!user || user.role !== "ADMIN") {
       showErrorToastWithFallback(new Error("No autorizado"), "No autorizado");
@@ -166,7 +181,6 @@ export function useProductoDetalle(id: string | undefined) {
       setDeactivating(true);
       await productService.updateProduct(product.id, { isActive: false });
       showSuccessToast(`"${product.name}" desactivado. Ya no aparece en el catálogo.`);
-      // Redirigir al catálogo (el producto ya no existe públicamente)
       navigate("/productos");
     } catch (err: any) {
       showErrorToastWithFallback(err, "Error al desactivar el producto");
@@ -178,11 +192,10 @@ export function useProductoDetalle(id: string | undefined) {
   // =============================================
   // 📦 MANEJAR CANTIDAD
   // =============================================
-const increaseQuantity = () => {
-  // 🆕 Si stock = 0 (consultar), permitir hasta 99. Si stock > 0, limitar al stock real.
-  const max = product?.stock && product.stock > 0 ? product.stock : 99;
-  setQuantity((prev) => Math.min(max, prev + 1));
-};
+  const increaseQuantity = () => {
+    const max = product?.stock && product.stock > 0 ? product.stock : 99;
+    setQuantity((prev) => Math.min(max, prev + 1));
+  };
 
   const decreaseQuantity = () => {
     setQuantity((prev) => Math.max(1, prev - 1));
@@ -208,6 +221,7 @@ const increaseQuantity = () => {
     addingToCart,
     finalPrice,
     isOutOfStock,
+    relatedProducts,  // 🆕
 
     // 🆕 Usuario (para condicionales admin)
     user,
@@ -219,7 +233,7 @@ const increaseQuantity = () => {
     loadProduct,
     handleAddToCart,
     handleToggleFavorite,
-    handleDesactivar,  // 🆕
+    handleDesactivar,
     increaseQuantity,
     decreaseQuantity,
     setQuantity,

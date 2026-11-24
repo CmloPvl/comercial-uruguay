@@ -19,6 +19,7 @@
  * 
  * 🆕 Galería de imágenes con ImageCarousel (flechas + auto-scroll)
  * 🆕 Mensaje de stock más explicativo
+ * 🆕 Botón "Compartir por WhatsApp"
  * 🔧 Fix: siempre mostrar "Stock a confirmar" (catálogo no opera en vivo)
  */
 
@@ -29,12 +30,12 @@ import { Badge } from "../components/ui/badge";
 import { Card, CardContent } from "../components/ui/card";
 import { Skeleton } from "../components/ui/skeleton";
 import { AppBreadcrumb } from "@/components/common/AppBreadcrumb";
-import { ImageCarousel } from "@/components/common/ImageCarousel";  // 🆕
+import { ImageCarousel } from "@/components/common/ImageCarousel";
 import { useProductoDetalle } from "../hooks/useProductoDetalle";
 
 export default function ProductoDetalle() {
   const { id } = useParams<{ id: string }>();
-  const {
+    const {
     product,
     loading,
     error,
@@ -49,7 +50,30 @@ export default function ProductoDetalle() {
     user,
     deactivating,
     handleDesactivar,
+    relatedProducts, // 🆕
   } = useProductoDetalle(id);
+
+  // =============================================
+  // 🆕 COMPARTIR POR WHATSAPP
+  // =============================================
+  const handleShareWhatsApp = () => {
+    if (!product) return;
+
+    const productUrl = `${window.location.origin}/producto/${product.id}`;
+    const message = `¡Mira este producto en Comercial Uruguay! 🛍️
+
+📦 *${product.name}*
+💰 $${Math.round(finalPrice).toLocaleString("es-CL")}
+
+🔗 ${productUrl}
+
+¡Pide por WhatsApp! 📲`;
+
+    window.open(
+      `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`,
+      "_blank"
+    );
+  };
 
   // =============================================
   // 🔄 ESTADO DE CARGA (Skeleton shadcn/ui)
@@ -280,11 +304,20 @@ export default function ProductoDetalle() {
               >
                 {isFavorite ? "♥ Quitar de favoritos" : "♡ Guardar en favoritos"}
               </Button>
+
+              {/* 🆕 Botón Compartir por WhatsApp */}
+              <Button
+                variant="outline"
+                onClick={handleShareWhatsApp}
+                className="w-full font-bold py-3 text-lg rounded-xl transition-all border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white"
+              >
+                📤 Compartir por WhatsApp
+              </Button>
             </div>
           </div>
         </div>
 
-        {/* ====== DESCRIPCIÓN ====== */}
+                {/* ====== DESCRIPCIÓN ====== */}
         <div className="mt-12 border-t border-gray-200 pt-8">
           <h2 className="text-2xl font-bold text-[#603060] mb-4">
             📋 Detalles del Artículo
@@ -298,6 +331,47 @@ export default function ProductoDetalle() {
             </CardContent>
           </Card>
         </div>
+
+        {/* ====== 🆕 PRODUCTOS RELACIONADOS ====== */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-12 border-t border-gray-200 pt-8">
+            <h2 className="text-2xl font-bold text-[#603060] mb-6">
+              🛍️ Productos relacionados
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {relatedProducts.map((p) => (
+                <Link
+                  key={p.id}
+                  to={`/producto/${p.id}`}
+                  className="group border-2 border-[#00D2D3] hover:border-[#7D5FFF] rounded-xl overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 bg-white"
+                >
+                  <div className="aspect-square overflow-hidden">
+                    {p.images?.[0] ? (
+                      <img
+                        src={p.images[0]}
+                        alt={p.name}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#F0F0C0]/30 to-[#F0C0F0]/30">
+                        <span className="text-4xl">📦</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <p className="font-bold text-sm text-[#303030] line-clamp-2 group-hover:text-[#7D5FFF] transition-colors">
+                      {p.name}
+                    </p>
+                    <p className="font-bold text-[#7D5FFF] text-sm mt-1">
+                      ${Math.round(p.price).toLocaleString("es-CL")}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ====== BOTÓN DE VOLVER ====== */}
         <div className="mt-8 text-center">
