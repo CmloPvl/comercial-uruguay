@@ -1,8 +1,8 @@
 # 🏪 PROMPT — Comercial Uruguay
 
 > **Contexto para agentes IA.** Pega este archivo al inicio de cada chat nuevo, junto con `ESTADO.md`.
-> **Última actualización:** 2026-10-30
-> **Versión del proyecto:** v1.2.0-beta.7
+> **Última actualización:** 2026-11-17
+> **Versión del proyecto:** v1.2.0-beta.9
 
 ---
 
@@ -145,6 +145,8 @@ Mejorar la venta del local mediante una vitrina digital que permita:
 | **Estilos**        | Tailwind + shadcn/ui                | CSS Modules / Styled Components | Consistencia y velocidad.                                                                                                  |
 | **Notificaciones** | react-hot-toast                     | react-toastify                  | Ligero y con `iconTheme`.                                                                                                  |
 | **Email**          | Resend                              | Nodemailer                      | API simple y buena entregabilidad.                                                                                         |
+| **Cropper**        | Canvas + Supabase Storage           | Guardar coordenadas             | La imagen recortada se sube a Supabase y se reemplaza la URL.                                                              |
+| **WhatsApp**       | `api.whatsapp.com/send`             | `wa.me`                         | `wa.me` corrompe emojis al redirigir.                                                                                      |
 
 > ⚠️ **Prisma:** está en `package.json` pero **no se usa**. Si en el futuro se decide usarlo, documentarlo aquí y en `CHANGELOG.md`. Si no, considerar desinstalarlo en una limpieza futura.
 
@@ -178,7 +180,6 @@ Mejorar la venta del local mediante una vitrina digital que permita:
 | `services/`   | API — Comunicación con el backend   | `api.ts`          |
 
 **Regla:** Si un componente tiene `useState`, `useEffect`, fetch, o validaciones → esa lógica va al hook.
-
 
 ---
 
@@ -254,7 +255,6 @@ Mejorar la venta del local mediante una vitrina digital que permita:
 
 > 📖 **Detalle completo de cada carpeta:** ver [`README.md`](./README.md#estructura-del-proyecto).
 
-
 ---
 
 ## 🔧 Componentes y hooks reutilizables clave
@@ -270,19 +270,24 @@ Mejorar la venta del local mediante una vitrina digital que permita:
 | **`SearchBar`**       | `components/common/`   | Buscador reutilizable                     |
 | **`ProtectedRoute`**  | `components/common/`   | Protección de rutas                       |
 | **`ImageCropper`**    | `components/admin/`    | Editor de recorte (Canvas + zoom)         |
+| **`ImageUploader`**   | `components/admin/`    | Sube imágenes a Supabase (con crops)      |
+
+> 🆕 **Cropper:** al guardar crop, sube imagen recortada a Supabase y reemplaza la URL original.
+> 🆕 **ProductoDetalle:** incluye botón "Compartir por WhatsApp" y sección "Productos relacionados".
 
 ### Hooks
 
-| Hook                      | Ubicación | Propósito                       |
-| ------------------------- | --------- | ------------------------------- |
-| **`useFeaturedProducts`** | `hooks/`  | Solo productos destacados       |
-| **`useHome`**             | `hooks/`  | Carrito + productos base        |
-| **`useProducts`**         | `hooks/`  | Catálogo, filtros, favoritos    |
-| **`useCategories`**       | `hooks/`  | Categorías dinámicas            |
-| **`useProductCarousel`**  | `hooks/`  | Lógica del carrusel             |
-| **`useImageCarousel`**    | `hooks/`  | Lógica del carrusel de imágenes |
-| **`useHero`**             | `hooks/`  | Lógica del Hero                 |
-| **`useImageCropper`**     | `hooks/`  | Lógica del editor de recorte    |
+| Hook                      | Ubicación | Propósito                          |
+| ------------------------- | --------- | ---------------------------------- |
+| **`useFeaturedProducts`** | `hooks/`  | Solo productos destacados          |
+| **`useHome`**             | `hooks/`  | Carrito + productos base           |
+| **`useProducts`**         | `hooks/`  | Catálogo, filtros, favoritos       |
+| **`useCategories`**       | `hooks/`  | Categorías dinámicas               |
+| **`useProductCarousel`**  | `hooks/`  | Lógica del carrusel                |
+| **`useImageCarousel`**    | `hooks/`  | Lógica del carrusel de imágenes    |
+| **`useHero`**             | `hooks/`  | Lógica del Hero                    |
+| **`useImageCropper`**     | `hooks/`  | Lógica del editor de recorte       |
+| **`useProductoDetalle`**  | `hooks/`  | Detalle + relacionados + compartir |
 
 ---
 
@@ -297,7 +302,9 @@ Mejorar la venta del local mediante una vitrina digital que permita:
 - `showSuccessToast(message)`
 - `getErrorMessage(error)`
 
-**Mensajes predefinidos:** `successMessages`, `infoMessages`, `authErrors`, `productErrors`, `cartErrors`, `categoryErrors`, `orderErrors`, `userErrors`.
+**Mensajes predefinidos:** `successMessages`, `infoMessages`, `authErrors`, `productErrors`, `cartErrors`, `categoryErrors`, `orderErrors`, `userErrors`, `adminErrors`, `favoriteErrors`, `profileErrors`.
+
+> 🆕 **Usar siempre el helper** en vez de `toast.error` directo. Si falta un mensaje, agregarlo al helper.
 
 **IMPORTANTE:** Usar `iconTheme` en lugar de `icon` en los toasts.
 
@@ -308,7 +315,6 @@ Mejorar la venta del local mediante una vitrina digital que permita:
 **Ubicación:** `frontend/src/config/empresa.ts`
 
 Contenido: datos de contacto, ubicación, redes, horarios, beneficios, año actual.
-
 
 ---
 
@@ -323,7 +329,6 @@ Contenido: datos de contacto, ubicación, redes, horarios, beneficios, año actu
 | **Prevención SQL injection**  | ✅     | SQL puro con parámetros               |
 | **JWT autenticación**         | ✅     | `backend/.../auth.middleware.ts`      |
 
-
 ---
 
 ## 📋 Archivos clave para referencia
@@ -337,8 +342,8 @@ Contenido: datos de contacto, ubicación, redes, horarios, beneficios, año actu
 | **Contexto ejemplo** | `context/AuthContext.tsx`             | Autenticación global       |
 | **Config ejemplo**   | `config/empresa.ts`                   | Configuración centralizada |
 
-> 🆕 **Tipos clave:** `CropData` (en `services/productService.ts`) — coordenadas del recorte que se guardan en el producto.
-> 🆕 **Helpers clave:** `getCroppedImg` (en `components/admin/ImageCropper.tsx`) — genera la imagen recortada real con Canvas.
+> 🆕 **Tipos clave:** `CropData` (en `services/productService.ts`) — incluye `x`, `y`, `width`, `height`, `zoom`, `aspect`.
+> 🆕 **Helpers clave:** `getCroppedImg` (en `components/admin/ImageCropper.tsx`) — genera la imagen recortada real con Canvas y la sube a Supabase.
 
 ---
 
@@ -368,7 +373,6 @@ Luego:
 1. Actualiza `ESTADO.md` con el resumen.
 2. Actualiza `CHANGELOG.md` con los cambios.
 3. Commit con mensaje descriptivo (ver [Checklist antes de commit](#checklist-antes-de-commit)).
-
 
 ---
 
@@ -422,7 +426,6 @@ Ejemplo: `feat: agregar productos relacionados en detalle`
 - [ ] El mensaje de commit sigue la convención.
 - [ ] Hice `git status` y revisé qué voy a commitear.
 
-
 ---
 
 ## ⚠️ Errores comunes y cómo evitarlos
@@ -436,6 +439,9 @@ Ejemplo: `feat: agregar productos relacionados en detalle`
 | Producto con stock 0 no se agrega al carrito | Backend validaba `stock < quantity` (0 < 1 = true)                              | Usar `stock > 0 && stock < quantity`                         |
 | Encoding roto en MD                          | Archivo guardado en Windows-1252                                                | Guardar como UTF-8 sin BOM                                   |
 | `Prisma` genera ruido                        | Está instalado pero no se usa                                                   | No agregar código nuevo con Prisma; considerar desinstalarlo |
+| Emojis en WhatsApp se ven como `�`           | Se usaba `wa.me` (redirige y corrompe)                                          | Usar `api.whatsapp.com/send` + `encodeURIComponent`          |
+| Crop no se aplica en catálogo                | `ProductCard` usaba `background-image`                                          | La imagen recortada se guarda en Supabase como nueva URL     |
+| Stock 0 bloquea agregar al carrito           | Backend validaba `stock < quantity`                                             | Usar `stock > 0 && stock < quantity` (ya corregido)          |
 
 ---
 
@@ -455,4 +461,3 @@ Ejemplo: `feat: agregar productos relacionados en detalle`
 - [`ESTADO.md`](./ESTADO.md) — Estado actual del proyecto (módulos, últimos cambios).
 - [`CHANGELOG.md`](./CHANGELOG.md) — Historial completo de cambios por versión.
 - [`CONTRIBUTING.md`](./CONTRIBUTING.md) — Flujo de trabajo, commits, cómo contribuir.
-

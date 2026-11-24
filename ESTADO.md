@@ -72,8 +72,11 @@ Leyenda: ✅ Completado · 🔄 En progreso · ⏳ Pendiente
 - Stock siempre "a confirmar por WhatsApp" (todos los productos).
 - Carrito: mensaje de WhatsApp con aviso de disponibilidad.
 - Admin: clic en nombre del producto → detalle.
+- ProductoDetalle: botón "Compartir por WhatsApp".
+- ProductoDetalle: sección "Productos relacionados".
+- Helper de toasts: mensajes nuevos (`adminErrors`, `favoriteErrors`, `profileErrors`, `authErrors` ampliados).
 - Fix: emojis en WhatsApp (api.whatsapp.com/send).
-- Fix: navegación admin (enlace al detalle).
+- Fix: categorías con espacio (TRIM en backend + encodeURIComponent en frontend).
 
 ### v1.2.0-beta.8 — 2026-11-13
 
