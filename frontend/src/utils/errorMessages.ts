@@ -14,6 +14,7 @@
  * 
  * 🆕 Mensajes agregados para el carrito (éxito al actualizar/eliminar/vaciar)
  * 🆕 Mensajes agregados para productos (deleteFailed, toggleFailed)
+ * 🆕 Mensajes agregados para admin, perfil, favoritos, reset password
  */
 
 import toast from 'react-hot-toast';
@@ -29,6 +30,11 @@ export const authErrors = {
   userNotFound: "Usuario no encontrado.",
   emailNotVerified: "Verifica tu email antes de iniciar sesión.",
   loginRequired: "Inicia sesión para realizar esta acción.",
+  // 🆕 Reset password
+  invalidToken: "Token inválido o expirado.",
+  passwordMismatch: "Las contraseñas no coinciden.",
+  passwordTooShort: "La contraseña debe tener al menos 8 caracteres.",
+  passwordResetFailed: "Error al restablecer la contraseña.",
 };
 
 // =============================================
@@ -41,9 +47,14 @@ export const productErrors = {
   invalidPrice: "Precio inválido.",
   fileTooLarge: "La imagen excede el tamaño máximo permitido.",
   invalidFileType: "El archivo no es una imagen válida.",
-  // 🆕 Nuevos
   deleteFailed: "Error al eliminar el producto.",
   toggleFailed: "Error al actualizar el estado del producto.",
+  // 🆕 Formulario
+  validationFailed: "Por favor, corrige los errores del formulario.",
+  saveFailed: "Error al guardar el producto.",
+  createFailed: "Error al publicar producto.",
+  updateFailed: "Error al actualizar producto.",
+  categoriesLoadFailed: "Error al cargar categorías.",
 };
 
 // =============================================
@@ -67,7 +78,6 @@ export const cartErrors = {
 export const categoryErrors = {
   notFound: "Categoría no encontrada.",
   hasProducts: "La categoría tiene productos asociados. No se puede eliminar.",
-  // 🆕 Nuevos
   nameRequired: "El nombre de la categoría es obligatorio.",
   saveFailed: "Error al guardar la categoría.",
   deleteFailed: "Error al eliminar la categoría.",
@@ -80,6 +90,7 @@ export const categoryErrors = {
 export const orderErrors = {
   notFound: "Pedido no encontrado.",
   invalidStatus: "Estado de pedido inválido.",
+  updateFailed: "Error al actualizar el estado del pedido.",
 };
 
 // =============================================
@@ -90,6 +101,40 @@ export const userErrors = {
   notFound: "Usuario no encontrado.",
   emailExists: "El email ya está registrado.",
   invalidRole: "Rol inválido.",
+  updateFailed: "Error al actualizar el usuario.",
+  deleteFailed: "Error al eliminar el usuario.",
+};
+
+// =============================================
+// 🔴 MENSAJES DE ERROR - ADMIN DASHBOARD
+// =============================================
+
+export const adminErrors = {
+  statsFailed: "Error al cargar las estadísticas.",
+  ordersFailed: "Error al cargar los pedidos recientes.",
+};
+
+// =============================================
+// 🔴 MENSAJES DE ERROR - FAVORITOS
+// =============================================
+
+export const favoriteErrors = {
+  loadFailed: "Error al cargar favoritos.",
+  removeFailed: "Error al eliminar de favoritos.",
+  addFailed: "Error al agregar a favoritos.",
+};
+
+// =============================================
+// 🔴 MENSAJES DE ERROR - PERFIL
+// =============================================
+
+export const profileErrors = {
+  loadFailed: "Error al cargar el perfil.",
+  ordersLoadFailed: "Error al cargar los pedidos.",
+  updateFailed: "Error al actualizar el perfil.",
+  passwordMismatch: "Las contraseñas no coinciden.",
+  passwordTooShort: "La contraseña debe tener al menos 8 caracteres.",
+  passwordUpdateFailed: "Error al actualizar la contraseña.",
 };
 
 // =============================================

@@ -21,7 +21,6 @@
  */
 
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
 import { Card, CardContent } from "../../ui/card";
 import { ProductFormSkeleton } from "./ProductFormSkeleton";
 import { ProductFormHeader } from "./ProductFormHeader";
@@ -31,6 +30,7 @@ import { ProductFormRightColumn } from "./ProductFormRightColumn";
 import type { Product } from "../../../services/adminService";  // 🆕
 import type { CropData } from "../../../services/productService";  // 🔧 Cambiado de adminService a productService
 import type { Category } from "../../../services/categoryService";
+import { showErrorToastWithFallback } from "@/utils/errorMessages";
 
 interface ProductFormProps {
   product?: Product;
@@ -174,14 +174,10 @@ export default function ProductForm({
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      toast.error("❌ Por favor, corrige los errores del formulario", {
-        style: {
-          border: '2px solid #FF6B81',
-          padding: '16px',
-          backgroundColor: '#FAF9E2',
-          color: '#303030',
-        },
-      });
+            showErrorToastWithFallback(
+        new Error("Por favor, corrige los errores del formulario"),
+        "Por favor, corrige los errores del formulario"
+      );
       return;
     }
 
@@ -208,14 +204,7 @@ export default function ProductForm({
         packPrice: formData.packPrice ? Number(formData.packPrice) : null,
       });
     } catch (error: any) {
-      toast.error(error.message || "Error al guardar el producto", {
-        style: {
-          border: '2px solid #FF6B81',
-          padding: '16px',
-          backgroundColor: '#FAF9E2',
-          color: '#303030',
-        },
-      });
+            showErrorToastWithFallback(error, "Error al guardar el producto");
     }
   };
 
